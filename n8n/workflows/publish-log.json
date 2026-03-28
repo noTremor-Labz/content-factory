@@ -1,0 +1,67 @@
+{
+  "id": "2b3b82ed-e4cf-48fd-afcb-2b3c693823f1",
+  "name": "publish-log",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "publish-log",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "d4f5a6b7-4444-7555-b666-777788889999",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "publish-log-webhook-001"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ack",
+              "name": "ok",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "route",
+              "name": "webhook",
+              "value": "publish-log",
+              "type": "string"
+            },
+            {
+              "id": "hint-pub",
+              "name": "hint",
+              "value": "Подключи сюда запись в Google Sheets / Notion или вызов Agent Board после публикации.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e5a6b7c8-5558-8666-c777-888899990000",
+      "name": "Ack + hints",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [280, 0]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Ack + hints",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": { "templateCredsSetupCompleted": true }
+}

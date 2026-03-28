@@ -1,0 +1,68 @@
+{
+  "agents": {
+    "list": [
+      {
+        "id": "director",
+        "workspace": "/home/node/.openclaw/workspace-director",
+        "model": "anthropic/claude-sonnet-4-6",
+        "default": true
+      },
+      {
+        "id": "scheduler",
+        "workspace": "/home/node/.openclaw/workspace-scheduler",
+        "model": "anthropic/claude-sonnet-4-6"
+      },
+      {
+        "id": "scout",
+        "workspace": "/home/node/.openclaw/workspace-scout",
+        "model": "anthropic/claude-sonnet-4-6"
+      },
+      {
+        "id": "pixel",
+        "workspace": "/home/node/.openclaw/workspace-pixel",
+        "model": "anthropic/claude-sonnet-4-6"
+      },
+      {
+        "id": "launch",
+        "workspace": "/home/node/.openclaw/workspace-launch",
+        "model": "anthropic/claude-haiku-4-5"
+      },
+      {
+        "id": "quill-tomas",
+        "workspace": "/home/node/.openclaw/workspace-quill-tomas",
+        "model": "anthropic/claude-sonnet-4-6"
+      },
+      {
+        "id": "lens-tomas",
+        "workspace": "/home/node/.openclaw/workspace-lens-tomas",
+        "model": "anthropic/claude-opus-4-6"
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "agentId": "director",
+      "match": {
+        "channel": "telegram",
+        "accountId": "default"
+      }
+    },
+    { "agentId": "scheduler",  "match": { "channel": "internal" } },
+    { "agentId": "scout",      "match": { "channel": "internal" } },
+    { "agentId": "pixel",      "match": { "channel": "internal" } },
+    { "agentId": "launch",     "match": { "channel": "internal" } },
+    { "agentId": "quill-tomas","match": { "channel": "internal" } },
+    { "agentId": "lens-tomas", "match": { "channel": "internal" } }
+  ],
+  "channels": {
+    "telegram": {
+      "accounts": {
+        "default": {
+          "botToken": "${TELEGRAM_BOT_TOKEN}",
+          "dmPolicy": "allowlist",
+          "allowFrom": ["tg:${TELEGRAM_OWNER_ID}"]
+        }
+      }
+    }
+  }
+}

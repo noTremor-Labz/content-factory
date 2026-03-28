@@ -1,0 +1,47 @@
+## Image Prompt — Autumn 2026 Trends: Maximalism, Warm Tones, Tactile Materials, Romance
+## Blogger: tomas | Job: 20260328-001
+
+---
+
+### PRIMARY PROMPT (Midjourney / DALL-E)
+
+A richly layered editorial still-life composition celebrating autumn 2026 fashion trends. Dark near-black background (#0a0a0b tone), ultra-high contrast. Foreground: an opulent arrangement of deeply textured tactile materials — thick velvet in burnt sienna and deep terracotta, brushed mohair in rust and amber, crinkled silk organza catching warm golden light, aged leather with visible grain. Draped and stacked maximalist layers, intentionally excessive yet architecturally composed. A single glowing accent — one slender candle flame or a thin strand of warm electric light — casting a narrow cyan-tinted highlight across the textures to bridge warmth and modernity. Scattered dried botanical elements: pressed autumn leaves in ochre and oxblood, dried roses mid-bloom. The overall mood is cinematic romance filtered through a controlled, editorial lens — abundant but never chaotic. Shallow depth of field, dramatic side lighting from one source. Shot on medium-format film aesthetic. No faces, no people, no stock imagery.
+
+Style tags: editorial product photography, moody dark studio, maximalist texture study, autumn palette, romantic melancholy, controlled chaos, Linear/Vercel dark-mode editorial sensibility, single accent light source
+
+Aspect ratio: 16:9 (Telegram post / YouTube thumbnail safe zone)
+
+---
+
+### MIDJOURNEY VERSION
+
+```
+ultra-detailed editorial still-life, autumn 2026 maximalism, dark studio background near-black #0a0a0a, layered tactile fabrics: burnt sienna velvet, terracotta mohair, rust silk organza, oxblood leather with visible grain texture, stacked and draped with intentional excess, dried roses and pressed autumn leaves scattered, single thin cyan electric light accent cutting across textures, dramatic one-source side lighting, golden warm glow with deep shadows, shallow depth of field, cinematic romance, controlled maximalist composition, medium-format film grain, no faces, no people --ar 16:9 --style raw --stylize 750 --v 6.1
+```
+
+---
+
+### DALL-E VERSION
+
+```
+A moody editorial still-life photograph for an autumn 2026 fashion trends article. The scene features an intentionally maximalist arrangement of deeply tactile fabrics — burnt sienna velvet, rust-orange mohair, terracotta silk with visible texture — draped over each other in abundant, romantic layers. The background is near-black dark studio. Dried dark-red roses and pressed autumn leaves in amber and ochre are scattered throughout. A single narrow beam of warm light, slightly cyan-tinted at its edge, illuminates one section of the composition dramatically, creating high contrast between deep shadow and glowing texture. The mood is cinematic, romantic, autumnal, and slightly melancholic. No human subjects. No text overlays. Shot in a medium-format editorial style with subtle film grain.
+```
+
+---
+
+### NEGATIVE PROMPT (for platforms that support it)
+
+```
+people, faces, open mouth, shocked expressions, stock photo, neon cyberpunk, watermarks, logos, brand marks, overexposed, flat lighting, white background, summer palette, minimalist, sparse, empty, low contrast, blurry text, cluttered unreadable elements, 3D render glitch effects
+```
+
+---
+
+### Notes for Director/Launch Agent
+
+- Accent color: one narrow cyan highlight is intentional — bridges Tomas's brand (#22d3ee) with the warm autumn palette without clashing
+- Composition: safe for Telegram preview (readable at small size due to high contrast)
+- If regenerating: try `--seed` locking after first approved result for consistency across series
+- Avoid adding text overlays in image gen — add post title as separate layer in post design
+
+---

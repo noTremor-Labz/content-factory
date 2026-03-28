@@ -1,0 +1,7 @@
+.DS_Store
+.env
+.env.local
+.env.bak
+*.bak
+agent-board/dist/
+node_modules/

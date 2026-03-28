@@ -1,0 +1,107 @@
+# OpenClaw: https://docs.openclaw.ai/install/docker
+# CLI: docker compose --profile cli run --rm openclaw-cli <команда>
+
+services:
+
+  openclaw-gateway:
+    image: ${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:latest}
+    platform: linux/arm64
+    container_name: openclaw-gateway
+    restart: unless-stopped
+    ports:
+      - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
+    volumes:
+      - ${OPENCLAW_CONFIG_DIR:-~/.openclaw}:/home/node/.openclaw
+      - ${OPENCLAW_WORKSPACE_DIR:-~/.openclaw/workspace}:/home/node/.openclaw/workspace
+      - ${HOST_SHARED_PATH:-./shared}:/home/node/shared
+    environment:
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:18789/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  openclaw-cli:
+    image: ${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:latest}
+    platform: linux/arm64
+    container_name: openclaw-cli
+    network_mode: "service:openclaw-gateway"
+    volumes:
+      - ${OPENCLAW_CONFIG_DIR:-~/.openclaw}:/home/node/.openclaw
+      - ${OPENCLAW_WORKSPACE_DIR:-~/.openclaw/workspace}:/home/node/.openclaw/workspace
+      - ${HOST_SHARED_PATH:-./shared}:/home/node/shared
+    environment:
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    profiles:
+      - cli
+
+  agent-board:
+    image: node:22-slim
+    platform: linux/arm64
+    container_name: agent-board
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ${HOST_AGENT_BOARD_PATH:-./agent-board/dist}:/app
+      # index.js отдаёт статику из ../dashboard → в контейнере это /dashboard (не внутри dist)
+      - ${HOST_AGENT_BOARD_DASHBOARD:-./agent-board/dashboard}:/dashboard
+      - agent-board-data:/app/data
+    environment:
+      - AGENTBOARD_API_KEYS=${AGENTBOARD_API_KEYS}
+      - OPENCLAW_HOOK_URL=http://openclaw-gateway:18789/hooks/agent
+      - OPENCLAW_HOOK_TOKEN=${OPENCLAW_HOOK_TOKEN}
+      - AGENTBOARD_WEBHOOK_SECRET=${AGENTBOARD_WEBHOOK_SECRET}
+    ports:
+      - "3456:3456"
+    command: node index.js --port 3456 --data ./data
+    depends_on:
+      openclaw-gateway:
+        condition: service_healthy
+
+  n8n:
+    image: n8nio/n8n:latest
+    platform: linux/arm64
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n-data:/home/node/.n8n
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-localdev123}
+      # HTTP без TLS: иначе браузер не примет secure-cookie (ошибка на скрине)
+      - N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE:-false}
+      # Обязательно строка false: иначе $env в выражениях заблокирован (n8n-workflow: только === 'false' снимает блок)
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=${N8N_BLOCK_ENV_ACCESS_IN_NODE:-false}
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=Europe/Tallinn
+      # Из контейнера n8n → Agent Board в той же Docker-сети
+      - AGENT_BOARD_URL=${AGENT_BOARD_URL:-http://agent-board:3456}
+      # Ключ из пары sk-n8n:n8n в AGENTBOARD_API_KEYS (см. .env.example)
+      - N8N_AGENT_BOARD_API_KEY=${N8N_AGENT_BOARD_API_KEY:-sk-n8n}
+      # Для HTTP-узлов к OpenClaw gateway из n8n (хуки — по доке OpenClaw / вашему сценарию)
+      - OPENCLAW_GATEWAY_INTERNAL_URL=${OPENCLAW_GATEWAY_INTERNAL_URL:-http://openclaw-gateway:18789}
+      - OPENCLAW_HOOK_TOKEN=${OPENCLAW_HOOK_TOKEN:-}
+
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    platform: linux/arm64
+    container_name: filebrowser
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      # Корень проекта content-factory (путь к каталогу с docker-compose.yml)
+      - ${HOST_FILEBROWSER_ROOT:-.}:/srv
+      - filebrowser-data:/database
+
+volumes:
+  agent-board-data:
+  n8n-data:
+  filebrowser-data:
