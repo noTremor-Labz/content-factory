@@ -32,7 +32,7 @@ add_agent() {
     --model "$model"
 }
 
-for agent in director scheduler scout pixel launch; do
+for agent in director scheduler scout launch; do
   if cli openclaw agents list 2>/dev/null | grep -q "^${agent}$"; then
     echo "[SKIP] $agent уже существует"
   else
@@ -41,7 +41,7 @@ for agent in director scheduler scout pixel launch; do
   fi
 done
 
-for agent in quill-tomas lens-tomas; do
+for agent in quill-tomas lens-tomas pixel-tomas; do
   if cli openclaw agents list 2>/dev/null | grep -q "^${agent}$"; then
     echo "[SKIP] $agent уже существует"
   else

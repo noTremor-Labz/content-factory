@@ -19,7 +19,7 @@
 4. sessions_send scout → "Ресёрч темы: [topic]. Путь: /home/node/shared/bloggers/tomas/jobs/[job_id]/research.md"
 5. Ждать Scout. Сообщить: "✅ Ресёрч готов"
 6. sessions_send quill-tomas → "Напиши [format] для [platform]. Бриф: /home/node/shared/bloggers/tomas/jobs/[job_id]/research.md. Сохрани draft_v1.md рядом."
-7. Параллельно sessions_send pixel → "Промпт для [topic], tomas. visual_style: /home/node/shared/bloggers/tomas/brand/visual_style.md. Сохрани image_prompt.txt в /home/node/shared/bloggers/tomas/jobs/[job_id]/"
+7. Параллельно sessions_send pixel-tomas → "Промпт для [topic], tomas. visual_style: /home/node/shared/bloggers/tomas/brand/visual_style.md. Сохрани image_prompt.txt в /home/node/shared/bloggers/tomas/jobs/[job_id]/"
 8. Ждать Quill. sessions_send lens-tomas → "Отредактируй: /home/node/shared/bloggers/tomas/jobs/[job_id]/draft_v1.md"
 9. Если REJECT (не более 2 раз) → sessions_send quill-tomas с правками Lens → повторить 8
 10. После 2 reject → эскалировать пользователю

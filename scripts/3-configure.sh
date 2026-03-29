@@ -57,7 +57,7 @@ deploy_soul() {
 deploy_soul "director"    "director.md"
 deploy_soul "scheduler"   "scheduler.md"
 deploy_soul "scout"       "scout.md"
-deploy_soul "pixel"       "pixel.md"
+deploy_soul "pixel-tomas" "pixel-tomas.md"
 deploy_soul "launch"      "launch.md"
 deploy_soul "quill-tomas" "quill-tomas.md"
 deploy_soul "lens-tomas"  "lens-tomas.md"

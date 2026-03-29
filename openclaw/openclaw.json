@@ -18,8 +18,8 @@
         "model": "anthropic/claude-sonnet-4-6"
       },
       {
-        "id": "pixel",
-        "workspace": "/home/node/.openclaw/workspace-pixel",
+        "id": "pixel-tomas",
+        "workspace": "/home/node/.openclaw/workspace-pixel-tomas",
         "model": "anthropic/claude-sonnet-4-6"
       },
       {
@@ -49,7 +49,7 @@
     },
     { "agentId": "scheduler",  "match": { "channel": "internal" } },
     { "agentId": "scout",      "match": { "channel": "internal" } },
-    { "agentId": "pixel",      "match": { "channel": "internal" } },
+    { "agentId": "pixel-tomas","match": { "channel": "internal" } },
     { "agentId": "launch",     "match": { "channel": "internal" } },
     { "agentId": "quill-tomas","match": { "channel": "internal" } },
     { "agentId": "lens-tomas", "match": { "channel": "internal" } }

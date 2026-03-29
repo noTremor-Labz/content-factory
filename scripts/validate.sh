@@ -42,7 +42,7 @@ else
   fail "Агенты: мало строк в списке ($AGENT_LINES), ожидалось ≥7"
 fi
 
-for agent in director scheduler scout quill-tomas lens-tomas pixel launch; do
+for agent in director scheduler scout quill-tomas lens-tomas pixel-tomas launch; do
   SOUL="$HOME/.openclaw/workspace-$agent/SOUL.md"
   [ -f "$SOUL" ] && ok "SOUL.md: $agent" || fail "SOUL.md: $agent — не найден"
 done
