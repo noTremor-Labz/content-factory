@@ -22,6 +22,11 @@ model_for() {
   esac
 }
 
+agent_exists() {
+  # Вывод list: "- director (default)" / "- scheduler" — не совпадает с ^id$
+  cli openclaw agents list 2>/dev/null | grep -qE "^- ${1}([[:space:]]|$|\\()"
+}
+
 add_agent() {
   local agent=$1
   local ws="/home/node/.openclaw/workspace-${agent}"
@@ -33,7 +38,7 @@ add_agent() {
 }
 
 for agent in director scheduler scout launch; do
-  if cli openclaw agents list 2>/dev/null | grep -q "^${agent}$"; then
+  if agent_exists "$agent"; then
     echo "[SKIP] $agent уже существует"
   else
     add_agent "$agent"
@@ -42,7 +47,7 @@ for agent in director scheduler scout launch; do
 done
 
 for agent in quill-tomas lens-tomas pixel-tomas; do
-  if cli openclaw agents list 2>/dev/null | grep -q "^${agent}$"; then
+  if agent_exists "$agent"; then
     echo "[SKIP] $agent уже существует"
   else
     add_agent "$agent"
