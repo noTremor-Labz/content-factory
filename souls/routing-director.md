@@ -10,5 +10,8 @@
 ## yulya
 - ig: quill-yulya-ig, lens-yulya-ig, pixel-yulya-ig, launch-yulya-ig
 
+## nasik
+- tt: quill-nasik-tt, lens-nasik-tt, pixel-nasik-tt, launch-nasik-tt
+
 ## Формат задачи
 тема: [тема] | платформа: telegram | формат: пост | блогер: tomas | канал: [food|vibe]
