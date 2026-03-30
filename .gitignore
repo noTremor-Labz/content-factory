@@ -5,3 +5,5 @@
 *.bak
 agent-board/dist/
 node_modules/
+shared/bloggers/*/jobs/
+shared/bloggers/*/published/
