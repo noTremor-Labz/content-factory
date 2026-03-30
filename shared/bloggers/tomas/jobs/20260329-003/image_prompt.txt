@@ -1,0 +1,21 @@
+Dark minimal product UI cover image for a Telegram post about Asian food trends 2026.
+
+COMPOSITION:
+A sleek dark-mode dashboard card showcasing curated Asian food items arranged as a minimal product grid — ramen bowl, bao bun, matcha drink, fermented kimchi jar, and a plant-based dumpling — photographed from above or slight angle, isolated on deep dark background. Each item sits inside a subtle rounded card (#18181b), thin border (#27272a), as if displayed in a product catalogue or design tool. One single cyan accent line (#22d3ee) traces across or underlines the hero element. Minimal grid overlay, subtle.
+
+STYLE:
+Dark mode product UI, minimal, Vercel / Linear aesthetic. Background deep near-black gradient #0a0a0b to #121214. Surface cards #18181b with thin zinc borders. Primary text #fafafa, secondary #a1a1aa. Single accent color cyan #22d3ee — used only on one highlight element (a line, a tag, a data label). No neon cyberpunk. No glitch effects. No stock photo people. No open mouths. No clutter.
+
+TYPOGRAPHY (overlay suggestion):
+Bold geometric sans-serif (Inter / Geist style). Short statement in top-left or center: "ASIA FOOD TRENDS / 2026" — large weight, high contrast white on dark. A small secondary label in muted zinc: "What's next on the plate". No decorative scripts.
+
+LIGHTING & MOOD:
+Soft studio light on food items. Dark atmosphere. Product photography meets UI design. Clean negative space. High contrast between food textures and dark background. Feels like a premium tech editorial, not a food blog banner.
+
+ASPECT RATIO: 16:9 (Telegram cover / wide post image)
+
+NEGATIVE PROMPT:
+no stock photo faces, no neon rainbow colors, no 3D glitch, no watermarks, no foreign brand logos, no cluttered backgrounds, no illegible small text, no shocking expressions, no busy patterns, no warm orange tones dominating, no retro anime style
+
+KEYWORDS:
+dark mode product UI, minimal, single cyan accent, Asian food editorial, 2026 trend, ramen matcha kimchi bao, deep dark background, subtle grid, geometric sans typography, clean composition, Vercel Linear aesthetic, high contrast, premium tech editorial style

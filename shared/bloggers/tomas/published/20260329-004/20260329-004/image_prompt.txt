@@ -1,0 +1,21 @@
+Dark minimal product UI cover image for a Telegram post about AI in the food industry — state of 2026.
+
+COMPOSITION:
+A sleek dark-mode interface layout: a central dashboard panel showing a stylized AI workflow diagram connected to food production nodes — icons of a robotic arm, a conveyor belt chip, a petri dish, a flavor molecule graph, and a delivery drone — arranged as minimal rounded cards in a grid. Thin connector lines flow between nodes like a pipeline schema. One cyan accent line (#22d3ee) highlights the central AI node (labeled "AI CORE" or depicted as a simple neural net icon). Subtle background grid. Feels like a Linear or Vercel product page screenshot, not a sci-fi poster.
+
+STYLE:
+Dark mode product UI, minimal, Vercel / Linear / Raycast aesthetic. Background deep gradient #0a0a0b to #121214. Surface cards #18181b, thin border #27272a. Primary text #fafafa, secondary #a1a1aa. Single accent cyan #22d3ee on one key element only. No neon cyberpunk glow. No 3D explosion effects. No robots with scary faces. Clean negative space. High contrast.
+
+TYPOGRAPHY (overlay suggestion):
+Bold geometric sans-serif (Inter / Geist style). Short sharp statement: "AI × FOOD / 2026" — large, heavy weight, top-left or center. Secondary label in muted zinc: "Industry snapshot". No question marks, no decorative script fonts.
+
+LIGHTING & MOOD:
+Dark studio atmosphere. Cold, precise, editorial. Tech-forward but grounded — this is industry analysis, not sci-fi. Product photography aesthetic meets infographic design. Minimal visual noise.
+
+ASPECT RATIO: 16:9 (Telegram cover / wide post image)
+
+NEGATIVE PROMPT:
+no stock photo faces, no neon rainbow colors, no 3D glitch, no watermarks, no foreign brand logos, no cluttered backgrounds, no illegible small text, no shocking expressions, no robotic humanoids, no warm tones dominating, no retro anime, no food photography without tech elements
+
+KEYWORDS:
+dark mode product UI, minimal, single cyan accent, AI food industry 2026, pipeline diagram, neural network nodes, food production tech, deep dark background, subtle grid, geometric sans typography, clean composition, Vercel Linear aesthetic, high contrast, tech editorial

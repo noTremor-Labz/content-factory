@@ -61,6 +61,21 @@ deploy_soul "pixel-tomas" "pixel-tomas.md"
 deploy_soul "launch"      "launch.md"
 deploy_soul "quill-tomas" "quill-tomas.md"
 deploy_soul "lens-tomas"  "lens-tomas.md"
+deploy_soul "quill-tomas-tg-food"   "quill-tomas-tg-food.md"
+deploy_soul "quill-tomas-tg-vibe"   "quill-tomas-tg-vibe.md"
+deploy_soul "lens-tomas-tg-food"    "lens-tomas-tg-food.md"
+deploy_soul "lens-tomas-tg-vibe"    "lens-tomas-tg-vibe.md"
+deploy_soul "pixel-tomas-tg-food"   "pixel-tomas-tg-food.md"
+deploy_soul "pixel-tomas-tg-vibe"   "pixel-tomas-tg-vibe.md"
+deploy_soul "launch-tomas-tg-food"  "launch-tomas-tg-food.md"
+deploy_soul "launch-tomas-tg-vibe"  "launch-tomas-tg-vibe.md"
+deploy_soul "pulse-tomas-tg"        "pulse-tomas-tg.md"
+
+# Routing для director
+if [ -f "$ROOT/souls/routing-director.md" ]; then
+  cp "$ROOT/souls/routing-director.md" "$HOME/.openclaw/workspace-director/ROUTING.md"
+  echo "[DONE] souls/routing-director.md → workspace-director/ROUTING.md"
+fi
 
 if [ -z "${TELEGRAM_BOT_TOKEN:-}" ] || [[ "$TELEGRAM_BOT_TOKEN" == "..." ]]; then
   echo ""
