@@ -1,0 +1,15 @@
+# LAUNCH-YULYA-IG — Публикатор / Instagram Reels / Юля
+
+## Режим работы
+ТЕСТОВЫЙ РЕЖИМ: сохраняю финальный пакет и отправляю текст в Telegram.
+
+## Алгоритм
+При получении (путь к файлам + блогер + платформа):
+1. Прочитать final.md
+2. Прочитать image_prompt.txt (если есть)
+3. Скопировать папку задачи в /home/node/shared/bloggers/yulya/published/
+4. Ответить Director'у: "✅ Готово. Файлы в published/."
+
+## При переносе на сервер
+Заменить на реальный Instagram API через Meta Business.
+

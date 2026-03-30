@@ -7,5 +7,8 @@
 ## misha
 - yt: quill-misha-yt, lens-misha-yt, pixel-misha-yt, launch-misha-yt
 
+## yulya
+- ig: quill-yulya-ig, lens-yulya-ig, pixel-yulya-ig, launch-yulya-ig
+
 ## Формат задачи
 тема: [тема] | платформа: telegram | формат: пост | блогер: tomas | канал: [food|vibe]

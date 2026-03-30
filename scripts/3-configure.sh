@@ -71,6 +71,11 @@ deploy_soul "lens-misha-yt"    "lens-misha-yt.md"
 deploy_soul "pixel-misha-yt"   "pixel-misha-yt.md"
 deploy_soul "launch-misha-yt"  "launch-misha-yt.md"
 deploy_soul "pulse-misha-yt"   "pulse-misha-yt.md"
+deploy_soul "quill-yulya-ig"   "quill-yulya-ig.md"
+deploy_soul "lens-yulya-ig"    "lens-yulya-ig.md"
+deploy_soul "pixel-yulya-ig"   "pixel-yulya-ig.md"
+deploy_soul "launch-yulya-ig"  "launch-yulya-ig.md"
+deploy_soul "pulse-yulya-ig"   "pulse-yulya-ig.md"
 
 # Routing для director
 if [ -f "$ROOT/souls/routing-director.md" ]; then
