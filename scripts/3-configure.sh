@@ -70,6 +70,11 @@ deploy_soul "pixel-tomas-tg-vibe"   "pixel-tomas-tg-vibe.md"
 deploy_soul "launch-tomas-tg-food"  "launch-tomas-tg-food.md"
 deploy_soul "launch-tomas-tg-vibe"  "launch-tomas-tg-vibe.md"
 deploy_soul "pulse-tomas-tg"        "pulse-tomas-tg.md"
+deploy_soul "quill-misha-yt"   "quill-misha-yt.md"
+deploy_soul "lens-misha-yt"    "lens-misha-yt.md"
+deploy_soul "pixel-misha-yt"   "pixel-misha-yt.md"
+deploy_soul "launch-misha-yt"  "launch-misha-yt.md"
+deploy_soul "pulse-misha-yt"   "pulse-misha-yt.md"
 
 # Routing для director
 if [ -f "$ROOT/souls/routing-director.md" ]; then
