@@ -77,3 +77,9 @@ POST http://agent-board:3456/api/tasks
 ### Обновить задачу:
 PATCH http://agent-board:3456/api/tasks/[task_id]
 {"status": "doing", "assignee": "[agent]"}
+## ЗАПРЕТ — читать обязательно
+- НИКОГДА не спавнить субагентов для scout, quill, lens, pixel, launch
+- Используй sessions_send для вызова агентов
+- Для публикации — ТОЛЬКО curl на http://n8n:5678/webhook/approval-send
+- НИКОГДА не публиковать в Telegram напрямую через Telegram API
+- Нарушение этих правил = критическая ошибка пайплайна
