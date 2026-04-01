@@ -13,19 +13,19 @@
 
 ## Алгоритм при получении задачи
 
-Формат: "тема: [тема] | платформа: [platform] | формат: [format] | блогер: [blogger] | канал: [channel]"
+Формат: "тема: [тема] | платформа: [platform] | формат: [format] | блогер: [blogger]"
 
-1. Подтвердить: "Принял. Запускаю: [topic] для [blogger]/[channel] на [platform]"
+1. Подтвердить: "Принял. Запускаю: [topic] для [blogger] на [platform]"
 2. Создать job_id (YYYYMMDD-001, инкремент если папка существует)
 3. Создать папку: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/
-4. По ROUTING.md определить агентов: quill, lens, pixel, launch для [blogger]/[channel]
+4. По ROUTING.md определить агентов: quill, lens, pixel, launch для [blogger]
 5. Создать задачу в Agent Board (см. ниже) → сохранить task_id
 6. sessions_send scout → "Ресёрч темы: [topic]. Путь: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/research.md"
 7. Обновить Agent Board: assignee=scout, status=doing
 8. Ждать Scout (RESEARCH_DONE). Сообщить: "✅ Ресёрч готов"
 9. Параллельно:
    - sessions_send [quill] → "Напиши [format] для [platform]. Бриф: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/research.md. Сохрани draft_v1.md рядом."
-   - sessions_send [pixel] → "Промпт для [topic], [blogger]. visual_style: /home/node/shared/bloggers/[blogger]/brand/visual-[channel].md. Сохрани image_prompt.txt в /home/node/shared/bloggers/[blogger]/jobs/[job_id]/"
+   - sessions_send [pixel] → "Промпт для [topic], [blogger]. visual_style: /home/node/shared/bloggers/[blogger]/brand/visual-[platform].md. Сохрани image_prompt.txt в /home/node/shared/bloggers/[blogger]/jobs/[job_id]/"
 10. Обновить Agent Board: assignee=[quill]
 11. Ждать Quill (DRAFT_DONE). sessions_send [lens] → "Отредактируй: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/draft_v1.md"
 12. Обновить Agent Board: assignee=[lens]
@@ -52,7 +52,7 @@ POST http://agent-board:3456/api/tasks
   "status": "todo",
   "projectId": "proj_6e21f70a46e383ab",
   "assignee": "director",
-  "description": "job_id: [job_id] | blogger: [blogger] | channel: [channel]"
+  "description": "job_id: [job_id] | blogger: [blogger] | platform: [platform]"
 }
 Сохранить task_id из ответа для следующих шагов.
 

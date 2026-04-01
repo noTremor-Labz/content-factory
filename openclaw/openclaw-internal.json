@@ -1,11 +1,21 @@
 {
+  "meta": {
+    "lastTouchedVersion": "2026.3.24",
+    "lastTouchedAt": "2026-03-29T05:10:23.193Z"
+  },
   "agents": {
+    "defaults": {
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      }
+    },
     "list": [
       {
         "id": "director",
+        "default": true,
         "workspace": "/home/node/.openclaw/workspace-director",
-        "model": "anthropic/claude-sonnet-4-6",
-        "default": true
+        "model": "anthropic/claude-sonnet-4-6"
       },
       {
         "id": "scheduler",
@@ -18,16 +28,6 @@
         "model": "anthropic/claude-sonnet-4-6"
       },
       {
-        "id": "pixel",
-        "workspace": "/home/node/.openclaw/workspace-pixel",
-        "model": "anthropic/claude-haiku-4-5"
-      },
-      {
-        "id": "launch",
-        "workspace": "/home/node/.openclaw/workspace-launch",
-        "model": "anthropic/claude-haiku-4-5"
-      },
-      {
         "id": "quill",
         "workspace": "/home/node/.openclaw/workspace-quill",
         "model": "anthropic/claude-sonnet-4-6"
@@ -36,6 +36,16 @@
         "id": "lens",
         "workspace": "/home/node/.openclaw/workspace-lens",
         "model": "anthropic/claude-sonnet-4-6"
+      },
+      {
+        "id": "launch",
+        "workspace": "/home/node/.openclaw/workspace-launch",
+        "model": "anthropic/claude-haiku-4-5"
+      },
+      {
+        "id": "pixel",
+        "workspace": "/home/node/.openclaw/workspace-pixel",
+        "model": "anthropic/claude-haiku-4-5"
       },
       {
         "id": "pulse-tomas",
@@ -60,27 +70,73 @@
     ]
   },
   "bindings": [
-    { "agentId": "director",    "match": { "channel": "telegram", "accountId": "default" } },
+    {
+      "agentId": "director",
+      "match": { "channel": "telegram", "accountId": "default" }
+    },
     { "agentId": "scheduler",   "match": { "channel": "internal" } },
     { "agentId": "scout",       "match": { "channel": "internal" } },
-    { "agentId": "pixel",       "match": { "channel": "internal" } },
-    { "agentId": "launch",      "match": { "channel": "internal" } },
     { "agentId": "quill",       "match": { "channel": "internal" } },
     { "agentId": "lens",        "match": { "channel": "internal" } },
+    { "agentId": "launch",      "match": { "channel": "internal" } },
+    { "agentId": "pixel",       "match": { "channel": "internal" } },
     { "agentId": "pulse-tomas", "match": { "channel": "internal" } },
     { "agentId": "pulse-misha", "match": { "channel": "internal" } },
     { "agentId": "pulse-nasik", "match": { "channel": "internal" } },
     { "agentId": "pulse-yulya", "match": { "channel": "internal" } }
   ],
+  "session": {
+    "maintenance": {
+      "mode": "enforce",
+      "pruneAfter": "1d",
+      "maxEntries": 200
+    }
+  },
+  "hooks": {
+    "enabled": true,
+    "token": "fd5c8a699789ba6beb43c59b5ad6834a3830c6e8e683b429"
+  },
+  "tools": {
+    "sessions": {
+      "visibility": "all"
+    }
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
   "channels": {
     "telegram": {
+      "enabled": true,
+      "dmPolicy": "pairing",
+      "botToken": "8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA",
+      "groupPolicy": "allowlist",
+      "streaming": "partial",
       "accounts": {
         "default": {
-          "botToken": "${TELEGRAM_BOT_TOKEN}",
           "dmPolicy": "allowlist",
-          "allowFrom": ["tg:${TELEGRAM_OWNER_ID}"]
+          "botToken": "8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA",
+          "allowFrom": ["tg:492912584"],
+          "groupPolicy": "allowlist",
+          "streaming": "partial"
         }
       }
+    }
+  },
+  "gateway": {
+    "mode": "local",
+    "bind": "lan",
+    "controlUi": {
+      "allowedOrigins": [
+        "http://localhost:18789",
+        "http://127.0.0.1:18789"
+      ]
+    },
+    "auth": {
+      "mode": "token",
+      "token": "f3aaf74ffcf602768b12f8890fed9b9b85e4f81ab31ce8f8"
     }
   }
 }

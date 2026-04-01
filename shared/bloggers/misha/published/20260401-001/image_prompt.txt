@@ -1,0 +1,34 @@
+# Image Prompts — Misha / YouTube / Барная индустрия / Кофе / HoReCa / Большая Азия / Бариста
+# Стиль канала: кинематографичный кофейный минимализм, тёплые нейтральные + медный акцент #b45309
+# Формат: вертикаль 9:16 (YouTube Shorts / превью)
+# Негатив: белый студийный фон, стоковые улыбки, пластик, неон, перегруженная композиция
+
+---
+
+## ПРОМПТ 1 — Азиатские вкусы в кофе (матча, убе, пандан)
+Cinematic close-up of three ceramic cups on a dark espresso bar counter: matcha latte with vivid green foam, ube latte with deep purple gradient, pandan coffee with pale jade hue. Warm ambient backlighting, natural steam rising, rich dark-brown wooden surface, copper spoon beside each cup. Moody, editorial coffee photography. Vertical 9:16. Color palette: cream, dark brown, copper #b45309, muted green. No white studio background, no plastic cups, no neon.
+--ar 9:16 --style cinematic --v 6
+
+---
+
+## ПРОМПТ 2 — Бариста за работой / POV стойки (день из жизни)
+POV shot from behind a skilled barista's hands pouring latte art into a ceramic cup at an Asian-inspired coffee bar. Close-up: steaming milk pitcher, espresso crema swirl, tattooed hands, ambient warm lighting. Background: blurred dark shelving with coffee bags and Japanese paper labels. Cinematic depth of field, film grain texture. Vertical 9:16. Warm neutrals: cream, espresso brown, copper accents. No smiling stock faces, no bright studio lights.
+--ar 9:16 --style raw --v 6
+
+---
+
+## ПРОМПТ 3 — Кофейни Большой Азии (Китай, Япония, Корея)
+Cinematic wide-angle interior of a minimalist Asian specialty coffee shop — blending Japanese wabi-sabi aesthetics with modern bar design. Stone counter, pendant warm lights, bamboo wood panels, a single espresso cup on the bar. Moody golden hour light streaming through shoji screen windows. Vertical 9:16. Color palette: warm cream, charcoal, copper #b45309, soft green accent. Photorealistic, editorial style, no clutter.
+--ar 9:16 --style cinematic --v 6
+
+---
+
+## ПРОМПТ 4 — Micro cocktails / Soft clubbing / Барная культура 2026
+Close-up of a bartender's hands placing two tiny shot-glass cocktails on a dark marble bar top — micro cocktails with layered amber and green gradients, garnished with yuzu zest and a single mint leaf. Atmospheric low-light bar environment, subtle DJ booth bokeh in background, copper bar tools. Cinematic, editorial, moody. Vertical 9:16. Palette: dark brown, copper, cream, accent green #4ade80. No neon colors, no overcrowded composition.
+--ar 9:16 --style cinematic --v 6
+
+---
+
+## ПРОМПТ 5 — Рост цен на кофе / Аналитика / HoReCa (провокационный заголовок)
+Dramatic macro shot of premium green coffee beans spilling from a burlap sack onto a dark wooden table, with a subtle ascending price chart overlaid as a translucent graphic element. One freshly roasted espresso cup in soft focus in the background, steam rising. Cinematic editorial photography. Vertical 9:16. Palette: warm cream, espresso dark brown, copper #b45309. Clean composition, no clutter, no plastic.
+--ar 9:16 --style editorial --v 6

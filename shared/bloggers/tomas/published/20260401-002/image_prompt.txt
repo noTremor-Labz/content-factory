@@ -1,0 +1,15 @@
+Dark mode product UI illustration, 1:1 square format.
+
+A cinematic top-down or isometric view of a minimal enterprise architecture diagram: autonomous AI agents represented as sleek rounded-rectangle nodes connected by clean directional arrows and async queues. Central node glows with a single cyan accent (#22d3ee), secondary nodes in dark charcoal (#18181b) with subtle zinc border (#27272a), all on a near-black background (#0a0a0b to #121214 gradient).
+
+Labels on the diagram are short English tech terms — "agent", "workflow", "queue", "2026" — rendered in white geometric sans-serif (Inter-like), minimal and readable. A subtle grid overlay in the background adds depth without noise. One micro-detail: a thin cyan pulse line traveling between two nodes, suggesting live autonomous activity.
+
+No people, no faces, no stock-photo elements, no neon cyberpunk chaos. No text outside the diagram nodes.
+
+Style: dark mode product UI, minimal, single cyan accent color, subtle grid, engineering diagram aesthetic, Vercel / Linear / Raycast mood, high contrast for small-size legibility, editorial tech.
+
+Negative prompt: stock photo people, glitch effects, rainbow colors, neon overload, white background, pastel tones, watermarks, logos, cluttered composition, illegible micro text.
+
+Aspect ratio: 1:1
+Style: --style raw
+Quality: maximum

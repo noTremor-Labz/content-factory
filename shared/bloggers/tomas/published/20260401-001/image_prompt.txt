@@ -1,0 +1,6 @@
+Extreme close-up macro shot of layered food textures on a deep black background (#0a0a0b): shattered freeze-dried fruit crystals, coarse dietary fiber strands (cassava, chicory root), and golden toasted grain clusters — all dramatically lit with a single warm amber (#f59e0b) side light that rakes across every crack and crevice, emphasizing maximum tactile depth. The composition is tight and industrial: fragments scattered with precision, not chaos, as if arranged in a laboratory sample dish. Amber-tinted mineral dust drifts in the air above the surface. Ultra-sharp focus on the foreground textures, with a subtle bokeh fade into pure black. No people. No cutlery. No lifestyle context. The feeling: sensory overload, engineered crunch, functional food as raw material.
+
+Aspect ratio: 1:1
+Style: --style raw
+Quality: --q 2
+Negative: white background, soft lighting, cozy kitchen, wooden table, stock photo, smiling people, pastel colors, flat design, cluttered composition

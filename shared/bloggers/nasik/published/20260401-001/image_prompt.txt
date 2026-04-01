@@ -1,0 +1,90 @@
+# Image Prompts — nasik / TikTok
+# Тема: Барная индустрия / Кофе / Большая Азия / Бариста
+# Формат: 9:16 (TikTok-обложка/превью)
+# Дата: 2026-04-01
+
+---
+
+## ПРОМПТ 1 — «Утро бариста» (POV крючок)
+
+**Midjourney / DALL-E:**
+```
+A barista's hands pulling a perfect espresso shot at dawn, extreme close-up, dark moody coffee shop interior, wisps of dense steam rising dramatically from the portafilter, deep black background #0a0a0a, warm amber and caramel highlights #f59e0b on the crema, cinematic grain, shot on iPhone vertical format, raw documentary feel, dynamic movement blur, chiaroscuro lighting, no studio setup, ultra-realistic --ar 9:16 --style raw --v 6
+```
+
+**Негативный промпт (DALL-E):**
+`studio lighting, beige, pastel, soft focus, static, clean white background, flat lay`
+
+**Использование:** обложка к посту «POV: твоя смена начинается в 07:00»
+
+---
+
+## ПРОМПТ 2 — «Убе Латте» (азиатский тренд, фиолетовый взрыв)
+
+**Midjourney / DALL-E:**
+```
+A vibrant ube latte being poured in slow motion, rich violet-purple liquid swirling into steamed milk, dark espresso bar counter, black background, electric purple and deep indigo color explosion, caramel foam crown #f59e0b, dramatic overhead lighting, macro lens splash effect, cinematic color grading, Asian cafe aesthetic, vertical 9:16 TikTok cover style, hyper-realistic food photography --ar 9:16 --style raw --v 6
+```
+
+**Негативный промпт (DALL-E):**
+`white background, flat lay, pastel tones, low contrast, studio softbox, symmetrical boring composition`
+
+**Использование:** обложка к посту «Пробую убе латте — вкус, который захватывает кофейни мира»
+
+---
+
+## ПРОМПТ 3 — «Матча Латте» (зелёный вирусный визуал)
+
+**Midjourney / DALL-E:**
+```
+Ceremonial grade matcha latte being prepared by tattooed barista hands, vivid electric green matcha powder cloud exploding from bamboo whisk, dark black counter surface, deep shadows with neon-green accent light, caramel milk foam swirl, Japanese minimalist cafe background with dark wood, steam rising, vertical mobile shot aesthetic, TikTok cover frame 9:16, ultra-sharp details, high contrast documentary style --ar 9:16 --style raw --v 6
+```
+
+**Негативный промпт (DALL-E):**
+`bright daylight, pastel green, boring flat composition, white cup on white table, soft focus`
+
+**Использование:** обложка к посту «Матча латте дома за 3 минуты — японский тренд без японских цен»
+
+---
+
+## ПРОМПТ 4 — «Soft Clubbing / Бар днём» (барный тренд 2026)
+
+**Midjourney / DALL-E:**
+```
+A stylish Asian-inspired cocktail bar at 2PM, moody amber and black interior, a bartender silhouetted against a backlit shelves of spirit bottles, micro cocktail in a tiny glass with a citrus yuzu peel garnish, bokeh lights in background, warm caramel #92400e and gold #f59e0b tones, cinematic wide-angle vertical frame, hazy atmospheric smoke effect, neon Chinese characters softly glowing in background, editorial nightlife photography style, 9:16 aspect ratio --ar 9:16 --style raw --v 6
+```
+
+**Негативный промпт (DALL-E):**
+`daytime outdoor, bright natural light, empty bar, casual snapshot, white walls, no atmosphere`
+
+**Использование:** обложка к посту «Soft clubbing: когда кофейня становится клубом в 2 часа дня»
+
+---
+
+## ПРОМПТ 5 — «Большая Азия / Пандан» (экзотический ингредиент)
+
+**Midjourney / DALL-E:**
+```
+A Southeast Asian pandan latte with an otherworldly deep emerald green color, dramatic pour from a sleek matte black pitcher into a dark ceramic cup, wooden tray with fresh pandan leaves as garnish, moody dark cafe background with rattan textures and tropical shadow play, rich black shadows #0a0a0a with vivid green and amber highlights, cinematic vertical format TikTok-style food content, intense saturation and contrast, handheld camera aesthetic, grain texture --ar 9:16 --style raw --v 6
+```
+
+**Негативный промпт (DALL-E):**
+`overexposed, white background, artificial bright studio, flat food photography, generic stock photo`
+
+**Использование:** обложка к посту «Пандан латте — зелёный вкус ЮВА, который скоро будет везде»
+
+---
+
+## Общие параметры стиля (для всех промптов)
+
+- Формат: **9:16** (TikTok vertical)
+- Фон: тёмный #0a0a0a или карамельный #92400e
+- Акцент: карамель #f59e0b
+- Стиль: живой, контрастный, документальный
+- Избегать: пастель, мягкий фокус, студийная постановка, бежевые тона
+
+## Рекомендации по генерации
+
+- **Midjourney:** добавляй `--ar 9:16 --style raw --v 6` к каждому промпту
+- **DALL-E:** указывай `vertical 9:16 TikTok format` внутри промпта + используй негативные промпты через API (`negative_prompt` параметр)
+- Для лучшего результата генерируй 4 варианта каждого промпта и выбирай наиболее динамичный

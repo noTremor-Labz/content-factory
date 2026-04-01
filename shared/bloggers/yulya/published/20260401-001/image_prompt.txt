@@ -1,0 +1,69 @@
+# IMAGE PROMPTS — Юля / Instagram
+# Тема: Барная индустрия / Кофе / Большая Азия / Бариста
+# Дата: 2026-04-01
+# Форматы: 1:1 (пост/карусель) и 9:16 (Reels)
+
+---
+
+## ПРОМПТ 1 — Матча латте / утренний момент
+**Формат:** 9:16 (Reels)
+**Контент-план:** Пост #3 (Четверг) — «Матча латте за 60 секунд»
+
+**Midjourney / DALL-E prompt:**
+A close-up of a matcha latte being poured in slow motion, soft morning light streaming through a cafe window, creamy milk swirling into vibrant green matcha in a clear glass cup, warm beige and cream tones, subtle steam rising, delicate foam texture, golden hour light reflections on the glass surface, Japanese-inspired minimalist cafe aesthetic, shallow depth of field, film grain, vertical 9:16 composition --ar 9:16 --style raw --v 6
+
+**Негативный промпт (MJ):** --no neon, harsh shadows, dark background, studio lighting, oversaturated colors, busy background
+
+---
+
+## ПРОМПТ 2 — Убе (Ube) латте / фиолетовый тренд
+**Формат:** 1:1 (пост)
+**Контент-план:** Пост #7 (Суббота) — «Убе латте — фиолетовый тренд из Филиппин»
+
+**Midjourney / DALL-E prompt:**
+A beautiful ube latte in a ceramic cup, rich purple-lavender color, creamy milk foam on top, placed on a light linen cloth, soft natural light from the side, pastel cream and soft violet palette, fresh purple yam pieces scattered nearby, Southeast Asian cafe aesthetic, warm and intimate atmosphere, bokeh background, overhead and slight angle shot, square 1:1 composition --ar 1:1 --style raw --v 6
+
+**Негативный промпт (MJ):** --no dark tones, neon light, harsh contrast, cluttered background, cold blue tones
+
+---
+
+## ПРОМПТ 3 — Бариста / закулисье / POV утра
+**Формат:** 9:16 (Reels)
+**Контент-план:** Пост #1 (Четверг) — «POV: утро бариста в баре с азиатским меню»
+
+**Midjourney / DALL-E prompt:**
+POV shot of a female barista's hands preparing a specialty coffee drink in an Asian-fusion cafe, morning light spilling softly through large windows, visible espresso machine and brass fixtures, small ceramic cups with Japanese kanji labels, bamboo trays, matcha powder in wooden bowls on marble counter, warm cream and olive green tones, intimate and quiet morning atmosphere, cinematic vertical composition, soft focus background --ar 9:16 --style raw --v 6
+
+**Негативный промпт (MJ):** --no busy crowds, dark atmosphere, harsh light, clutter, modern neon signs
+
+---
+
+## ПРОМПТ 4 — Азиатская кофейная культура / вайб
+**Формат:** 1:1 (пост / обложка карусели)
+**Контент-план:** Пост #11 (Воскресенье) — «Кофейная культура Китая vs Японии»
+
+**Midjourney / DALL-E prompt:**
+Flat lay of an Asian specialty coffee bar setup: a small ceramic cup of pour-over coffee, a glass of iced matcha, yuzu peel on a dark stone saucer, bamboo chopstick rests, minimalist Japanese menu card in kanji, all on a warm beige linen surface, soft diffused daylight, muted gold and cream palette with matcha green accents (#86efac), elegant and tranquil composition, styled editorial photography, square 1:1 --ar 1:1 --style raw --v 6
+
+**Негативный промпт (MJ):** --no bold graphic overlays, neon, dark moody tones, clutter, western coffee shop aesthetic
+
+---
+
+## ПРОМПТ 5 — Атмосфера бара / soft clubbing / вечер
+**Формат:** 9:16 (Reels)
+**Контент-план:** Пост #6 (Пятница) — «Атмосфера вечернего бара: soft clubbing изнутри»
+
+**Midjourney / DALL-E prompt:**
+Atmospheric evening bar scene with soft warm ambient lighting, a bartender silhouette preparing a micro cocktail at a sleek bar counter, small delicate glassware with citrus garnishes and aromatic herbs, subtle golden backlighting, smooth marble bar surface, Japanese whiskey bottles in the background, intimate low-light atmosphere without harshness, cinematic film look, warm cream and amber tones with soft shadows, vertical Reels composition --ar 9:16 --style raw --v 6
+
+**Негативный промпт (MJ):** --no strobe lights, neon signs, loud party crowd, harsh flash photography, oversaturated colors, dark oppressive shadows
+
+---
+
+## ПРИМЕЧАНИЯ
+
+- **Палитра:** бежево-кремовый фон, акцент #86efac (зелёный матча), золотистый #fbbf24
+- **Свет:** утренний или мягкий вечерний, без резких теней и студийного света
+- **Настроение:** уютно, присутствие в моменте, азиатская эстетика без клише
+- **Для DALL-E:** убрать параметры --ar, --v, --style; описание используется как есть
+- **Для Midjourney:** все промпты готовы к использованию с параметрами

@@ -7,3 +7,4 @@ agent-board/dist/
 node_modules/
 shared/bloggers/*/jobs/
 shared/bloggers/*/published/.env
+shared/bloggers/*/config.json
