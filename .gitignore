@@ -6,6 +6,9 @@
 agent-board/dist/
 node_modules/
 shared/bloggers/*/jobs/
-shared/bloggers/*/published/.env
+shared/bloggers/*/published/
 shared/bloggers/*/config.json
 openclaw/openclaw-internal.json
+shared/bloggers/*/jobs/
+shared/bloggers/*/*/published/
+shared/bloggers/*/*/jobs/
