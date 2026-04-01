@@ -8,3 +8,4 @@ node_modules/
 shared/bloggers/*/jobs/
 shared/bloggers/*/published/.env
 shared/bloggers/*/config.json
+openclaw/openclaw-internal.json
