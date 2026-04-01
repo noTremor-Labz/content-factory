@@ -13,6 +13,8 @@ services:
     volumes:
       - ${OPENCLAW_CONFIG_DIR:-~/.openclaw}:/home/node/.openclaw
       - ${OPENCLAW_WORKSPACE_DIR:-~/.openclaw/workspace}:/home/node/.openclaw/workspace
+      - n8n-data:/home/node/.n8n
+      - ./shared:/home/node/shared
       - ${HOST_SHARED_PATH:-./shared}:/home/node/shared
     environment:
       - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
@@ -71,6 +73,7 @@ services:
       - "5678:5678"
     volumes:
       - n8n-data:/home/node/.n8n
+      - ./shared:/home/node/shared
     environment:
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-admin}
@@ -79,7 +82,7 @@ services:
       - N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE:-false}
       # Обязательно строка false: иначе $env в выражениях заблокирован (n8n-workflow: только === 'false' снимает блок)
       - N8N_BLOCK_ENV_ACCESS_IN_NODE=${N8N_BLOCK_ENV_ACCESS_IN_NODE:-false}
-      - WEBHOOK_URL=http://localhost:5678/
+      - WEBHOOK_URL=https://spotted-pokingly-nichelle.ngrok-free.dev/
       - GENERIC_TIMEZONE=Europe/Tallinn
       # Из контейнера n8n → Agent Board в той же Docker-сети
       - AGENT_BOARD_URL=${AGENT_BOARD_URL:-http://agent-board:3456}
@@ -88,6 +91,11 @@ services:
       # Для HTTP-узлов к OpenClaw gateway из n8n (хуки — по доке OpenClaw / вашему сценарию)
       - OPENCLAW_GATEWAY_INTERNAL_URL=${OPENCLAW_GATEWAY_INTERNAL_URL:-http://openclaw-gateway:18789}
       - OPENCLAW_HOOK_TOKEN=${OPENCLAW_HOOK_TOKEN:-}
+      - N8N_EDITOR_BASE_URL=http://127.0.0.1:5678
+      - N8N_PROTOCOL=http
+      - N8N_HOST=127.0.0.1
+      - N8N_PORT=5678
+
 
   filebrowser:
     image: filebrowser/filebrowser:latest

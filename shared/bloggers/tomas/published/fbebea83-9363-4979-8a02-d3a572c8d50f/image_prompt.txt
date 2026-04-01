@@ -1,0 +1,22 @@
+A stunning, editorial-style flat lay photograph of plant-based protein sources arranged on a clean light stone surface. The composition features:
+
+- A central arrangement of vibrant green pea pods freshly split open, golden chickpeas, and red lentils spilling artfully from a small ceramic bowl
+- Scattered hemp seeds and spirulina powder in a small wooden spoon adding texture and color contrast
+- A sleek, modern protein bar with visible seeds and a "clean label" aesthetic placed at the edge
+- A small glass jar of smooth pea protein powder with a wooden scoop resting beside it
+- Fresh microgreens and edamame pods as accent elements adding lushness
+- Subtle background of pale warm beige / off-white linen texture
+
+Lighting: soft natural diffused daylight from the upper left, creating gentle shadows and warm highlights. No harsh shadows.
+
+Color palette: earthy greens, warm yellows, soft terracotta, creamy whites — vibrant but natural.
+
+Style: premium food photography, editorial magazine quality, minimalist Scandinavian aesthetic, clean and modern. 
+
+Mood: fresh, energetic, health-forward, approachable — not clinical or "supplement store". Think Kinfolk magazine meets functional nutrition.
+
+No people, no text overlays, no plates. Pure ingredients storytelling.
+
+Aspect ratio: 1:1 (square, optimized for Telegram post).
+
+--ar 1:1 --style raw --v 6 --q 2
