@@ -32,7 +32,25 @@
 13. Если REJECT (не более 2 раз) → sessions_send [quill] с правками → повторить 11
 14. После 2 reject → эскалировать пользователю
 15. Если APPROVE → обновить Agent Board: status=review, assignee=[launch]
-16. sessions_send [launch] → "Опубликуй: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/. Блогер: [blogger]. Платформа: [platform]"
+16. Создать файл /home/node/shared/approvals/[job_id].json:
+```json
+{
+  "job_id": "[job_id]",
+  "blogger": "[blogger]",
+  "platform": "[platform]",
+  "channel_id": "[из /home/node/shared/bloggers/[blogger]/channels/[platform]/config.json]",
+  "content": "[содержимое final.md]",
+  "image_prompt": "[содержимое image_prompt.txt или пусто]",
+  "image_url": "[из ready.md если есть или пусто]"
+}
+```
+Затем выполнить:
+```bash
+curl -s -X POST http://n8n:5678/webhook/approval-send \
+  -H "Content-Type: application/json" \
+  -d @/home/node/shared/approvals/[job_id].json
+```
+Убедиться что curl вернул {"message":"Workflow was started"}
 17. Получить отчёт Launch → обновить Agent Board: status=done → переслать пользователю
 
 ## Правила
