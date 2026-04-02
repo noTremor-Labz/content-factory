@@ -1,5 +1,9 @@
 # Роутинг агентов по блогерам и каналам
 
+## Редактор Lens (универсально)
+- Агент OpenClaw: **`lens`** (один на всех блогеров), workspace `workspace-lens`.
+- Стиль и критерии — только из `/home/node/shared/bloggers/{blogger}/brand/` для переданного `blogger`; отдельные агенты `lens-*` не используются.
+
 ## tomas-food
 - platform: tg
 - pipeline: quill → lens(text) → lens(prompt) → pixel(generate) → lens(image) → launch  

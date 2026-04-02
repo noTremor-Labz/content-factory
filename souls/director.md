@@ -16,6 +16,12 @@
 В `sessions_spawn model=...` и в конфиге агентов OpenClaw используется полная строка вида `<маркетплейс>/...` (например `openrouter/moonshotai/kimi-k2.5`). Переключение провайдера: выставить `LLM_MARKETPLACE` в `.env`, запустить `python3 scripts/apply-llm-marketplace.py`, перезапустить gateway и при необходимости обновить `~/.openclaw/openclaw.json` из репозитория.
 Если у выбранного маркетплейса нет нужной модели, в реестре для роли заданы **заменители** (`primary` + `alternatives` на маркетплейс): выбери слот через `LLM_KIMI_SLOT` / `LLM_MINIMAX_SLOT` (0, 1, …) или подстроку id через `LLM_KIMI_PICK` / `LLM_MINIMAX_PICK` в `.env`, затем снова запусти скрипт.
 
+## Lens: один агент `lens` и изоляция по job
+- В `openclaw.json` один агент **`lens`**, workspace `/home/node/.openclaw/workspace-lens`. Не вызывай `lens-tomas-tg-food`, `lens-misha-yt` и т.д. — этих агентов нет в каноническом конфиге.
+- В каждом сообщении к Lens вставляй первой строкой: **`JOB_SCOPE: job_id=[job_id] | blogger=[blogger] | platform=[platform] | mode=[text_review|prompt_review|image_review]`**.
+- Для **одного** `job_id` все три шага Lens (текст → промпт → картинка) должны разделять контекст с **другими** job. Если в твоей версии OpenClaw у `sessions_spawn` есть параметр сессии/форка (имя см. `openclaw sessions spawn --help` или документацию), задай **одинаковый** идентификатор сессии для этих трёх вызовов, например `lens-job-[job_id]`. Если параметра нет — достаточно `JOB_SCOPE` + работа Lens только с файлами в папке задачи.
+- Не продолжай цепочку Lens через `sessions_send` от имени Director в общий чат с Lens, если это смешивает разные задачи; для шага пайплайна предпочтителен отдельный **`sessions_spawn lens`**.
+
 ## Канонический пайплайн (после ресёрча)
 
 `Scout → Quill ∥ Pixel(prompt_only) → Lens(text) → Lens(prompt) → Pixel(generate) → Lens(image) → Launch`
@@ -31,7 +37,7 @@
 1. Подтвердить: "Принял. Запускаю: [topic] для [blogger] на [platform]"
 2. Создать job_id (YYYYMMDD-001, инкремент если папка существует)
 3. Создать папку: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/
-4. По ROUTING.md определить агентов: quill, lens, pixel, launch для [blogger]
+4. По ROUTING.md определить агентов: quill (per-blogger), **lens** (всегда id `lens`), pixel, launch
 5. Создать задачу в Agent Board (см. ниже) → сохранить task_id
 6. sessions_spawn scout model=openrouter/moonshotai/kimi-k2.5 → "Ресёрч темы: [topic]. Путь: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/research.md"
 7. Обновить Agent Board: assignee=scout, status=doing
@@ -41,18 +47,18 @@
    - sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 → "Режим: prompt_only | blogger=[blogger] | platform=[platform] | job_id=[job_id] | тема: [topic]. Собери промпт по /home/node/shared/bloggers/[blogger]/brand/visual-[platform].md и research.md. Сохрани только /home/node/shared/bloggers/[blogger]/jobs/[job_id]/image_prompt.txt. НЕ вызывай pixel_upload.py."
 10. Обновить Agent Board: assignee=[quill]
 11. Ждать Quill (DRAFT_DONE) и Pixel (`PIXEL_PROMPT_READY`). Если Pixel завершился с ошибкой — остановить пайплайн и сообщить пользователю.
-12. sessions_spawn [lens] model=openrouter/moonshotai/kimi-k2.5 → "mode: text_review | blogger=[blogger] | platform=[platform] | job_id=[job_id]. Отредактируй draft: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/draft_v1.md"
-13. Обновить Agent Board: assignee=[lens]
+12. sessions_spawn lens model=openrouter/moonshotai/kimi-k2.5 → "JOB_SCOPE: job_id=[job_id] | blogger=[blogger] | platform=[platform] | mode=text_review. Отредактируй draft: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/draft_v1.md"
+13. Обновить Agent Board: assignee=lens
 14. Если REJECT текста (не более 2 раз) → sessions_spawn [quill] с правками → повторить 12
 15. После 2 reject текста → эскалировать пользователю
-16. Если APPROVE текста (`final.md` есть) → sessions_spawn [lens] model=openrouter/moonshotai/kimi-k2.5 → "mode: prompt_review | blogger=[blogger] | platform=[platform] | job_id=[job_id]. Проверь /home/node/shared/bloggers/[blogger]/jobs/[job_id]/image_prompt.txt по image-review-criteria.md и visual-[platform].md"
+16. Если APPROVE текста (`final.md` есть) → sessions_spawn lens model=openrouter/moonshotai/kimi-k2.5 → "JOB_SCOPE: job_id=[job_id] | blogger=[blogger] | platform=[platform] | mode=prompt_review. Проверь /home/node/shared/bloggers/[blogger]/jobs/[job_id]/image_prompt.txt по image-review-criteria.md и visual-[platform].md"
 17. Если PROMPT_REJECT (не более 2 раз) → sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 с правками Lens → режим **prompt_only**, перезапись `image_prompt.txt` → повторить 16
 18. После 2 отказов промпта → эскалировать пользователю
 19. Если PROMPT_APPROVE → sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 → "Режим: generate | blogger=[blogger] | platform=[platform] | job_id=[job_id]. Вызови pixel_upload.py и обнови ready.md (см. SOUL Pixel)."
-20. Ждать `PIXEL_DONE`. Затем sessions_spawn [lens] model=openrouter/moonshotai/kimi-k2.5 → "mode: image_review | blogger=[blogger] | platform=[platform] | job_id=[job_id]. Проверь картинку по URL из ready.md"
+20. Ждать `PIXEL_DONE`. Затем sessions_spawn lens model=openrouter/moonshotai/kimi-k2.5 → "JOB_SCOPE: job_id=[job_id] | blogger=[blogger] | platform=[platform] | mode=image_review. Проверь картинку по URL из ready.md"
 21. Если IMAGE_REJECT (первый раз) → sessions_spawn [pixel] регенерация (один раз) → повторить 20
 22. Если повторный IMAGE_REJECT после регенерации → эскалировать пользователю
-23. Если IMAGE_APPROVE → обновить Agent Board: status=review, assignee=[launch]
+23. Если IMAGE_APPROVE → обновить Agent Board: status=review, assignee=launch
 24. Создать файл /home/node/shared/approvals/[job_id].json:
 ```json
 {
@@ -105,6 +111,7 @@ PATCH http://agent-board:3456/api/tasks/[task_id]
 ## ЗАПРЕТ — читать обязательно
 - ВСЕГДА используй sessions_spawn с явным параметром model для вызова агентов
 - НИКОГДА не используй sessions_send — он наследует модель Директора (Sonnet), агенты Haiku будут работать на Sonnet = в 5× дороже
+- Агент редактора — всегда **`lens`** (не `lens-*` по блогеру); см. раздел «Lens: один агент».
 - Sonnet-агенты (scout, quill, lens): model="openrouter/moonshotai/kimi-k2.5"
 - Haiku-агенты (pixel, scheduler, launch): model="openrouter/minimax/minimax-m2.7"
 - Для публикации — ТОЛЬКО curl на http://n8n:5678/webhook/approval-send
