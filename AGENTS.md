@@ -35,6 +35,8 @@ VERIFY_ROUTER=1 bash scripts/verify-approval-media.sh
 ## Согласование в Telegram (approval-send / telegram-router)
 
 - **Два бота:** у OpenClaw Director свой Telegram-бот; согласование постов должно идти через **отдельного** бота. В `.env` задай `TELEGRAM_APPROVAL_BOT_TOKEN` (токен именно approval-бота). Если переменная пустая, в n8n подставится `TELEGRAM_BOT_TOKEN` (совпадение с Director — только если ты сознательно используешь один бот). Контейнеру **n8n** нужны обе переменные в окружении (см. `docker-compose.yml`).
+- **Куда слать кнопки:** задай **`APPROVE_CHAT_ID`** (числовой id чата approval: личка или группа). Узел **Parse approval body** в approval-send берёт `chat_id` **только** из `process.env.APPROVE_CHAT_ID` / `TELEGRAM_APPROVAL_CHAT_ID`, не из тела webhook — иначе сообщения уезжают в чат Директора.
+- Если в POST на `approval-send` не передали `media_url`, но в `shared/bloggers/{blogger}/jobs/{job_id}/ready.md` есть строки `media_url:` / `image_url:` или `PIXEL_URL:` — workflow подставит URL из файла (после `pixel_upload.py` там всегда есть оба поля).
 - **Webhook Telegram:** у **approval-бота** в BotFather/`setWebhook` должен быть URL вебхука n8n на workflow **telegram-router** (тот же хост, что и для POST approval-send). Если вебхук указывает на другого бота или старый URL, колбэки и сообщения пойдут не туда.
 - Все вызовы `api.telegram.org` в workflow берут токен из `$env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN` — не хардкодь токен в JSON.
 - После отправки поста на согласование workflow **approval-send** пишет состояние в  

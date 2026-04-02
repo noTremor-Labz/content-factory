@@ -126,6 +126,9 @@ services:
       # Согласование постов: approval-бот (пусто → fallback на TELEGRAM_BOT_TOKEN в выражениях n8n)
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
       - TELEGRAM_APPROVAL_BOT_TOKEN=${TELEGRAM_APPROVAL_BOT_TOKEN:-}
+      # Куда слать кнопки согласования (личный чат / группа approval). Обязательно задать в .env
+      - APPROVE_CHAT_ID=${APPROVE_CHAT_ID:-}
+      - TELEGRAM_APPROVAL_CHAT_ID=${TELEGRAM_APPROVAL_CHAT_ID:-}
       # workflow references-style-examples: привязка chat_id → блогер (опционально)
       - TELEGRAM_STYLE_CHAT_TOMAS=${TELEGRAM_STYLE_CHAT_TOMAS:-}
       - TELEGRAM_STYLE_CHAT_MISHA=${TELEGRAM_STYLE_CHAT_MISHA:-}

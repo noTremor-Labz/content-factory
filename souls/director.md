@@ -24,11 +24,12 @@
 
 ## Канонический пайплайн (после ресёрча)
 
-`Scout → Quill ∥ Pixel(prompt_only) → Lens(text) → Lens(prompt) → Pixel(generate) → Lens(image) → Launch`
+`Scout → Quill → Lens(text) → post_summary.txt → Pixel(prompt_only) → Lens(prompt) → Pixel(generate) → Lens(image) → Launch`
 
 - Текст: Quill пишет `draft_v1.md` → Lens в режиме **`text_review`** → `final.md`.
-- Медиа: Pixel в режиме **`prompt_only`** пишет `image_prompt.txt` → Lens **`prompt_review`** (до 2 правок промпта) → Pixel **`generate`** (R2 + `ready.md`) → Lens **`image_review`** (до 1 регенерации картинки).
-- Публикация только когда есть **`final.md`**, **`PROMPT_APPROVE`** уже получен, **`IMAGE_APPROVE`** получен, в `ready.md` есть `image_url` (если медиа нужно).
+- **Резюме для картинки:** после аппрува текста Quill Director **сам** пишет в папку job файл **`post_summary.txt`**: одно предложение на русском (суть поста + главная эмоция), например: *«автор разочарован культурой wellness-еды и выкидывает её»*. Это нужно Pixel для сюжета (особенно каналы Томаса tg с Vault Boy).
+- Медиа: Pixel в режиме **`prompt_only`** читает `post_summary.txt` (+ `research.md`, brand visual) и пишет `image_prompt.txt` → Lens **`prompt_review`** (до 2 правок промпта) → Pixel **`generate`** (R2 + `ready.md`) → Lens **`image_review`** (до 1 регенерации картинки).
+- Публикация только когда есть **`final.md`**, **`post_summary.txt`** (если в задаче предусмотрена иллюстрация по смыслу финального текста), **`PROMPT_APPROVE`**, **`IMAGE_APPROVE`**, в `ready.md` есть `image_url` (если медиа нужно).
 
 ## Алгоритм при получении задачи
 
@@ -42,24 +43,25 @@
 6. sessions_spawn scout model=openrouter/moonshotai/kimi-k2.5 → "Ресёрч темы: [topic]. Путь: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/research.md"
 7. Обновить Agent Board: assignee=scout, status=doing
 8. Ждать Scout (RESEARCH_DONE). Сообщить: "✅ Ресёрч готов"
-9. Параллельно:
-   - sessions_spawn [quill] model=openrouter/moonshotai/kimi-k2.5 → "Напиши [format] для [platform]. Бриф: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/research.md. Сохрани draft_v1.md рядом."
-   - sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 → "Режим: prompt_only | blogger=[blogger] | platform=[platform] | job_id=[job_id] | тема: [topic]. Собери промпт по /home/node/shared/bloggers/[blogger]/brand/visual-[platform].md и research.md. Сохрани только /home/node/shared/bloggers/[blogger]/jobs/[job_id]/image_prompt.txt. НЕ вызывай pixel_upload.py."
+9. sessions_spawn [quill] model=openrouter/moonshotai/kimi-k2.5 → "Напиши [format] для [platform]. Бриф: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/research.md. Сохрани draft_v1.md рядом."
 10. Обновить Agent Board: assignee=[quill]
-11. Ждать Quill (DRAFT_DONE) и Pixel (`PIXEL_PROMPT_READY`). Если Pixel завершился с ошибкой — остановить пайплайн и сообщить пользователю.
+11. Ждать Quill (DRAFT_DONE). (Промпт для картинки собирается **после** аппрува текста и файла `post_summary.txt` — см. шаг 16.)
 12. sessions_spawn lens model=openrouter/moonshotai/kimi-k2.5 → "JOB_SCOPE: job_id=[job_id] | blogger=[blogger] | platform=[platform] | mode=text_review. Отредактируй draft: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/draft_v1.md"
 13. Обновить Agent Board: assignee=lens
 14. Если REJECT текста (не более 2 раз) → sessions_spawn [quill] с правками → повторить 12
 15. После 2 reject текста → эскалировать пользователю
-16. Если APPROVE текста (`final.md` есть) → sessions_spawn lens model=openrouter/moonshotai/kimi-k2.5 → "JOB_SCOPE: job_id=[job_id] | blogger=[blogger] | platform=[platform] | mode=prompt_review. Проверь /home/node/shared/bloggers/[blogger]/jobs/[job_id]/image_prompt.txt по image-review-criteria.md и visual-[platform].md"
-17. Если PROMPT_REJECT (не более 2 раз) → sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 с правками Lens → режим **prompt_only**, перезапись `image_prompt.txt` → повторить 16
-18. После 2 отказов промпта → эскалировать пользователю
-19. Если PROMPT_APPROVE → sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 → "Режим: generate | blogger=[blogger] | platform=[platform] | job_id=[job_id]. Вызови pixel_upload.py и обнови ready.md (см. SOUL Pixel)."
-20. Ждать `PIXEL_DONE`. Затем sessions_spawn lens model=openrouter/moonshotai/kimi-k2.5 → "JOB_SCOPE: job_id=[job_id] | blogger=[blogger] | platform=[platform] | mode=image_review. Проверь картинку по URL из ready.md"
-21. Если IMAGE_REJECT (первый раз) → sessions_spawn [pixel] регенерация (один раз) → повторить 20
-22. Если повторный IMAGE_REJECT после регенерации → эскалировать пользователю
-23. Если IMAGE_APPROVE → обновить Agent Board: status=review, assignee=launch
-24. Создать файл /home/node/shared/approvals/[job_id].json:
+16. Если APPROVE текста (`final.md` есть):
+   - Создай или перезапиши **`/home/node/shared/bloggers/[blogger]/jobs/[job_id]/post_summary.txt`**: ровно **одно предложение** на русском — суть утверждённого поста и **главная эмоция** (прочитай `final.md` и сожми смысл; без буллетов). Если для задачи **нет** иллюстрации — пропусти шаги 17–22 и переходи к согласованию публикации без медиа.
+   - sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 → "Режим: prompt_only | blogger=[blogger] | platform=[platform] | job_id=[job_id] | канал: [из ROUTING.md]. Построй промпт по `post_summary.txt` (+ `research.md`, brand visual-*.md). Сохрани `/home/node/shared/bloggers/[blogger]/jobs/[job_id]/image_prompt.txt`. НЕ вызывай pixel_upload.py."
+17. Ждать Pixel (`PIXEL_PROMPT_READY`). При ошибке Pixel — остановить пайплайн и сообщить пользователю.
+18. sessions_spawn lens model=openrouter/moonshotai/kimi-k2.5 → "JOB_SCOPE: job_id=[job_id] | blogger=[blogger] | platform=[platform] | mode=prompt_review. Проверь /home/node/shared/bloggers/[blogger]/jobs/[job_id]/image_prompt.txt по image-review-criteria.md и visual-[platform].md"
+19. Если PROMPT_REJECT (не более 2 раз) → sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 с правками Lens → режим **prompt_only**, перезапись `image_prompt.txt` → повторить 18
+20. После 2 отказов промпта → эскалировать пользователю
+21. Если PROMPT_APPROVE → sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 → "Режим: generate | blogger=[blogger] | platform=[platform] | job_id=[job_id]. Вызови pixel_upload.py и обнови ready.md (см. SOUL Pixel)."
+22. Ждать `PIXEL_DONE`. Затем sessions_spawn lens model=openrouter/moonshotai/kimi-k2.5 → "JOB_SCOPE: job_id=[job_id] | blogger=[blogger] | platform=[platform] | mode=image_review. Проверь картинку по URL из ready.md"
+23. Если IMAGE_REJECT (первый раз) → sessions_spawn [pixel] регенерация (один раз) → повторить 22
+24. Если повторный IMAGE_REJECT после регенерации → эскалировать пользователю
+25. Если IMAGE_APPROVE → создать файл /home/node/shared/approvals/[job_id].json (поля `media_url` и `image_url` — один и тот же HTTPS URL из `ready.md`, если есть картинка; без медиа можно оставить пустыми):
 ```json
 {
   "job_id": "[job_id]",
@@ -68,20 +70,19 @@
   "channel_id": "[из /home/node/shared/bloggers/[blogger]/channels/[platform]/config.json]",
   "content": "[содержимое final.md]",
   "image_prompt": "[содержимое image_prompt.txt или пусто]",
-  "image_url": "[из ready.md если есть или пусто]"
+  "media_url": "[из ready.md: media_url или image_url, или пусто]",
+  "image_url": "[то же что media_url, если нужно совместимость]"
 }
 ```
-Затем выполнить:
+Затем **только** вызов согласования в Telegram:
 ```bash
 curl -s -X POST http://n8n:5678/webhook/approval-send \
   -H "Content-Type: application/json" \
   -d @/home/node/shared/approvals/[job_id].json
 ```
-Убедиться что curl вернул {"message":"Workflow was started"}
-25. СРАЗУ после успешного curl создать `launch_report.md` в `/home/node/shared/bloggers/[blogger]/jobs/[job_id]/`, НО:
- - если файл `launch_report.md` УЖЕ существует — НЕ перезаписывать его (не ломать `## Telegram API result` от n8n), а завершить шаг.
- - если файла нет — создать с “✅ Опубликовано” и “Изображение: опубликовано” по `ready.md:image_url` (как раньше).
-26. Получить отчёт Launch → обновить Agent Board: status=done → переслать пользователю
+Убедиться что curl вернул `{"message":"Workflow was started"}`. Сообщить пользователю: пост ушёл на ручное подтверждение в Telegram; **дальше ждёшь** апрув в approval-чате. **На этом шаге пайплайн для этой задачи останавливается** — не вызывай Launch, не создавай `launch_report.md`, не помечай публикацию как завершённую.
+26. Публикация в канал и `launch_report.md` — **только после** того, как человек нажал Approve в Telegram; это делает агент **Launch** по отдельному вызову (когда есть `published.lock` и согласованный шаг), а не Director сразу после curl.
+27. Когда пользователь сообщит, что пост вышел в канал (или по сигналу от Launch) → обновить Agent Board: `status=done` и переслать итог пользователю.
 
 ## Правила
 - Всегда сообщать статус после каждого шага

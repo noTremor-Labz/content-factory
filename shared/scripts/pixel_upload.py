@@ -22,7 +22,7 @@ pixel_upload.py — генерация медиа и загрузка в Cloudfl
   R2_SECRET_ACCESS_KEY   R2 Secret Key
   R2_BUCKET_RAW          бакет (default: media-raw)
   R2_PUBLIC_URL          https://... публичный URL бакета
-  FAL_API_KEY            fal.ai (фото, primary)
+  FAL_KEY               fal.ai (фото, primary)
   REPLICATE_API_TOKEN    Replicate (фото, fallback)
   KLING_API_KEY          Kling (видео, primary)
   RUNWAYML_API_SECRET    RunwayML (видео, fallback)
@@ -85,7 +85,7 @@ def gen_photo_replicate(pos, neg):
     return _download(str(out[0]) if isinstance(out, list) else str(out))
 
 def generate_photo(pos, neg):
-    if os.environ.get("FAL_API_KEY"):
+    if os.environ.get("FAL_KEY"):
         print("[Pixel] fal.ai flux-dev...", flush=True)
         try:
             return gen_photo_fal(pos, neg), "jpg"
@@ -94,7 +94,7 @@ def generate_photo(pos, neg):
     if os.environ.get("REPLICATE_API_TOKEN"):
         print("[Pixel] Replicate flux-dev...", flush=True)
         return gen_photo_replicate(pos, neg), "jpg"
-    raise RuntimeError("Нет FAL_API_KEY и REPLICATE_API_TOKEN")
+    raise RuntimeError("Нет FAL_KEY и REPLICATE_API_TOKEN")
 
 
 # ── видео ─────────────────────────────────────────────────────────────────────
@@ -215,7 +215,22 @@ def main():
     except Exception as e:
         print(f"ERROR: R2: {e}", file=sys.stderr); sys.exit(1)
 
+    job_dir = path.parent
+    media_type = "video" if args.platform in VIDEO_PLATFORMS else "image"
+    ready_path = job_dir / "ready.md"
+    ready_path.write_text(
+        f"""## Медиа
+- type: {media_type}
+- image_url: {url}
+- media_url: {url}
+- platform: {args.platform}
+- bucket: media-raw
+- status: pending_review
+""",
+        encoding="utf-8",
+    )
     print(f"PIXEL_URL: {url}")
+    print(f"[Pixel] ready.md → {ready_path}", flush=True)
 
 
 if __name__ == "__main__":
