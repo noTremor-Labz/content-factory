@@ -152,7 +152,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMediaGroup",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMediaGroup' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, media: [{ type: 'photo', media: $json.media_url, caption: 'A' }, { type: 'photo', media: $json.media_url_b, caption: 'B' }] }) }}",
@@ -170,7 +170,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ A', callback_data: 'approve_a_' + $json.job_id }, { text: '✅ B', callback_data: 'approve_b_' + $json.job_id }, { text: '✏️ Правки', callback_data: 'revise_' + $json.job_id }, { text: '❌', callback_data: 'reject_' + $json.job_id }]] } }) }}",
@@ -188,7 +188,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendPhoto",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendPhoto' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, photo: $json.media_url, caption: $json.caption_single }) }}",
@@ -206,7 +206,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ Опубликовать', callback_data: 'approve_' + $json.job_id }, { text: '✏️ Правки', callback_data: 'revise_' + $json.job_id }, { text: '❌ Отклонить', callback_data: 'reject_' + $json.job_id }]] } }) }}",
@@ -224,7 +224,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.text_no_image, reply_markup: { inline_keyboard: [[{ text: '✅ Опубликовать', callback_data: 'approve_' + $json.job_id }, { text: '✏️ Правки', callback_data: 'revise_' + $json.job_id }, { text: '❌ Отклонить', callback_data: 'reject_' + $json.job_id }]] } }) }}",

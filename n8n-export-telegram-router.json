@@ -163,7 +163,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendPhoto",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendPhoto' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({chat_id: $json.channel_id, photo: $json.image_url, caption: $json.content}) }}",
@@ -207,7 +207,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/answerCallbackQuery",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/answerCallbackQuery' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({callback_query_id: $json.callback_query_id, text: \"✅ Опубликовано!\"}) }}",
@@ -225,7 +225,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/answerCallbackQuery",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/answerCallbackQuery' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({callback_query_id: $json.callback_query_id, text: \"❌ Отклонено\"}) }}",
@@ -346,7 +346,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({chat_id: $json.channel_id, text: $json.content}) }}",
@@ -424,7 +424,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/answerCallbackQuery",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/answerCallbackQuery' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ callback_query_id: $json.callback_query_id, text: \"✏️\" }) }}",
@@ -442,7 +442,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/editMessageReplyMarkup",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/editMessageReplyMarkup' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.callback_chat_id, message_id: $json.approve_text_message_id, reply_markup: {} }) }}",
@@ -460,7 +460,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, text: '✏️ Жду правки по посту ' + $json.job_id + ' (' + $json.blogger + ' | ' + $json.platform + ').\\n' + 'Следующим сообщением напиши что изменить — передам Quill через Director.' }) }}",
@@ -605,29 +605,259 @@
       },
       {
         "parameters": {
-          "jsCode": "const fs = require('fs');\nconst token = '8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA';\nreturn (async () => {\n  const st = $json.awaiting_job;\n  const pathState = $json.job_state_path;\n  const jobId = st.job_id;\n  const chatId = st.chat_id;\n  const jobIdStr = String(jobId);\n\n  if (st.awaiting_revision_message_id) {\n    await fetch(`https://api.telegram.org/bot${token}/deleteMessage`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ chat_id: chatId, message_id: st.awaiting_revision_message_id }),\n    });\n  }\n\n  const kind = st.approval_ui_kind || 'single_photo';\n  let markup;\n  if (kind === 'album') {\n    markup = { inline_keyboard: [[\n      { text: '✅ A', callback_data: 'approve_a_' + jobIdStr },\n      { text: '✅ B', callback_data: 'approve_b_' + jobIdStr },\n      { text: '✏️ Правки', callback_data: 'revise_' + jobIdStr },\n      { text: '❌', callback_data: 'reject_' + jobIdStr },\n    ]] };\n  } else {\n    markup = { inline_keyboard: [[\n      { text: '✅ Опубликовать', callback_data: 'approve_' + jobIdStr },\n      { text: '✏️ Правки', callback_data: 'revise_' + jobIdStr },\n      { text: '❌ Отклонить', callback_data: 'reject_' + jobIdStr },\n    ]] };\n  }\n\n  if (st.approve_text_message_id) {\n    await fetch(`https://api.telegram.org/bot${token}/editMessageReplyMarkup`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ chat_id: chatId, message_id: st.approve_text_message_id, reply_markup: markup }),\n    });\n  }\n\n  const next = { ...st, status: 'pending_approval', awaiting_revision_message_id: undefined, updated_at: new Date().toISOString() };\n  fs.writeFileSync(pathState, JSON.stringify(next, null, 2));\n\n  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({ chat_id: chatId, text: 'Отменено. Кнопки восстановлены.' }),\n  });\n\n  return [{ json: { ok: true } }];\n})();"
+          "jsCode": "const st = $json.awaiting_job;\nconst pathState = $json.job_state_path;\nconst jobIdStr = String(st.job_id);\nconst kind = st.approval_ui_kind || 'single_photo';\nlet markup;\nif (kind === 'album') {\n  markup = { inline_keyboard: [[\n    { text: '✅ A', callback_data: 'approve_a_' + jobIdStr },\n    { text: '✅ B', callback_data: 'approve_b_' + jobIdStr },\n    { text: '✏️ Правки', callback_data: 'revise_' + jobIdStr },\n    { text: '❌', callback_data: 'reject_' + jobIdStr },\n  ]] };\n} else {\n  markup = { inline_keyboard: [[\n    { text: '✅ Опубликовать', callback_data: 'approve_' + jobIdStr },\n    { text: '✏️ Правки', callback_data: 'revise_' + jobIdStr },\n    { text: '❌ Отклонить', callback_data: 'reject_' + jobIdStr },\n  ]] };\n}\nconst nextState = { ...st, status: 'pending_approval', awaiting_revision_message_id: undefined, updated_at: new Date().toISOString() };\nreturn [{ json: {\n  chat_id: st.chat_id,\n  del_wait_mid: st.awaiting_revision_message_id || null,\n  text_mid: st.approve_text_message_id,\n  markup,\n  path_state: pathState,\n  next_state_json: JSON.stringify(nextState),\n}}];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1220,
+          1180,
           96
         ],
-        "id": "f100000c-0000-4000-8000-00000000000c",
-        "name": "Cancel revision flow"
+        "id": "ca111111-1111-4111-8111-111111111101",
+        "name": "Cancel prepare"
       },
       {
         "parameters": {
-          "jsCode": "const fs = require('fs');\nconst token = '8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA';\nconst openclawUrl = 'http://openclaw-gateway:18789/hooks/agent';\nreturn (async () => {\n  const st = $json.awaiting_job;\n  const pathState = $json.job_state_path;\n  const text = ($json.text || '').trim();\n  const chatId = st.chat_id;\n  const jobId = st.job_id;\n  const blogger = st.blogger;\n  const platform = st.platform;\n  const jobDir = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}`;\n\n  for (const mid of (st.approve_media_message_ids || [])) {\n    await fetch(`https://api.telegram.org/bot${token}/deleteMessage`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ chat_id: chatId, message_id: mid }),\n    });\n  }\n  if (st.approve_text_message_id) {\n    await fetch(`https://api.telegram.org/bot${token}/deleteMessage`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ chat_id: chatId, message_id: st.approve_text_message_id }),\n    });\n  }\n  if (st.awaiting_revision_message_id) {\n    await fetch(`https://api.telegram.org/bot${token}/deleteMessage`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ chat_id: chatId, message_id: st.awaiting_revision_message_id }),\n    });\n  }\n\n  const revisedAt = new Date().toISOString();\n  const approvalPath = `/home/node/shared/approvals/${jobId}.json`;\n  let approval = {};\n  try { approval = JSON.parse(fs.readFileSync(approvalPath, 'utf8')); } catch (e) {}\n\n  const nextState = {\n    ...st,\n    status: 'revision_requested',\n    revision_comment: text,\n    revised_at: revisedAt,\n    awaiting_revision_message_id: undefined,\n    updated_at: revisedAt,\n  };\n  fs.writeFileSync(pathState, JSON.stringify(nextState, null, 2));\n\n  const draftPath = `${jobDir}/draft_approved.md`;\n  fs.writeFileSync(draftPath, approval.content || '', 'utf8');\n\n  const directorMsg = `Пользователь запросил правки по job ${jobId}.\\nКомментарий: ${text}\\nФайл: ${draftPath}\\nПередай правки Lens, затем Quill для переработки.`;\n  await fetch(openclawUrl, {\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json',\n      Authorization: 'Bearer fd5c8a699789ba6beb43c59b5ad6834a3830c6e8e683b429',\n    },\n    body: JSON.stringify({ message: directorMsg, agentId: 'director', wakeMode: 'now' }),\n  });\n\n  const ts = revisedAt.replace('T', ' ').slice(0, 19);\n  const statusText = `✏️ Правки переданы\\n👤 ${blogger} | 📢 ${platform} | 🗂 ${jobId}\\n💬 ${text}\\n🕐 ${ts}`;\n  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({ chat_id: chatId, text: statusText }),\n  });\n\n  return [{ json: { ok: true, job_id: jobId } }];\n})();"
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "cif-del",
+                "leftValue": "={{ $json.del_wait_mid }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1320,
+          96
+        ],
+        "id": "ca111111-1111-4111-8111-111111111102",
+        "name": "If cancel has wait msg"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/deleteMessage' }}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, message_id: $json.del_wait_mid }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1500,
+          32
+        ],
+        "id": "ca111111-1111-4111-8111-111111111103",
+        "name": "TG cancel delete wait"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/editMessageReplyMarkup' }}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $('Cancel prepare').item.json.chat_id, message_id: $('Cancel prepare').item.json.text_mid, reply_markup: $('Cancel prepare').item.json.markup }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1680,
+          96
+        ],
+        "id": "ca111111-1111-4111-8111-111111111104",
+        "name": "TG cancel edit markup"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/editMessageReplyMarkup' }}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $('Cancel prepare').item.json.chat_id, message_id: $('Cancel prepare').item.json.text_mid, reply_markup: $('Cancel prepare').item.json.markup }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1680,
+          160
+        ],
+        "id": "ca111111-1111-4111-8111-111111111105",
+        "name": "TG cancel edit markup (no del)"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\nconst p = $('Cancel prepare').first().json;\nfs.writeFileSync(p.path_state, p.next_state_json);\nreturn [{ json: { chat_id: p.chat_id } }];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1220,
+          1860,
+          96
+        ],
+        "id": "ca111111-1111-4111-8111-111111111106",
+        "name": "Cancel write state"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: 'Отменено. Кнопки восстановлены.' }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          2040,
+          96
+        ],
+        "id": "ca111111-1111-4111-8111-111111111107",
+        "name": "TG cancel ack"
+      },
+      {
+        "parameters": {
+          "jsCode": "const st = $json.awaiting_job;\nconst text = ($json.text || '').trim();\nconst pathState = $json.job_state_path;\nconst chatId = st.chat_id;\nconst ids = [];\nfor (const m of (st.approve_media_message_ids || [])) ids.push(m);\nif (st.approve_text_message_id) ids.push(st.approve_text_message_id);\nif (st.awaiting_revision_message_id) ids.push(st.awaiting_revision_message_id);\nif (ids.length === 0) {\n  return [{ json: {\n    skip_delete: true,\n    _revision_text: text,\n    _path_state: pathState,\n    _st: st,\n  }}];\n}\nreturn ids.map((message_id) => ({\n  json: {\n    chat_id: chatId,\n    message_id,\n    _revision_text: text,\n    _path_state: pathState,\n    _st: st,\n  },\n}));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1180,
           288
         ],
-        "id": "f100000d-0000-4000-8000-00000000000d",
-        "name": "Revision message flow"
+        "id": "rv222222-2222-4222-8222-222222222201",
+        "name": "Revision expand deletes"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "rv-if-skip",
+                "leftValue": "={{ $json.skip_delete }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1320,
+          288
+        ],
+        "id": "rv222222-2222-4222-8222-222222222210",
+        "name": "If revision skip delete"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/deleteMessage' }}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, message_id: $json.message_id }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1500,
+          360
+        ],
+        "id": "rv222222-2222-4222-8222-222222222202",
+        "name": "TG revision delete"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\nconst first = $('Revision expand deletes').first().json;\nconst text = first._revision_text;\nconst pathState = first._path_state;\nconst st = first._st;\nif (!st || !text) {\n  return [{ json: { error: 'missing context' } }];\n}\nconst revisedAt = new Date().toISOString();\nconst jobId = st.job_id;\nconst blogger = st.blogger;\nconst platform = st.platform;\nconst jobDir = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}`;\nconst approvalPath = `/home/node/shared/approvals/${jobId}.json`;\nlet approval = {};\ntry { approval = JSON.parse(fs.readFileSync(approvalPath, 'utf8')); } catch (e) {}\nconst nextState = {\n  ...st,\n  status: 'revision_requested',\n  revision_comment: text,\n  revised_at: revisedAt,\n  awaiting_revision_message_id: undefined,\n  updated_at: revisedAt,\n};\nfs.writeFileSync(pathState, JSON.stringify(nextState, null, 2));\nconst draftPath = `${jobDir}/draft_approved.md`;\nfs.writeFileSync(draftPath, approval.content || '', 'utf8');\nconst directorMsg = `Пользователь запросил правки по job ${jobId}.\\nКомментарий: ${text}\\nФайл: ${draftPath}\\nПередай правки Lens, затем Quill для переработки.`;\nconst ts = revisedAt.replace('T', ' ').slice(0, 19);\nconst statusText = `✏️ Правки переданы\\n👤 ${blogger} | 📢 ${platform} | 🗂 ${jobId}\\n💬 ${text}\\n🕐 ${ts}`;\nreturn [{ json: {\n  chat_id: st.chat_id,\n  director_msg: directorMsg,\n  status_text: statusText,\n}}];",
+          "mode": "runOnceForAllItems"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1680,
+          288
+        ],
+        "id": "rv222222-2222-4222-8222-222222222203",
+        "name": "Revision finalize"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $env.OPENCLAW_GATEWAY_INTERNAL_URL || 'http://openclaw-gateway:18789' }}/hooks/agent",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "={{ 'Bearer ' + ($env.OPENCLAW_GATEWAY_TOKEN || $env.OPENCLAW_HOOK_TOKEN || $env.OPENCLAW_HOOKS_TOKEN || '') }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ message: $json.director_msg, agentId: 'director', wakeMode: 'now' }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1860,
+          288
+        ],
+        "id": "rv222222-2222-4222-8222-222222222204",
+        "name": "HTTP Director revision"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.status_text }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          2040,
+          288
+        ],
+        "id": "rv222222-2222-4222-8222-222222222205",
+        "name": "TG revision status"
       }
     ],
     "connections": {
@@ -816,14 +1046,14 @@
           ],
           [
             {
-              "node": "Cancel revision flow",
+              "node": "Cancel prepare",
               "type": "main",
               "index": 0
             }
           ],
           [
             {
-              "node": "Revision message flow",
+              "node": "Revision expand deletes",
               "type": "main",
               "index": 0
             }
@@ -868,6 +1098,141 @@
           [
             {
               "node": "Revise save job-state",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cancel prepare": {
+        "main": [
+          [
+            {
+              "node": "If cancel has wait msg",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If cancel has wait msg": {
+        "main": [
+          [
+            {
+              "node": "TG cancel delete wait",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "TG cancel edit markup (no del)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG cancel delete wait": {
+        "main": [
+          [
+            {
+              "node": "TG cancel edit markup",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG cancel edit markup": {
+        "main": [
+          [
+            {
+              "node": "Cancel write state",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG cancel edit markup (no del)": {
+        "main": [
+          [
+            {
+              "node": "Cancel write state",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cancel write state": {
+        "main": [
+          [
+            {
+              "node": "TG cancel ack",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Revision expand deletes": {
+        "main": [
+          [
+            {
+              "node": "If revision skip delete",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If revision skip delete": {
+        "main": [
+          [
+            {
+              "node": "Revision finalize",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "TG revision delete",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG revision delete": {
+        "main": [
+          [
+            {
+              "node": "Revision finalize",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Revision finalize": {
+        "main": [
+          [
+            {
+              "node": "HTTP Director revision",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTTP Director revision": {
+        "main": [
+          [
+            {
+              "node": "TG revision status",
               "type": "main",
               "index": 0
             }

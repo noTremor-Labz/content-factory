@@ -34,10 +34,14 @@ VERIFY_ROUTER=1 bash scripts/verify-approval-media.sh
 
 ## Согласование в Telegram (approval-send / telegram-router)
 
+- **Два бота:** у OpenClaw Director свой Telegram-бот; согласование постов должно идти через **отдельного** бота. В `.env` задай `TELEGRAM_APPROVAL_BOT_TOKEN` (токен именно approval-бота). Если переменная пустая, в n8n подставится `TELEGRAM_BOT_TOKEN` (совпадение с Director — только если ты сознательно используешь один бот). Контейнеру **n8n** нужны обе переменные в окружении (см. `docker-compose.yml`).
+- **Webhook Telegram:** у **approval-бота** в BotFather/`setWebhook` должен быть URL вебхука n8n на workflow **telegram-router** (тот же хост, что и для POST approval-send). Если вебхук указывает на другого бота или старый URL, колбэки и сообщения пойдут не туда.
+- Все вызовы `api.telegram.org` в workflow берут токен из `$env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN` — не хардкодь токен в JSON.
 - После отправки поста на согласование workflow **approval-send** пишет состояние в  
   `shared/bloggers/{blogger}/jobs/{job_id}/job-state.json`: `approve_text_message_id`, `approve_media_message_ids` (альбом/одно фото), `approval_ui_kind` (`album` | `single_photo` | `text_only`), `status`.
-- Кнопки: **Опубликовать** (`approve_*` / `approve_a` / `approve_b`), **Правки** (`revise_{job_id}`), **Отклонить** (`reject_*`). Обработка колбэков и следующего сообщения редактора — **telegram-router** (тот же URL webhook, что настроен у бота).
-- Режим «Жду правки»: `status: awaiting_revision`; после текста правок — `revision_requested`, пишется `draft_approved.md` и вызывается Director через `hooks/agent`. Отмена: сообщение `/cancel` восстанавливает клавиатуру (см. workflow).
+- Кнопки: **Опубликовать** (`approve_*` / `approve_a` / `approve_b`), **Правки** (`revise_{job_id}`), **Отклонить** (`reject_*`). Обработка колбэков и следующего сообщения редактора — **telegram-router**.
+- Текст «Картинка не сгенерирована» — это ветка **без** `media_url`/`image_url` в теле webhook; чтобы пришло фото, в `shared/approvals/{job_id}.json` должны быть заполнены `media_url` или `image_url` (и при двух картинках ещё `media_url_b`).
+- Режим «Жду правки»: `status: awaiting_revision`; после текста правок — `revision_requested`, пишется `draft_approved.md` и вызывается Director через `hooks/agent` (узел **HTTP Director revision** использует `$env.OPENCLAW_GATEWAY_TOKEN`). Отмена: `/cancel` восстанавливает клавиатуру.
 
 ## Прочее
 
