@@ -57,22 +57,34 @@ deploy_soul() {
 deploy_soul "director"    "director.md"
 deploy_soul "scheduler"   "scheduler.md"
 deploy_soul "scout"       "scout.md"
-deploy_soul "quill-tomas-tg-food"   "quill-tomas-tg-food.md"
-deploy_soul "quill-tomas-tg-vibe"   "quill-tomas-tg-vibe.md"
+deploy_soul "quill"       "quill.md"
 deploy_soul "lens"                  "lens.md"
 deploy_soul "launch-tomas-tg-food"  "launch-tomas-tg-food.md"
 deploy_soul "launch-tomas-tg-vibe"  "launch-tomas-tg-vibe.md"
 deploy_soul "pulse-tomas-tg"        "pulse-tomas-tg.md"
-deploy_soul "quill-misha-yt"   "quill-misha-yt.md"
 deploy_soul "launch-misha-yt"  "launch-misha-yt.md"
 deploy_soul "pulse-misha-yt"   "pulse-misha-yt.md"
-deploy_soul "quill-yulya-ig"   "quill-yulya-ig.md"
 deploy_soul "launch-yulya-ig"  "launch-yulya-ig.md"
 deploy_soul "pulse-yulya-ig"   "pulse-yulya-ig.md"
-deploy_soul "quill-nasik-tt"   "quill-nasik-tt.md"
 deploy_soul "launch-nasik-tt"  "launch-nasik-tt.md"
 deploy_soul "pulse-nasik-tt"   "pulse-nasik-tt.md"
 deploy_soul "pixel" "pixel.md"
+
+deploy_style_examples() {
+  local blogger
+  for blogger in tomas misha yulya nasik; do
+    local src="$ROOT/shared/bloggers/$blogger/brand/style-examples.md"
+    local dest="$HOME/.openclaw/workspace-quill/shared/bloggers/$blogger/brand/style-examples.md"
+    if [ -f "$src" ]; then
+      mkdir -p "$(dirname "$dest")"
+      cp "$src" "$dest"
+      echo "[DONE] shared/bloggers/$blogger/brand/style-examples.md → workspace-quill/"
+    else
+      echo "[WARN] $src не найден"
+    fi
+  done
+}
+deploy_style_examples
 
 # Routing для director
 if [ -f "$ROOT/souls/routing-director.md" ]; then
@@ -90,7 +102,13 @@ else
   cli openclaw channels add \
     --channel telegram \
     --token "$TELEGRAM_BOT_TOKEN"
-  echo "✅ Telegram подключён"
+  echo "✅ Telegram (Director) подключён"
+fi
+
+if [ -n "${TELEGRAM_REFERENCES_BOT_TOKEN:-}" ] && [[ "${TELEGRAM_REFERENCES_BOT_TOKEN}" != "..." ]]; then
+  echo "✅ TELEGRAM_REFERENCES_BOT_TOKEN задан — в n8n укажи этот токен в Credentials для workflow references-style-examples (отдельно от Director)"
+else
+  echo "ℹ️  Бот References (референсы → style-examples): BotFather → токен в TELEGRAM_REFERENCES_BOT_TOKEN, импорт n8n/workflows/references-style-examples.json"
 fi
 
 echo ""

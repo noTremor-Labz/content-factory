@@ -38,28 +38,28 @@
 1. Подтвердить: "Принял. Запускаю: [topic] для [blogger] на [platform]"
 2. Создать job_id (YYYYMMDD-001, инкремент если папка существует)
 3. Создать папку: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/
-4. По ROUTING.md определить агентов: quill (per-blogger), **lens** (всегда id `lens`), pixel, launch
+4. По ROUTING.md определить агентов: **quill** (универсальный), **lens** (всегда id `lens`), **pixel**, launch (per-канал при необходимости — см. ROUTING)
 5. Создать задачу в Agent Board (см. ниже) → сохранить task_id
 6. sessions_spawn scout model=openrouter/moonshotai/kimi-k2.5 → "Ресёрч темы: [topic]. Путь: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/research.md"
 7. Обновить Agent Board: assignee=scout, status=doing
 8. Ждать Scout (RESEARCH_DONE). Сообщить: "✅ Ресёрч готов"
-9. sessions_spawn [quill] model=openrouter/moonshotai/kimi-k2.5 → "Напиши [format] для [platform]. Бриф: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/research.md. Сохрани draft_v1.md рядом."
-10. Обновить Agent Board: assignee=[quill]
+9. sessions_spawn quill model=openrouter/moonshotai/kimi-k2.5 → "Напиши [format] для [platform]. Бриф: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/research.md. Сохрани draft_v1.md рядом."
+10. Обновить Agent Board: assignee=quill
 11. Ждать Quill (DRAFT_DONE). (Промпт для картинки собирается **после** аппрува текста и файла `post_summary.txt` — см. шаг 16.)
 12. sessions_spawn lens model=openrouter/moonshotai/kimi-k2.5 → "JOB_SCOPE: job_id=[job_id] | blogger=[blogger] | platform=[platform] | mode=text_review. Отредактируй draft: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/draft_v1.md"
 13. Обновить Agent Board: assignee=lens
-14. Если REJECT текста (не более 2 раз) → sessions_spawn [quill] с правками → повторить 12
+14. Если REJECT текста (не более 2 раз) → sessions_spawn quill с правками → повторить 12
 15. После 2 reject текста → эскалировать пользователю
 16. Если APPROVE текста (`final.md` есть):
    - Создай или перезапиши **`/home/node/shared/bloggers/[blogger]/jobs/[job_id]/post_summary.txt`**: ровно **одно предложение** на русском — суть утверждённого поста и **главная эмоция** (прочитай `final.md` и сожми смысл; без буллетов). Если для задачи **нет** иллюстрации — пропусти шаги 17–22 и переходи к согласованию публикации без медиа.
-   - sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 → "Режим: prompt_only | blogger=[blogger] | platform=[platform] | job_id=[job_id] | канал: [из ROUTING.md]. Построй промпт по `post_summary.txt` (+ `research.md`, brand visual-*.md). Сохрани `/home/node/shared/bloggers/[blogger]/jobs/[job_id]/image_prompt.txt`. НЕ вызывай pixel_upload.py."
+   - sessions_spawn pixel model=openrouter/minimax/minimax-m2.7 → "Режим: prompt_only | blogger=[blogger] | platform=[platform] | job_id=[job_id] | канал: [из ROUTING.md]. Построй промпт по `post_summary.txt` (+ `research.md`, brand visual-*.md). Сохрани `/home/node/shared/bloggers/[blogger]/jobs/[job_id]/image_prompt.txt`. НЕ вызывай pixel_upload.py."
 17. Ждать Pixel (`PIXEL_PROMPT_READY`). При ошибке Pixel — остановить пайплайн и сообщить пользователю.
 18. sessions_spawn lens model=openrouter/moonshotai/kimi-k2.5 → "JOB_SCOPE: job_id=[job_id] | blogger=[blogger] | platform=[platform] | mode=prompt_review. Проверь /home/node/shared/bloggers/[blogger]/jobs/[job_id]/image_prompt.txt по image-review-criteria.md и visual-[platform].md"
-19. Если PROMPT_REJECT (не более 2 раз) → sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 с правками Lens → режим **prompt_only**, перезапись `image_prompt.txt` → повторить 18
+19. Если PROMPT_REJECT (не более 2 раз) → sessions_spawn pixel model=openrouter/minimax/minimax-m2.7 с правками Lens → режим **prompt_only**, перезапись `image_prompt.txt` → повторить 18
 20. После 2 отказов промпта → эскалировать пользователю
-21. Если PROMPT_APPROVE → sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 → "Режим: generate | blogger=[blogger] | platform=[platform] | job_id=[job_id]. Вызови pixel_upload.py и обнови ready.md (см. SOUL Pixel)."
+21. Если PROMPT_APPROVE → sessions_spawn pixel model=openrouter/minimax/minimax-m2.7 → "Режим: generate | blogger=[blogger] | platform=[platform] | job_id=[job_id]. Вызови pixel_upload.py и обнови ready.md (см. SOUL Pixel)."
 22. Ждать `PIXEL_DONE`. Затем sessions_spawn lens model=openrouter/moonshotai/kimi-k2.5 → "JOB_SCOPE: job_id=[job_id] | blogger=[blogger] | platform=[platform] | mode=image_review. Проверь картинку по URL из ready.md"
-23. Если IMAGE_REJECT (первый раз) → sessions_spawn [pixel] регенерация (один раз) → повторить 22
+23. Если IMAGE_REJECT (первый раз) → sessions_spawn pixel регенерация (один раз) → повторить 22
 24. Если повторный IMAGE_REJECT после регенерации → эскалировать пользователю
 25. Если IMAGE_APPROVE → создать файл /home/node/shared/approvals/[job_id].json (поля `media_url` и `image_url` — один и тот же HTTPS URL из `ready.md`, если есть картинка; без медиа можно оставить пустыми):
 ```json

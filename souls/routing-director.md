@@ -1,5 +1,8 @@
 # Роутинг агентов по блогерам и каналам
 
+## Quill (универсально)
+- Агент OpenClaw: **`quill`** (один на всех блогеров), workspace `workspace-quill`. Голос и стиль — из `/home/node/shared/bloggers/{blogger}/brand/` для переданного `blogger`; отдельные агенты `quill-*` не используются.
+
 ## Редактор Lens (универсально)
 - Агент OpenClaw: **`lens`** (один на всех блогеров), workspace `workspace-lens`.
 - Стиль и критерии — только из `/home/node/shared/bloggers/{blogger}/brand/` для переданного `blogger`; отдельные агенты `lens-*` не используются.

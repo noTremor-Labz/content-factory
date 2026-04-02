@@ -16,7 +16,7 @@ cli() {
 
 model_for() {
   case "$1" in
-    launch|scheduler|pixel-tomas) echo "openrouter/minimax/minimax-m2.7" ;;
+    launch|scheduler|pixel) echo "openrouter/minimax/minimax-m2.7" ;;
     lens) echo "openrouter/moonshotai/kimi-k2.5" ;;
     *) echo "openrouter/moonshotai/kimi-k2.5" ;;
   esac
@@ -46,7 +46,7 @@ for agent in director scheduler scout launch; do
   fi
 done
 
-for agent in quill-tomas lens pixel-tomas; do
+for agent in quill lens pixel; do
   if agent_exists "$agent"; then
     echo "[SKIP] $agent уже существует"
   else
