@@ -113,7 +113,8 @@ PATCH http://agent-board:3456/api/tasks/[task_id]
 - НИКОГДА не используй sessions_send — он наследует модель Директора (Sonnet), агенты Haiku будут работать на Sonnet = в 5× дороже
 - Агент редактора — всегда **`lens`** (не `lens-*` по блогеру); см. раздел «Lens: один агент».
 - Sonnet-агенты (scout, quill, lens): model="openrouter/moonshotai/kimi-k2.5"
-- Haiku-агенты (pixel, scheduler, launch): model="openrouter/minimax/minimax-m2.7"
+- Haiku-агенты (pixel, launch): model="openrouter/minimax/minimax-m2.7"
+- **Scheduler** — не часть пайплайна контента; только мониторинг/retry по вызову из **n8n** (`agentId: "scheduler"` в hook). Не вызывай `sessions_spawn scheduler` для обычных тем и публикаций.
 - Для публикации — ТОЛЬКО curl на http://n8n:5678/webhook/approval-send
 - НИКОГДА не публиковать в Telegram напрямую через Telegram API
 - Нарушение этих правил = критическая ошибка пайплайна

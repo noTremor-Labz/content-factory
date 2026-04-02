@@ -47,7 +47,7 @@
             {
               "id": "hint-stuck",
               "name": "hint",
-              "value": "Добавь: проверка «зависших» задач (shared/, статусы проектов), алерт в Telegram при таймауте.",
+              "value": "Дальше: POST на $env.OPENCLAW_GATEWAY_INTERNAL_URL/hooks/agent с agentId «scheduler», message с контекстом (зависшие job в shared/bloggers/…/jobs/, Agent Board). Роль Scheduler — мониторинг/retry; см. souls/scheduler.md и workspace-scheduler/SOUL.md.",
               "type": "string"
             }
           ]

@@ -47,7 +47,7 @@
             {
               "id": "note1",
               "name": "hint",
-              "value": "Добавь сюда узлы: чтение shared/schedule.md, HTTP к Agent Board /api/projects, уведомление в Telegram.",
+              "value": "Очередь и слоты — Google Sheets + этот workflow; мониторинг зависших — отдельно stuck-alerts → agent scheduler (см. souls/scheduler.md).",
               "type": "string"
             }
           ]
