@@ -40,6 +40,8 @@ VERIFY_ROUTER=1 bash scripts/verify-approval-media.sh
 - После отправки поста на согласование workflow **approval-send** пишет состояние в  
   `shared/bloggers/{blogger}/jobs/{job_id}/job-state.json`: `approve_text_message_id`, `approve_media_message_ids` (альбом/одно фото), `approval_ui_kind` (`album` | `single_photo` | `text_only`), `status`.
 - Кнопки: **Опубликовать** (`approve_*` / `approve_a` / `approve_b`), **Правки** (`revise_{job_id}`), **Отклонить** (`reject_*`). Обработка колбэков и следующего сообщения редактора — **telegram-router**.
+- После одобрения **telegram-router** только пишет `published.lock` и вызывает `answerCallbackQuery` («Опубликовано»). Пост **в публичный канал из n8n не уходит** — выкладку делает отдельный шаг (Pixel / агент по lock). Раньше в workflow ошибочно вызывались `sendPhoto`/`sendMessage` в `channel_id`; это убрано.
+- Если в Telegram по-прежнему английские **Approve/Reject** и только две кнопки — в БД n8n старая версия workflow; повтори импорт из репо (см. выше).
 - Текст «Картинка не сгенерирована» — это ветка **без** `media_url`/`image_url` в теле webhook; чтобы пришло фото, в `shared/approvals/{job_id}.json` должны быть заполнены `media_url` или `image_url` (и при двух картинках ещё `media_url_b`).
 - Режим «Жду правки»: `status: awaiting_revision`; после текста правок — `revision_requested`, пишется `draft_approved.md` и вызывается Director через `hooks/agent` (узел **HTTP Director revision** использует `$env.OPENCLAW_GATEWAY_TOKEN`). Отмена: `/cancel` восстанавливает клавиатуру.
 
