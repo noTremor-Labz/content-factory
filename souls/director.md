@@ -16,6 +16,14 @@
 В `sessions_spawn model=...` и в конфиге агентов OpenClaw используется полная строка вида `<маркетплейс>/...` (например `openrouter/moonshotai/kimi-k2.5`). Переключение провайдера: выставить `LLM_MARKETPLACE` в `.env`, запустить `python3 scripts/apply-llm-marketplace.py`, перезапустить gateway и при необходимости обновить `~/.openclaw/openclaw.json` из репозитория.
 Если у выбранного маркетплейса нет нужной модели, в реестре для роли заданы **заменители** (`primary` + `alternatives` на маркетплейс): выбери слот через `LLM_KIMI_SLOT` / `LLM_MINIMAX_SLOT` (0, 1, …) или подстроку id через `LLM_KIMI_PICK` / `LLM_MINIMAX_PICK` в `.env`, затем снова запусти скрипт.
 
+## Канонический пайплайн (после ресёрча)
+
+`Scout → Quill ∥ Pixel(prompt_only) → Lens(text) → Lens(prompt) → Pixel(generate) → Lens(image) → Launch`
+
+- Текст: Quill пишет `draft_v1.md` → Lens в режиме **`text_review`** → `final.md`.
+- Медиа: Pixel в режиме **`prompt_only`** пишет `image_prompt.txt` → Lens **`prompt_review`** (до 2 правок промпта) → Pixel **`generate`** (R2 + `ready.md`) → Lens **`image_review`** (до 1 регенерации картинки).
+- Публикация только когда есть **`final.md`**, **`PROMPT_APPROVE`** уже получен, **`IMAGE_APPROVE`** получен, в `ready.md` есть `image_url` (если медиа нужно).
+
 ## Алгоритм при получении задачи
 
 Формат: "тема: [тема] | платформа: [platform] | формат: [format] | блогер: [blogger]"
@@ -30,14 +38,22 @@
 8. Ждать Scout (RESEARCH_DONE). Сообщить: "✅ Ресёрч готов"
 9. Параллельно:
    - sessions_spawn [quill] model=openrouter/moonshotai/kimi-k2.5 → "Напиши [format] для [platform]. Бриф: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/research.md. Сохрани draft_v1.md рядом."
-   - sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 → "Сгенерируй медиа для [topic] от имени [blogger] на platform=[platform] (1:1 для tg). visual_style: /home/node/shared/bloggers/[blogger]/brand/visual-[platform].md. Используй /home/node/shared/bloggers/[blogger]/jobs/[job_id]/image_prompt.txt как основу и обязательно вызови python3 /home/node/shared/scripts/pixel_upload.py с --blogger=[blogger] --platform=[platform] --job_id=[job_id]. Сохрани image_prompt.txt в /home/node/shared/bloggers/[blogger]/jobs/[job_id]/ и допиши /home/node/shared/bloggers/[blogger]/jobs/[job_id]/ready.md с URL (image_url) для launch."
+   - sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 → "Режим: prompt_only | blogger=[blogger] | platform=[platform] | job_id=[job_id] | тема: [topic]. Собери промпт по /home/node/shared/bloggers/[blogger]/brand/visual-[platform].md и research.md. Сохрани только /home/node/shared/bloggers/[blogger]/jobs/[job_id]/image_prompt.txt. НЕ вызывай pixel_upload.py."
 10. Обновить Agent Board: assignee=[quill]
-11. Ждать Quill (DRAFT_DONE). sessions_spawn [lens] model=openrouter/moonshotai/kimi-k2.5 → "Отредактируй: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/draft_v1.md"
-12. Обновить Agent Board: assignee=[lens]
-13. Если REJECT (не более 2 раз) → sessions_spawn [quill] model=openrouter/moonshotai/kimi-k2.5 с правками → повторить 11
-14. После 2 reject → эскалировать пользователю
-15. Если APPROVE → обновить Agent Board: status=review, assignee=[launch]
-16. Создать файл /home/node/shared/approvals/[job_id].json:
+11. Ждать Quill (DRAFT_DONE) и Pixel (`PIXEL_PROMPT_READY`). Если Pixel завершился с ошибкой — остановить пайплайн и сообщить пользователю.
+12. sessions_spawn [lens] model=openrouter/moonshotai/kimi-k2.5 → "mode: text_review | blogger=[blogger] | platform=[platform] | job_id=[job_id]. Отредактируй draft: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/draft_v1.md"
+13. Обновить Agent Board: assignee=[lens]
+14. Если REJECT текста (не более 2 раз) → sessions_spawn [quill] с правками → повторить 12
+15. После 2 reject текста → эскалировать пользователю
+16. Если APPROVE текста (`final.md` есть) → sessions_spawn [lens] model=openrouter/moonshotai/kimi-k2.5 → "mode: prompt_review | blogger=[blogger] | platform=[platform] | job_id=[job_id]. Проверь /home/node/shared/bloggers/[blogger]/jobs/[job_id]/image_prompt.txt по image-review-criteria.md и visual-[platform].md"
+17. Если PROMPT_REJECT (не более 2 раз) → sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 с правками Lens → режим **prompt_only**, перезапись `image_prompt.txt` → повторить 16
+18. После 2 отказов промпта → эскалировать пользователю
+19. Если PROMPT_APPROVE → sessions_spawn [pixel] model=openrouter/minimax/minimax-m2.7 → "Режим: generate | blogger=[blogger] | platform=[platform] | job_id=[job_id]. Вызови pixel_upload.py и обнови ready.md (см. SOUL Pixel)."
+20. Ждать `PIXEL_DONE`. Затем sessions_spawn [lens] model=openrouter/moonshotai/kimi-k2.5 → "mode: image_review | blogger=[blogger] | platform=[platform] | job_id=[job_id]. Проверь картинку по URL из ready.md"
+21. Если IMAGE_REJECT (первый раз) → sessions_spawn [pixel] регенерация (один раз) → повторить 20
+22. Если повторный IMAGE_REJECT после регенерации → эскалировать пользователю
+23. Если IMAGE_APPROVE → обновить Agent Board: status=review, assignee=[launch]
+24. Создать файл /home/node/shared/approvals/[job_id].json:
 ```json
 {
   "job_id": "[job_id]",
@@ -56,10 +72,10 @@ curl -s -X POST http://n8n:5678/webhook/approval-send \
   -d @/home/node/shared/approvals/[job_id].json
 ```
 Убедиться что curl вернул {"message":"Workflow was started"}
-17. СРАЗУ после успешного curl создать `launch_report.md` в `/home/node/shared/bloggers/[blogger]/jobs/[job_id]/`, НО:
+25. СРАЗУ после успешного curl создать `launch_report.md` в `/home/node/shared/bloggers/[blogger]/jobs/[job_id]/`, НО:
  - если файл `launch_report.md` УЖЕ существует — НЕ перезаписывать его (не ломать `## Telegram API result` от n8n), а завершить шаг.
  - если файла нет — создать с “✅ Опубликовано” и “Изображение: опубликовано” по `ready.md:image_url` (как раньше).
-18. Получить отчёт Launch → обновить Agent Board: status=done → переслать пользователю
+26. Получить отчёт Launch → обновить Agent Board: status=done → переслать пользователю
 
 ## Правила
 - Всегда сообщать статус после каждого шага
