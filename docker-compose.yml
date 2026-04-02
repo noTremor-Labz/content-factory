@@ -19,6 +19,21 @@ services:
     environment:
       - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - COMMONSTACK_API_KEY=${COMMONSTACK_API_KEY}
+      - TOGETHER_API_KEY=${TOGETHER_API_KEY}
+      - MOONSHOTAI_API_KEY=${MOONSHOTAI_API_KEY}
+      - MINIMAX_API_KEY=${MINIMAX_API_KEY}
+      # Pixel (fal.ai / Replicate) + media upload (Cloudflare R2) env vars
+      - FAL_KEY=${FAL_KEY}
+      - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}
+      - KLING_API_KEY=${KLING_API_KEY}
+      - RUNWAYML_API_SECRET=${RUNWAYML_API_SECRET}
+      - R2_ACCOUNT_ID=${R2_ACCOUNT_ID}
+      - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
+      - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
+      - R2_BUCKET_RAW=${R2_BUCKET_RAW}
+      - R2_PUBLIC_URL=${R2_PUBLIC_URL}
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:18789/healthz"]
       interval: 30s
@@ -38,6 +53,21 @@ services:
     environment:
       - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - COMMONSTACK_API_KEY=${COMMONSTACK_API_KEY}
+      - TOGETHER_API_KEY=${TOGETHER_API_KEY}
+      - MOONSHOTAI_API_KEY=${MOONSHOTAI_API_KEY}
+      - MINIMAX_API_KEY=${MINIMAX_API_KEY}
+      # Keep same env vars in CLI container (some tools may reuse runtime)
+      - FAL_KEY=${FAL_KEY}
+      - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}
+      - KLING_API_KEY=${KLING_API_KEY}
+      - RUNWAYML_API_SECRET=${RUNWAYML_API_SECRET}
+      - R2_ACCOUNT_ID=${R2_ACCOUNT_ID}
+      - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
+      - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
+      - R2_BUCKET_RAW=${R2_BUCKET_RAW}
+      - R2_PUBLIC_URL=${R2_PUBLIC_URL}
     profiles:
       - cli
 
@@ -95,6 +125,9 @@ services:
       - N8N_PROTOCOL=http
       - N8N_HOST=127.0.0.1
       - N8N_PORT=5678
+      # Разрешаем fs в Code-нодах (task runner sandbox запрещает по умолчанию)
+      - NODE_FUNCTION_ALLOW_BUILTIN=fs,path
+      - N8N_RUNNERS_ALLOW_BUILTIN_MODULES=fs,path
 
 
   filebrowser:
