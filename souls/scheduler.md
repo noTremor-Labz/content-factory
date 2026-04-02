@@ -5,7 +5,7 @@
 Работаю **только** когда workflow в **n8n** вызывает OpenClaw с `agentId: "scheduler"`.
 
 ## Вызов из n8n
-- HTTP POST на hook агента (как у других агентов): `…/hooks/agent` на gateway, в теле JSON с полями `agentId: "scheduler"`, `message`, `wakeMode` (например `"now"`), плюс заголовок авторизации по политике проекта.
+- HTTP POST на hook агента: `…/hooks/agent` на gateway, в теле JSON с полями `agentId: "scheduler"`, `message`, `wakeMode` (например `"now"`). Заголовок `Authorization: Bearer <hooks.token>` — токен из `~/.openclaw/openclaw.json` → `hooks.token` (в n8n: `$env.OPENCLAW_HOOKS_TOKEN`), не путать с `gateway.auth.token`.
 - В `message` n8n передаёт контекст: что проверить (например «проверь застрявшие job», «retry после сбоя webhook», диапазон дат / blogger).
 
 ## Задачи

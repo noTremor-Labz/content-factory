@@ -116,7 +116,21 @@ services:
       - N8N_AGENT_BOARD_API_KEY=${N8N_AGENT_BOARD_API_KEY:-sk-n8n}
       # Для HTTP-узлов к OpenClaw gateway из n8n (хуки — по доке OpenClaw / вашему сценарию)
       - OPENCLAW_GATEWAY_INTERNAL_URL=${OPENCLAW_GATEWAY_INTERNAL_URL:-http://openclaw-gateway:18789}
+      # Bearer к /hooks/agent из workflow (HTTP Director revision и др.)
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN:-}
+      # Bearer к POST /hooks/agent — ~/.openclaw/openclaw.json → hooks.token (см. .env.example)
+      - OPENCLAW_HOOKS_TOKEN=${OPENCLAW_HOOKS_TOKEN:-}
       - OPENCLAW_HOOK_TOKEN=${OPENCLAW_HOOK_TOKEN:-}
+      # Токен бота References (тот же, что в Credentials n8n для этого workflow)
+      - TELEGRAM_REFERENCES_BOT_TOKEN=${TELEGRAM_REFERENCES_BOT_TOKEN:-}
+      # Согласование постов: approval-бот (пусто → fallback на TELEGRAM_BOT_TOKEN в выражениях n8n)
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_APPROVAL_BOT_TOKEN=${TELEGRAM_APPROVAL_BOT_TOKEN:-}
+      # workflow references-style-examples: привязка chat_id → блогер (опционально)
+      - TELEGRAM_STYLE_CHAT_TOMAS=${TELEGRAM_STYLE_CHAT_TOMAS:-}
+      - TELEGRAM_STYLE_CHAT_MISHA=${TELEGRAM_STYLE_CHAT_MISHA:-}
+      - TELEGRAM_STYLE_CHAT_YULYA=${TELEGRAM_STYLE_CHAT_YULYA:-}
+      - TELEGRAM_STYLE_CHAT_NASIK=${TELEGRAM_STYLE_CHAT_NASIK:-}
       - N8N_EDITOR_BASE_URL=http://127.0.0.1:5678
       - N8N_PROTOCOL=http
       - N8N_HOST=127.0.0.1

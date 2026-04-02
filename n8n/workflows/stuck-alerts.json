@@ -42,22 +42,30 @@
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
+        "method": "POST",
+        "url": "={{ $env.OPENCLAW_GATEWAY_INTERNAL_URL }}/hooks/agent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
             {
-              "id": "hint-stuck",
-              "name": "hint",
-              "value": "Дальше: POST на $env.OPENCLAW_GATEWAY_INTERNAL_URL/hooks/agent с agentId «scheduler», message с контекстом (зависшие job в shared/bloggers/…/jobs/, Agent Board). Роль Scheduler — мониторинг/retry; см. souls/scheduler.md и workspace-scheduler/SOUL.md.",
-              "type": "string"
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + ($env.OPENCLAW_HOOKS_TOKEN || $env.OPENCLAW_HOOK_TOKEN || '') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
             }
           ]
         },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"Плановый мониторинг зависших задач (workflow stuck-alerts, каждые 6 ч). Узел «Ping Agent Board» уже проверил health. Проверь shared/bloggers/*/jobs/ на зависшие состояния, при необходимости сверься с Agent Board и предложи retry или эскалацию.\",\n  \"agentId\": \"scheduler\",\n  \"wakeMode\": \"now\"\n}",
         "options": {}
       },
-      "id": "c3e4a5b6-3333-6444-a555-666677778888",
-      "name": "Next: stuck detection",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "id": "e1f2a3b4-5555-6666-7777-888899990001",
+      "name": "Wake Scheduler",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
       "position": [520, 0]
     }
   ],
@@ -77,7 +85,7 @@
       "main": [
         [
           {
-            "node": "Next: stuck detection",
+            "node": "Wake Scheduler",
             "type": "main",
             "index": 0
           }
