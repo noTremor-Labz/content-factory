@@ -795,69 +795,218 @@
       },
       {
         "parameters": {
-          "jsCode": "const body = $input.first().json.body;\nreturn [{\n  json: {\n    chat_id: \"492912584\",\n    text: body.blogger + ' | ' + body.platform + '\\n\\n' + body.content,\n    job_id: body.job_id\n  }\n}];"
+          "jsCode": "const body = $input.first().json.body || {};\nconst job_id = body.job_id;\nconst blogger = body.blogger;\nconst platform = body.platform;\nconst channel_id = body.channel_id;\nconst content = body.content || '';\nconst media_url = String(body.media_url || body.image_url || '').trim();\nconst media_url_b = String(body.media_url_b || '').trim();\nconst chat_id = String(body.chat_id || '492912584');\nreturn [{\n  json: {\n    job_id,\n    blogger,\n    platform,\n    channel_id,\n    content,\n    media_url,\n    media_url_b,\n    chat_id,\n    caption_single: `🖼 ${job_id} | ${blogger} | ${platform}`,\n    text_no_image: `⚠️ Картинка не сгенерирована\\n\\n${content}`\n  }\n}];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          176,
+          220,
           0
         ],
         "id": "69c49e98-fe72-46aa-9c5e-8c4d03fa8a50",
-        "name": "Code in JavaScript"
+        "name": "Parse approval body"
       },
       {
         "parameters": {
-          "chatId": "492912584",
-          "text": "={{ $json.text }}",
-          "replyMarkup": "inlineKeyboard",
-          "inlineKeyboard": {
-            "rows": [
+          "rules": {
+            "values": [
               {
-                "row": {
-                  "buttons": [
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
                     {
-                      "text": "✅ Опубликовать",
-                      "additionalFields": {
-                        "callback_data": "={{ 'approve_' + $json.job_id }}"
+                      "id": "c1-has-two",
+                      "leftValue": "={{ $json.media_url }}",
+                      "rightValue": "",
+                      "operator": {
+                        "type": "string",
+                        "operation": "notEmpty",
+                        "singleValue": true
                       }
                     },
                     {
-                      "text": "✏️ Правки",
-                      "additionalFields": {
-                        "callback_data": "={{ 'revise_' + $json.job_id }}"
-                      }
-                    },
-                    {
-                      "text": "❌ Отклонить",
-                      "additionalFields": {
-                        "callback_data": "={{ 'reject_' + $json.job_id }}"
+                      "id": "c2-has-two-b",
+                      "leftValue": "={{ $json.media_url_b }}",
+                      "rightValue": "",
+                      "operator": {
+                        "type": "string",
+                        "operation": "notEmpty",
+                        "singleValue": true
                       }
                     }
-                  ]
-                }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "has_two_images"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "c3-one-a",
+                      "leftValue": "={{ $json.media_url }}",
+                      "rightValue": "",
+                      "operator": {
+                        "type": "string",
+                        "operation": "notEmpty",
+                        "singleValue": true
+                      }
+                    },
+                    {
+                      "id": "c4-one-b",
+                      "leftValue": "={{ $json.media_url_b }}",
+                      "rightValue": "",
+                      "operator": {
+                        "type": "string",
+                        "operation": "empty",
+                        "singleValue": true
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "has_one_image"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "c5-no",
+                      "leftValue": "={{ $json.media_url }}",
+                      "rightValue": "",
+                      "operator": {
+                        "type": "string",
+                        "operation": "empty",
+                        "singleValue": true
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "no_images"
               }
             ]
           },
-          "additionalFields": {
-            "appendAttribution": false
-          }
+          "options": {}
         },
-        "type": "n8n-nodes-base.telegram",
-        "typeVersion": 1.2,
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.4,
         "position": [
-          384,
+          460,
           0
         ],
-        "id": "19252b95-5e27-4cc2-989a-53f535c43898",
-        "name": "Send a text message",
-        "webhookId": "7bf20759-6f3d-45a9-95f9-cb1649a061f4",
-        "credentials": {
-          "telegramApi": {
-            "id": "ycrjqRhDUEQ24XoZ",
-            "name": "Approval TG Bot"
-          }
-        }
+        "id": "a8f3c2d1-4e5b-4a6c-9d0e-1f2a3b4c5d6e",
+        "name": "Media branch"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMediaGroup",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, media: [{ type: 'photo', media: $json.media_url, caption: 'A' }, { type: 'photo', media: $json.media_url_b, caption: 'B' }] }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          720,
+          -200
+        ],
+        "id": "b9e4d3c2-5f6a-4b7c-8d1e-2a3b4c5d6e7f",
+        "name": "TG sendMediaGroup"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ Approve A', callback_data: 'approve_a_' + $json.job_id }, { text: '✅ Approve B', callback_data: 'approve_b_' + $json.job_id }, { text: '❌ Reject', callback_data: 'reject_' + $json.job_id }]] } }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          940,
+          -200
+        ],
+        "id": "c0f5e4d3-6a7b-4c8d-9e2f-3b4c5d6e7f8a",
+        "name": "TG album + buttons msg"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendPhoto",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, photo: $json.media_url, caption: $json.caption_single }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          720,
+          0
+        ],
+        "id": "d1a6f5e4-7b8c-4d9e-0f3a-4c5d6e7f8a9b",
+        "name": "TG sendPhoto"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: 'approve_' + $json.job_id }, { text: '❌ Reject', callback_data: 'reject_' + $json.job_id }]] } }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          940,
+          0
+        ],
+        "id": "e2b7a6f5-8c9d-5e0f-1a4b-5d6e7f8a9b0c",
+        "name": "TG one image buttons"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.text_no_image, reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: 'approve_' + $json.job_id }, { text: '❌ Reject', callback_data: 'reject_' + $json.job_id }]] } }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          720,
+          200
+        ],
+        "id": "f3c8b7a6-9d0e-6f1a-2b5c-6e7f8a9b0c1d",
+        "name": "TG no image msg"
       }
     ],
     "connections": {
@@ -865,18 +1014,65 @@
         "main": [
           [
             {
-              "node": "Code in JavaScript",
+              "node": "Parse approval body",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "Code in JavaScript": {
+      "Parse approval body": {
         "main": [
           [
             {
-              "node": "Send a text message",
+              "node": "Media branch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Media branch": {
+        "main": [
+          [
+            {
+              "node": "TG sendMediaGroup",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "TG sendPhoto",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "TG no image msg",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG sendMediaGroup": {
+        "main": [
+          [
+            {
+              "node": "TG album + buttons msg",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG sendPhoto": {
+        "main": [
+          [
+            {
+              "node": "TG one image buttons",
               "type": "main",
               "index": 0
             }
@@ -1005,7 +1201,7 @@
     "nodes": [
       {
         "parameters": {
-          "jsCode": "const data = $input.first().json.body;\n\nif (data.callback_query) {\n  const cb = data.callback_query;\n  const cbData = cb.data;\n  const underscoreIdx = cbData.indexOf('_');\n  const action = cbData.substring(0, underscoreIdx);\n  const jobId = cbData.substring(underscoreIdx + 1);\n  \n  return [{\n    json: {\n      event_type: 'callback',\n      action: action,\n      job_id: jobId,\n      message_id: cb.message.message_id,\n      chat_id: cb.from.id,\n      callback_query_id: cb.id\n    }\n  }];\n}\n\nif (data.message) {\n  return [{\n    json: {\n      event_type: 'message',\n      text: data.message.text || '',\n      chat_id: data.message.chat.id,\n      from_id: data.message.from.id,\n      message_id: data.message.message_id\n    }\n  }];\n}\n\nreturn [{ json: { event_type: 'unknown' } }];"
+          "jsCode": "const data = $input.first().json.body;\n\nif (data.callback_query) {\n  const cb = data.callback_query;\n  const cbData = String(cb.data || '');\n  let action;\n  let jobId;\n  if (cbData.startsWith('approve_a_')) {\n    action = 'approve_a';\n    jobId = cbData.slice('approve_a_'.length);\n  } else if (cbData.startsWith('approve_b_')) {\n    action = 'approve_b';\n    jobId = cbData.slice('approve_b_'.length);\n  } else if (cbData.startsWith('approve_')) {\n    action = 'approve';\n    jobId = cbData.slice('approve_'.length);\n  } else if (cbData.startsWith('reject_')) {\n    action = 'reject';\n    jobId = cbData.slice('reject_'.length);\n  } else if (cbData.startsWith('revise_')) {\n    action = 'revise';\n    jobId = cbData.slice('revise_'.length);\n  } else {\n    const underscoreIdx = cbData.indexOf('_');\n    action = underscoreIdx === -1 ? cbData : cbData.substring(0, underscoreIdx);\n    jobId = underscoreIdx === -1 ? '' : cbData.substring(underscoreIdx + 1);\n  }\n  return [{\n    json: {\n      event_type: 'callback',\n      action,\n      job_id: jobId,\n      message_id: cb.message.message_id,\n      chat_id: cb.from.id,\n      callback_query_id: cb.id\n    }\n  }];\n}\n\nif (data.message) {\n  return [{\n    json: {\n      event_type: 'message',\n      text: data.message.text || '',\n      chat_id: data.message.chat.id,\n      from_id: data.message.from.id,\n      message_id: data.message.message_id\n    }\n  }];\n}\n\nreturn [{ json: { event_type: 'unknown' } }];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1043,6 +1239,54 @@
                 },
                 "renameOutput": true,
                 "outputKey": "approve"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "approve_a",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "a1b2c3d4-approve-a"
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "approve_a"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "approve_b",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "a1b2c3d4-approve-b"
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "approve_b"
               },
               {
                 "conditions": {
@@ -1140,7 +1384,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const jobId = $json.job_id;\nconst fs = require('fs');\nconst filePath = `/home/node/shared/approvals/${jobId}.json`;\n\nlet approvalData;\ntry {\n  approvalData = JSON.parse(fs.readFileSync(filePath, 'utf8'));\n} catch(e) {\n  throw new Error(`Файл не найден: ${filePath}`);\n}\n\nreturn [{\n  json: {\n    ...approvalData,\n    job_id: jobId,\n    message_id: $json.message_id,\n    chat_id_user: $json.chat_id,\n    callback_query_id: $json.callback_query_id\n  }\n}];"
+          "jsCode": "const jobId = $json.job_id;\nconst action = $json.action;\nconst fs = require('fs');\nconst filePath = `/home/node/shared/approvals/${jobId}.json`;\n\nlet approvalData;\ntry {\n  approvalData = JSON.parse(fs.readFileSync(filePath, 'utf8'));\n} catch(e) {\n  throw new Error(`Файл не найден: ${filePath}`);\n}\n\nconst mu = String(approvalData.media_url || approvalData.image_url || '').trim();\nconst mub = String(approvalData.media_url_b || '').trim();\n\nlet selected_media_url = '';\nif (action === 'approve_a') selected_media_url = mu;\nelse if (action === 'approve_b') selected_media_url = mub;\nelse if (action === 'approve') selected_media_url = mu || mub;\n\nif (selected_media_url && ['approve', 'approve_a', 'approve_b'].includes(action)) {\n  const blogger = approvalData.blogger;\n  const jobDir = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}`;\n  const lockPath = `${jobDir}/published.lock`;\n  try {\n    if (!fs.existsSync(jobDir)) fs.mkdirSync(jobDir, { recursive: true });\n    fs.writeFileSync(lockPath, JSON.stringify({ selected_media_url: selected_media_url }, null, 2));\n  } catch (e) {}\n}\n\nreturn [{\n  json: {\n    ...approvalData,\n    job_id: jobId,\n    image_url: selected_media_url || approvalData.image_url || '',\n    message_id: $json.message_id,\n    chat_id_user: $json.chat_id,\n    callback_query_id: $json.callback_query_id,\n    action\n  }\n}];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1388,6 +1632,20 @@
       },
       "Switch1": {
         "main": [
+          [
+            {
+              "node": "Code in JavaScript1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Code in JavaScript1",
+              "type": "main",
+              "index": 0
+            }
+          ],
           [
             {
               "node": "Code in JavaScript1",

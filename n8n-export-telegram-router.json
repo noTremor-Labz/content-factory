@@ -1,0 +1,624 @@
+[
+  {
+    "updatedAt": "2026-04-02T05:14:01.496Z",
+    "createdAt": "2026-03-31T12:24:42.264Z",
+    "id": "TwB0v8AOQ8CQmJCg",
+    "name": "telegram-router",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {
+          "jsCode": "const data = $input.first().json.body;\n\nif (data.callback_query) {\n  const cb = data.callback_query;\n  const cbData = String(cb.data || '');\n  let action;\n  let jobId;\n  if (cbData.startsWith('approve_a_')) {\n    action = 'approve_a';\n    jobId = cbData.slice('approve_a_'.length);\n  } else if (cbData.startsWith('approve_b_')) {\n    action = 'approve_b';\n    jobId = cbData.slice('approve_b_'.length);\n  } else if (cbData.startsWith('approve_')) {\n    action = 'approve';\n    jobId = cbData.slice('approve_'.length);\n  } else if (cbData.startsWith('reject_')) {\n    action = 'reject';\n    jobId = cbData.slice('reject_'.length);\n  } else if (cbData.startsWith('revise_')) {\n    action = 'revise';\n    jobId = cbData.slice('revise_'.length);\n  } else {\n    const underscoreIdx = cbData.indexOf('_');\n    action = underscoreIdx === -1 ? cbData : cbData.substring(0, underscoreIdx);\n    jobId = underscoreIdx === -1 ? '' : cbData.substring(underscoreIdx + 1);\n  }\n  return [{\n    json: {\n      event_type: 'callback',\n      action,\n      job_id: jobId,\n      message_id: cb.message.message_id,\n      chat_id: cb.from.id,\n      callback_query_id: cb.id\n    }\n  }];\n}\n\nif (data.message) {\n  return [{\n    json: {\n      event_type: 'message',\n      text: data.message.text || '',\n      chat_id: data.message.chat.id,\n      from_id: data.message.from.id,\n      message_id: data.message.message_id\n    }\n  }];\n}\n\nreturn [{ json: { event_type: 'unknown' } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          416,
+          0
+        ],
+        "id": "9536ec76-8052-4429-a7ff-065da9a8b118",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "approve",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "4d2cc785-405d-466c-b8c5-f86810c731ee"
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "approve"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "approve_a",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "a1b2c3d4-approve-a"
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "approve_a"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "approve_b",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "a1b2c3d4-approve-b"
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "approve_b"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "bee38171-2d51-4015-81be-77988d7b2823",
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "revise",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "revise"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "49cddd30-c848-4eee-a9b4-2ae6308b5456",
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "reject",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "reject"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.4,
+        "position": [
+          1040,
+          -192
+        ],
+        "id": "e563a647-5004-432a-be56-ab9965a6a933",
+        "name": "Switch1"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendPhoto",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({chat_id: $json.channel_id, photo: $json.image_url, caption: $json.content}) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1632,
+          -416
+        ],
+        "id": "69a8c5e6-dd99-4396-a7e3-44da95163d74",
+        "name": "HTTP Request"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\n\nconst blogger = $json.blogger;\nconst jobId = $json.job_id;\nif (!blogger || !jobId) return [{ json: $json }];\n\nconst reportPath = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}/launch_report.md`;\nconst marker = '## Telegram API result';\n\n// n8n HTTP Request often exposes Telegram response either at root ($json) or in $json.body\nconst telegram = $json.result ? $json : ($json.body?.result ? { result: $json.body.result } : $json);\nconst result = telegram.result || {};\nconst messageId = result.message_id;\n\nlet report = '';\ntry {\n  report = fs.existsSync(reportPath) ? fs.readFileSync(reportPath, 'utf8') : '';\n} catch (e) {\n  // ignore read errors\n}\n\nconst block = `\\n\\n${marker}\\n- message_id: ${messageId ?? ''}\\n`;\nif (report) {\n  if (!report.includes(marker)) {\n    fs.writeFileSync(reportPath, report.trimEnd() + block);\n  } else {\n    // best-effort: replace message_id line if present\n    const replaced = report.replace(/- message_id:\\s*.*\\n/, `- message_id: ${messageId ?? ''}\\n`);\n    fs.writeFileSync(reportPath, replaced);\n  }\n} else {\n  // minimal fallback\n  fs.writeFileSync(reportPath, block);\n}\n\nreturn [{ json: $json }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1800,
+          -416
+        ],
+        "id": "d1ed5000-3e29-4589-be09-4c6de1b18a0c",
+        "name": "Write Telegram message_id (photo)"
+      },
+      {
+        "parameters": {
+          "jsCode": "const jobId = $json.job_id;\nconst action = $json.action;\nconst fs = require('fs');\nconst filePath = `/home/node/shared/approvals/${jobId}.json`;\n\nlet approvalData;\ntry {\n  approvalData = JSON.parse(fs.readFileSync(filePath, 'utf8'));\n} catch(e) {\n  throw new Error(`Файл не найден: ${filePath}`);\n}\n\nconst mu = String(approvalData.media_url || approvalData.image_url || '').trim();\nconst mub = String(approvalData.media_url_b || '').trim();\n\nlet selected_media_url = '';\nif (action === 'approve_a') selected_media_url = mu;\nelse if (action === 'approve_b') selected_media_url = mub;\nelse if (action === 'approve') selected_media_url = mu || mub;\n\nif (selected_media_url && ['approve', 'approve_a', 'approve_b'].includes(action)) {\n  const blogger = approvalData.blogger;\n  const jobDir = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}`;\n  const lockPath = `${jobDir}/published.lock`;\n  try {\n    if (!fs.existsSync(jobDir)) fs.mkdirSync(jobDir, { recursive: true });\n    fs.writeFileSync(lockPath, JSON.stringify({ selected_media_url: selected_media_url }, null, 2));\n  } catch (e) {}\n}\n\nreturn [{\n  json: {\n    ...approvalData,\n    job_id: jobId,\n    image_url: selected_media_url || approvalData.image_url || '',\n    message_id: $json.message_id,\n    chat_id_user: $json.chat_id,\n    callback_query_id: $json.callback_query_id,\n    action\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1232,
+          -336
+        ],
+        "id": "51d30bfd-9f01-44b6-8cba-cd6f7c2a5ece",
+        "name": "Code in JavaScript1"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/answerCallbackQuery",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({callback_query_id: $json.callback_query_id, text: \"✅ Опубликовано!\"}) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1824,
+          -336
+        ],
+        "id": "200b3c6b-f843-48d6-859b-ba730d881a3b",
+        "name": "HTTP Request1"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({chat_id: \"492912584\", text: \"✏️ Напиши правки для job \" + $json.job_id + \" и отправь мне сообщение в формате:\\nправки \" + $json.job_id + \": [текст правок]\"}) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1232,
+          -176
+        ],
+        "id": "715b1c7e-4d45-4862-a951-57ee9fc4a75c",
+        "name": "HTTP Request2"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/answerCallbackQuery",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({callback_query_id: $json.callback_query_id, text: \"❌ Отклонено\"}) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1232,
+          -16
+        ],
+        "id": "fd06a7f0-fc4b-4763-b287-361edc336fc2",
+        "name": "HTTP Request3"
+      },
+      {
+        "parameters": {
+          "jsCode": "const text = $json.text;\n\n// Парсим формат: \"правки JOB_ID: текст правок\"\nconst match = text.match(/^правки\\s+(\\S+):\\s*(.+)$/s);\n\nif (!match) {\n  return [{\n    json: {\n      valid: false,\n      raw_text: text\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    valid: true,\n    job_id: match[1],\n    revision_text: match[2],\n    chat_id: $json.chat_id\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1040,
+          192
+        ],
+        "id": "2b6d0fc1-62e1-4664-ab1d-b636fc578303",
+        "name": "Code in JavaScript2"
+      },
+      {
+        "parameters": {
+          "jsCode": "const jobId = $json.job_id;\nconst revisionText = $json.revision_text;\nconst fs = require('fs');\n\n// Читаем данные задачи\nconst filePath = `/home/node/shared/approvals/${jobId}.json`;\nlet approvalData;\ntry {\n  approvalData = JSON.parse(fs.readFileSync(filePath, 'utf8'));\n} catch(e) {\n  throw new Error(`Файл не найден: ${filePath}`);\n}\n\nreturn [{\n  json: {\n    ...approvalData,\n    job_id: jobId,\n    revision_text: revisionText,\n    hook_message: `Правки от редактора для job ${jobId}: ${revisionText}. Верни Quill на доработку.`\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1232,
+          192
+        ],
+        "id": "01de3436-ed44-4f3c-beeb-19d1351a5bb5",
+        "name": "Code in JavaScript3"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://openclaw-gateway:18789/hooks/agent",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Bearer fd5c8a699789ba6beb43c59b5ad6834a3830c6e8e683b429"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "{\n  \"message\": \"={{ $json.hook_message }}\",\n  \"agentId\": \"director\",\n  \"wakeMode\": \"now\"\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1440,
+          192
+        ],
+        "id": "2521681c-a2f0-480c-bc55-5cfbcfc1faf7",
+        "name": "HTTP Request4"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "telegram-router",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          208,
+          0
+        ],
+        "id": "f1413307-a05d-4520-8897-8b7925a3d4c8",
+        "name": "Webhook",
+        "webhookId": "fef0967e-a531-4e66-913b-90959be3ddae"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "807bbdc5-bcb8-4196-911c-de0d1f093493",
+                "leftValue": "={{ $json.image_url }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1440,
+          -336
+        ],
+        "id": "b06c86fd-06eb-49b0-81b9-fcb21f20a614",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({chat_id: $json.channel_id, text: $json.content}) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1632,
+          -256
+        ],
+        "id": "15db0c76-a11c-4796-bacb-0bc24606251d",
+        "name": "HTTP Request5"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\n\nconst blogger = $json.blogger;\nconst jobId = $json.job_id;\nif (!blogger || !jobId) return [{ json: $json }];\n\nconst reportPath = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}/launch_report.md`;\nconst marker = '## Telegram API result';\n\nconst telegram = $json.result ? $json : ($json.body?.result ? { result: $json.body.result } : $json);\nconst result = telegram.result || {};\nconst messageId = result.message_id;\n\nlet report = '';\ntry {\n  report = fs.existsSync(reportPath) ? fs.readFileSync(reportPath, 'utf8') : '';\n} catch (e) {}\n\nconst block = `\\n\\n${marker}\\n- message_id: ${messageId ?? ''}\\n`;\nif (report) {\n  if (!report.includes(marker)) {\n    fs.writeFileSync(reportPath, report.trimEnd() + block);\n  } else {\n    const replaced = report.replace(/- message_id:\\s*.*\\n/, `- message_id: ${messageId ?? ''}\\n`);\n    fs.writeFileSync(reportPath, replaced);\n  }\n} else {\n  fs.writeFileSync(reportPath, block);\n}\n\nreturn [{ json: $json }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1800,
+          -256
+        ],
+        "id": "14efbff9-1cd7-4d82-8df2-806db96ddb08",
+        "name": "Write Telegram message_id (text)"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "e458e7f6-68ab-4936-88e6-2e71a20a4293",
+                "leftValue": "={{ $json.event_type }}",
+                "rightValue": "callback",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          624,
+          0
+        ],
+        "id": "03d94d52-b5b7-4f93-98a0-86318868966a",
+        "name": "If1"
+      }
+    ],
+    "connections": {
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "If1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Switch1": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Code in JavaScript1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Code in JavaScript1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "HTTP Request2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "HTTP Request3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript1": {
+        "main": [
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTTP Request": {
+        "main": [
+          [
+            {
+              "node": "Write Telegram message_id (photo)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript2": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript3": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "HTTP Request5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTTP Request5": {
+        "main": [
+          [
+            {
+              "node": "Write Telegram message_id (text)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If1": {
+        "main": [
+          [
+            {
+              "node": "Switch1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Code in JavaScript2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate",
+      "callerPolicy": "workflowsFromSameOwner",
+      "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "pinData": {},
+    "versionId": "8166dfba-fbe3-419c-8f72-ebe7c4670e05",
+    "activeVersionId": "8166dfba-fbe3-419c-8f72-ebe7c4670e05",
+    "versionCounter": 175,
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-03-31T12:24:42.268Z",
+        "createdAt": "2026-03-31T12:24:42.268Z",
+        "role": "workflow:owner",
+        "workflowId": "TwB0v8AOQ8CQmJCg",
+        "projectId": "tB3UHQaJuvOlSpuk",
+        "project": {
+          "updatedAt": "2026-03-28T09:03:01.212Z",
+          "createdAt": "2026-03-28T08:30:12.897Z",
+          "id": "tB3UHQaJuvOlSpuk",
+          "name": "Tomas Rabi <strong.rabii@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "b60ea93a-0490-42d3-95c8-fe5f505c11ed"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": null,
+      "description": null
+    }
+  }
+]

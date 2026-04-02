@@ -1,0 +1,352 @@
+[
+  {
+    "updatedAt": "2026-04-01T18:55:19.367Z",
+    "createdAt": "2026-03-31T12:05:35.086Z",
+    "id": "4lq3sy9j6qlzH99W",
+    "name": "approval-send",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "approval-send",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "fbec9af7-d0c8-498e-a2b5-21a6a1bf99cb",
+        "name": "Webhook",
+        "webhookId": "b65ee8af-8322-40a8-8adf-a039c8a58cc5"
+      },
+      {
+        "parameters": {
+          "jsCode": "const body = $input.first().json.body || {};\nconst job_id = body.job_id;\nconst blogger = body.blogger;\nconst platform = body.platform;\nconst channel_id = body.channel_id;\nconst content = body.content || '';\nconst media_url = String(body.media_url || body.image_url || '').trim();\nconst media_url_b = String(body.media_url_b || '').trim();\nconst chat_id = String(body.chat_id || '492912584');\nreturn [{\n  json: {\n    job_id,\n    blogger,\n    platform,\n    channel_id,\n    content,\n    media_url,\n    media_url_b,\n    chat_id,\n    caption_single: `🖼 ${job_id} | ${blogger} | ${platform}`,\n    text_no_image: `⚠️ Картинка не сгенерирована\\n\\n${content}`\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          220,
+          0
+        ],
+        "id": "69c49e98-fe72-46aa-9c5e-8c4d03fa8a50",
+        "name": "Parse approval body"
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "c1-has-two",
+                      "leftValue": "={{ $json.media_url }}",
+                      "rightValue": "",
+                      "operator": {
+                        "type": "string",
+                        "operation": "notEmpty",
+                        "singleValue": true
+                      }
+                    },
+                    {
+                      "id": "c2-has-two-b",
+                      "leftValue": "={{ $json.media_url_b }}",
+                      "rightValue": "",
+                      "operator": {
+                        "type": "string",
+                        "operation": "notEmpty",
+                        "singleValue": true
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "has_two_images"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "c3-one-a",
+                      "leftValue": "={{ $json.media_url }}",
+                      "rightValue": "",
+                      "operator": {
+                        "type": "string",
+                        "operation": "notEmpty",
+                        "singleValue": true
+                      }
+                    },
+                    {
+                      "id": "c4-one-b",
+                      "leftValue": "={{ $json.media_url_b }}",
+                      "rightValue": "",
+                      "operator": {
+                        "type": "string",
+                        "operation": "empty",
+                        "singleValue": true
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "has_one_image"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "c5-no",
+                      "leftValue": "={{ $json.media_url }}",
+                      "rightValue": "",
+                      "operator": {
+                        "type": "string",
+                        "operation": "empty",
+                        "singleValue": true
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "no_images"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.4,
+        "position": [
+          460,
+          0
+        ],
+        "id": "a8f3c2d1-4e5b-4a6c-9d0e-1f2a3b4c5d6e",
+        "name": "Media branch"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMediaGroup",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, media: [{ type: 'photo', media: $json.media_url, caption: 'A' }, { type: 'photo', media: $json.media_url_b, caption: 'B' }] }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          720,
+          -200
+        ],
+        "id": "b9e4d3c2-5f6a-4b7c-8d1e-2a3b4c5d6e7f",
+        "name": "TG sendMediaGroup"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ Approve A', callback_data: 'approve_a_' + $json.job_id }, { text: '✅ Approve B', callback_data: 'approve_b_' + $json.job_id }, { text: '❌ Reject', callback_data: 'reject_' + $json.job_id }]] } }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          940,
+          -200
+        ],
+        "id": "c0f5e4d3-6a7b-4c8d-9e2f-3b4c5d6e7f8a",
+        "name": "TG album + buttons msg"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendPhoto",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, photo: $json.media_url, caption: $json.caption_single }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          720,
+          0
+        ],
+        "id": "d1a6f5e4-7b8c-4d9e-0f3a-4c5d6e7f8a9b",
+        "name": "TG sendPhoto"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: 'approve_' + $json.job_id }, { text: '❌ Reject', callback_data: 'reject_' + $json.job_id }]] } }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          940,
+          0
+        ],
+        "id": "e2b7a6f5-8c9d-5e0f-1a4b-5d6e7f8a9b0c",
+        "name": "TG one image buttons"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.text_no_image, reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: 'approve_' + $json.job_id }, { text: '❌ Reject', callback_data: 'reject_' + $json.job_id }]] } }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          720,
+          200
+        ],
+        "id": "f3c8b7a6-9d0e-6f1a-2b5c-6e7f8a9b0c1d",
+        "name": "TG no image msg"
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Parse approval body",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse approval body": {
+        "main": [
+          [
+            {
+              "node": "Media branch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Media branch": {
+        "main": [
+          [
+            {
+              "node": "TG sendMediaGroup",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "TG sendPhoto",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "TG no image msg",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG sendMediaGroup": {
+        "main": [
+          [
+            {
+              "node": "TG album + buttons msg",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG sendPhoto": {
+        "main": [
+          [
+            {
+              "node": "TG one image buttons",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "pinData": {},
+    "versionId": "5c1b8baa-e0ae-48b4-9248-839f873b2fd8",
+    "activeVersionId": "5c1b8baa-e0ae-48b4-9248-839f873b2fd8",
+    "versionCounter": 148,
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-03-31T12:05:35.090Z",
+        "createdAt": "2026-03-31T12:05:35.090Z",
+        "role": "workflow:owner",
+        "workflowId": "4lq3sy9j6qlzH99W",
+        "projectId": "tB3UHQaJuvOlSpuk",
+        "project": {
+          "updatedAt": "2026-03-28T09:03:01.212Z",
+          "createdAt": "2026-03-28T08:30:12.897Z",
+          "id": "tB3UHQaJuvOlSpuk",
+          "name": "Tomas Rabi <strong.rabii@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "b60ea93a-0490-42d3-95c8-fe5f505c11ed"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": "Version 5c1b8baa",
+      "description": ""
+    }
+  }
+]
