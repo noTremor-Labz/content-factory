@@ -1,22 +1,40 @@
 {
-  "version": 1,
+  "version": 2,
   "canonical": {
     "kimi": "moonshotai/kimi-k2.5",
     "minimax": "minimax/minimax-m2.7"
   },
-  "_comment": "canonical — одни и те же логические имена vendor/model для документации и сравнения каталогов. marketplaces.* — полные id для OpenClaw (sessions_spawn, agents.model). Подставь реальные id из каталога выбранного маркетплейса при смене провайдера.",
+  "_comment": "canonical — логические имена vendor/model. Для каждого маркетплейса: primary + alternatives — взаимозаменяемые слоты одной роли (индекс 0, 1, …). Полные id для OpenClaw. Если у провайдера нет слота — оставь только primary или убери лишние alternatives; скрипт применит доступный индекс (с предупреждением). Внешние id (commonstack/together) проверь по каталогу провайдера.",
   "marketplaces": {
     "openrouter": {
-      "kimi": "openrouter/moonshotai/kimi-k2.5",
-      "minimax": "openrouter/minimax/minimax-m2.7"
+      "kimi": {
+        "primary": "openrouter/moonshotai/kimi-k2.5",
+        "alternatives": ["openrouter/xiaomi/mimo-v2-pro"]
+      },
+      "minimax": {
+        "primary": "openrouter/minimax/minimax-m2.7",
+        "alternatives": []
+      }
     },
     "commonstack": {
-      "kimi": "commonstack/moonshotai/kimi-k2.5",
-      "minimax": "commonstack/minimax/minimax-m2.7"
+      "kimi": {
+        "primary": "commonstack/moonshotai/kimi-k2.5",
+        "alternatives": []
+      },
+      "minimax": {
+        "primary": "commonstack/minimax/minimax-m2.7",
+        "alternatives": []
+      }
     },
     "together": {
-      "kimi": "together/moonshotai/kimi-k2.5",
-      "minimax": "together/minimax/minimax-m2.7"
+      "kimi": {
+        "primary": "together/moonshotai/kimi-k2.5",
+        "alternatives": []
+      },
+      "minimax": {
+        "primary": "together/minimax/minimax-m2.7",
+        "alternatives": []
+      }
     }
   }
 }

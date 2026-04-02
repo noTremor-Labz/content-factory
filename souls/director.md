@@ -14,6 +14,7 @@
 ## Модели и маркетплейсы
 Канонические логические имена (vendor/model без префикса маркетплейса): `moonshotai/kimi-k2.5` и `minimax/minimax-m2.7` — см. `config/llm-model-registry.json`.
 В `sessions_spawn model=...` и в конфиге агентов OpenClaw используется полная строка вида `<маркетплейс>/...` (например `openrouter/moonshotai/kimi-k2.5`). Переключение провайдера: выставить `LLM_MARKETPLACE` в `.env`, запустить `python3 scripts/apply-llm-marketplace.py`, перезапустить gateway и при необходимости обновить `~/.openclaw/openclaw.json` из репозитория.
+Если у выбранного маркетплейса нет нужной модели, в реестре для роли заданы **заменители** (`primary` + `alternatives` на маркетплейс): выбери слот через `LLM_KIMI_SLOT` / `LLM_MINIMAX_SLOT` (0, 1, …) или подстроку id через `LLM_KIMI_PICK` / `LLM_MINIMAX_PICK` в `.env`, затем снова запусти скрипт.
 
 ## Алгоритм при получении задачи
 

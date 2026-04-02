@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
 """
 Заменяет id моделей OpenClaw во всех зарегистрированных файлах репозитория (и опционально ~/.openclaw)
-согласно LLM_MARKETPLACE и config/llm-model-registry.json.
+согласно LLM_MARKETPLACE, config/llm-model-registry.json и выбору слота (primary / alternatives).
 
-Канонические логические имена см. в registry["canonical"] (например moonshotai/kimi-k2.5).
-В конфиге OpenClaw используются полные строки вида <маркетплейс>/... из registry["marketplaces"][LLM_MARKETPLACE].
+Канонические имена — в registry["canonical"]. Для каждой роли (kimi, minimax) в маркетплейсе заданы
+primary + alternatives — взаимозаменяемые варианты, если у провайдера нет основной модели.
 
-Использование:
-  LLM_MARKETPLACE=commonstack python3 scripts/apply-llm-marketplace.py
-  LLM_MARKETPLACE=openrouter python3 scripts/apply-llm-marketplace.py
+Переменные окружения:
+  LLM_MARKETPLACE     — openrouter | commonstack | together
+  LLM_KIMI_SLOT       — индекс слота для роли kimi (0 = primary, 1 = первый alternative, …)
+  LLM_MINIMAX_SLOT   — то же для minimax
+  LLM_KIMI_PICK       — опционально: подстрока id модели (например mimo-v2-pro, kimi-k2.5); переопределяет SLOT
+  LLM_MINIMAX_PICK    — то же для minimax
+
+Примеры:
+  LLM_MARKETPLACE=openrouter LLM_KIMI_SLOT=1 python3 scripts/apply-llm-marketplace.py
+  LLM_KIMI_PICK=mimo-v2-pro python3 scripts/apply-llm-marketplace.py
 """
 from __future__ import annotations
 
@@ -24,26 +31,82 @@ def load_registry(root: Path) -> dict:
         return json.load(f)
 
 
-def migrate_text(text: str, target_mp: str, reg: dict) -> tuple[str, int]:
-    markets = reg["marketplaces"]
-    if target_mp not in markets:
-        raise SystemExit(f"Неизвестный LLM_MARKETPLACE={target_mp!r}. Допустимо: {list(markets)}")
+def role_slots(entry: str | dict) -> list[str]:
+    """Список полных id OpenClaw для роли: [primary, ...alternatives]."""
+    if isinstance(entry, str):
+        return [entry]
+    primary = entry.get("primary")
+    if not primary:
+        raise SystemExit(f"В registry для роли нет primary: {entry!r}")
+    alts = entry.get("alternatives") or []
+    return [primary] + [a for a in alts if a]
 
-    t_kimi = markets[target_mp]["kimi"]
-    t_minimax = markets[target_mp]["minimax"]
+
+def all_known_strings_for_role(markets: dict, role: str) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for m in markets.values():
+        entry = m.get(role)
+        if entry is None:
+            continue
+        for s in role_slots(entry):
+            if s not in seen:
+                seen.add(s)
+                out.append(s)
+    return out
+
+
+def pick_index(slots: list[str], slot_env: str, pick_env: str | None, role: str) -> tuple[int, list[str]]:
+    """Возвращает индекс и список предупреждений."""
+    warns: list[str] = []
+    if pick_env:
+        needle = pick_env.strip().lower()
+        for i, s in enumerate(slots):
+            if needle in s.lower():
+                return i, warns
+        warns.append(f"{role}: LLM_*_PICK={pick_env!r} не найден среди слотов {slots}; используется primary")
+        return 0, warns
+    try:
+        idx = int(os.environ.get(slot_env, "0").strip() or "0")
+    except ValueError:
+        warns.append(f"{role}: неверный {slot_env}, используется 0")
+        idx = 0
+    if idx < 0 or idx >= len(slots):
+        warns.append(
+            f"{role}: слот {idx} вне диапазона 0..{len(slots) - 1} ({len(slots)} вариантов); используется {min(idx, len(slots) - 1) if slots else 0}"
+        )
+        idx = max(0, min(idx, len(slots) - 1)) if slots else 0
+    return idx, warns
+
+
+def resolve_target(markets: dict, mp: str, role: str, slot_env: str, pick_env: str | None) -> tuple[str, list[str]]:
+    entry = markets[mp][role]
+    slots = role_slots(entry)
+    idx, warns = pick_index(slots, slot_env, pick_env, role)
+    return slots[idx], warns
+
+
+def migrate_text(
+    text: str,
+    t_kimi: str,
+    t_minimax: str,
+    all_kimi: list[str],
+    all_minimax: list[str],
+) -> tuple[str, int]:
     new = text
     n = 0
-    for mp, m in markets.items():
-        if mp == target_mp:
-            continue
-        for role in ("kimi", "minimax"):
-            old = m[role]
-            neu = t_kimi if role == "kimi" else t_minimax
-            if old != neu:
-                c = new.count(old)
-                if c:
-                    new = new.replace(old, neu)
-                    n += c
+    for old in all_kimi:
+        if old != t_kimi:
+            c = new.count(old)
+            if c:
+                new = new.replace(old, t_kimi)
+                n += c
+    for old in all_minimax:
+        if old != t_minimax:
+            c = new.count(old)
+            if c:
+                new = new.replace(old, t_minimax)
+                n += c
     return new, n
 
 
@@ -67,6 +130,15 @@ def main() -> None:
         print(f"Ошибка: LLM_MARKETPLACE={target_mp!r} нет в registry. Варианты: {list(markets.keys())}", file=sys.stderr)
         sys.exit(1)
 
+    pick_kimi = os.environ.get("LLM_KIMI_PICK", "").strip() or None
+    pick_minimax = os.environ.get("LLM_MINIMAX_PICK", "").strip() or None
+    t_kimi, w1 = resolve_target(markets, target_mp, "kimi", "LLM_KIMI_SLOT", pick_kimi)
+    t_minimax, w2 = resolve_target(markets, target_mp, "minimax", "LLM_MINIMAX_SLOT", pick_minimax)
+    resolve_warns = w1 + w2
+
+    all_kimi = all_known_strings_for_role(markets, "kimi")
+    all_minimax = all_known_strings_for_role(markets, "minimax")
+
     repo_files = [
         root / "souls" / "director.md",
         root / "openclaw" / "openclaw.json",
@@ -86,7 +158,7 @@ def main() -> None:
             print(f"[skip] нет файла: {path}")
             continue
         raw = path.read_text(encoding="utf-8")
-        new, n = migrate_text(raw, target_mp, reg)
+        new, n = migrate_text(raw, t_kimi, t_minimax, all_kimi, all_minimax)
         if new != raw:
             path.write_text(new, encoding="utf-8")
             print(f"[ok] {rel_display(path, root)} — замен: {n}")
@@ -94,16 +166,22 @@ def main() -> None:
         else:
             print(f"[--] {rel_display(path, root)} — без изменений")
 
-    t_kimi = markets[target_mp]["kimi"]
-    t_minimax = markets[target_mp]["minimax"]
     print()
     print(f"LLM_MARKETPLACE={target_mp}")
     print(f"  kimi (OpenClaw):    {t_kimi}")
     print(f"  minimax (OpenClaw): {t_minimax}")
     print(f"  canonical.kimi:     {reg['canonical']['kimi']}")
     print(f"  canonical.minimax:  {reg['canonical']['minimax']}")
+    k_slots = role_slots(markets[target_mp]["kimi"])
+    m_slots = role_slots(markets[target_mp]["minimax"])
+    print(f"  слоты kimi в этом маркетплейсе:    {k_slots}")
+    print(f"  слоты minimax в этом маркетплейсе: {m_slots}")
+    if resolve_warns:
+        print()
+        for w in resolve_warns:
+            print(f"⚠️  {w}", file=sys.stderr)
     if total_repl == 0:
-        print("(строки уже соответствуют выбранному маркетплейсу)")
+        print("(строки уже соответствуют выбранным маркетплейсу и слотам)")
 
 
 if __name__ == "__main__":
