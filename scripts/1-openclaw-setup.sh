@@ -80,6 +80,10 @@ fi
 echo ""
 echo "Запуск openclaw-gateway..."
 load_env "$ROOT"
+export LLM_MARKETPLACE="${LLM_MARKETPLACE:-openrouter}"
+if [ -f "$ROOT/scripts/apply-llm-marketplace.py" ]; then
+  python3 "$ROOT/scripts/apply-llm-marketplace.py" || echo "⚠️ apply-llm-marketplace.py: пропуск (проверь вывод выше)"
+fi
 docker compose up -d openclaw-gateway
 
 echo ""

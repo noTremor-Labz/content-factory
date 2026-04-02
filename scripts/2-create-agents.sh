@@ -16,9 +16,9 @@ cli() {
 
 model_for() {
   case "$1" in
-    launch) echo "anthropic/claude-haiku-4-5" ;;
-    lens-tomas) echo "anthropic/claude-opus-4-6" ;;
-    *) echo "anthropic/claude-sonnet-4-6" ;;
+    launch|scheduler|pixel-tomas) echo "openrouter/minimax/minimax-m2.7" ;;
+    lens-tomas) echo "openrouter/moonshotai/kimi-k2.5" ;;
+    *) echo "openrouter/moonshotai/kimi-k2.5" ;;
   esac
 }
 

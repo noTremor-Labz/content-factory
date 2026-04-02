@@ -15,57 +15,57 @@
         "id": "director",
         "default": true,
         "workspace": "/home/node/.openclaw/workspace-director",
-        "model": "anthropic/claude-sonnet-4-6"
+        "model": "openrouter/moonshotai/kimi-k2.5"
       },
       {
         "id": "scheduler",
         "workspace": "/home/node/.openclaw/workspace-scheduler",
-        "model": "anthropic/claude-haiku-4-5"
+        "model": "openrouter/minimax/minimax-m2.7"
       },
       {
         "id": "scout",
         "workspace": "/home/node/.openclaw/workspace-scout",
-        "model": "anthropic/claude-sonnet-4-6"
+        "model": "openrouter/moonshotai/kimi-k2.5"
       },
       {
         "id": "quill",
         "workspace": "/home/node/.openclaw/workspace-quill",
-        "model": "anthropic/claude-sonnet-4-6"
+        "model": "openrouter/moonshotai/kimi-k2.5"
       },
       {
         "id": "lens",
         "workspace": "/home/node/.openclaw/workspace-lens",
-        "model": "anthropic/claude-sonnet-4-6"
+        "model": "openrouter/moonshotai/kimi-k2.5"
       },
       {
         "id": "launch",
         "workspace": "/home/node/.openclaw/workspace-launch",
-        "model": "anthropic/claude-haiku-4-5"
+        "model": "openrouter/minimax/minimax-m2.7"
       },
       {
         "id": "pixel",
         "workspace": "/home/node/.openclaw/workspace-pixel",
-        "model": "anthropic/claude-haiku-4-5"
+        "model": "openrouter/minimax/minimax-m2.7"
       },
       {
         "id": "pulse-tomas",
         "workspace": "/home/node/.openclaw/workspace-pulse-tomas",
-        "model": "anthropic/claude-haiku-4-5"
+        "model": "openrouter/minimax/minimax-m2.7"
       },
       {
         "id": "pulse-misha",
         "workspace": "/home/node/.openclaw/workspace-pulse-misha",
-        "model": "anthropic/claude-haiku-4-5"
+        "model": "openrouter/minimax/minimax-m2.7"
       },
       {
         "id": "pulse-nasik",
         "workspace": "/home/node/.openclaw/workspace-pulse-nasik",
-        "model": "anthropic/claude-haiku-4-5"
+        "model": "openrouter/minimax/minimax-m2.7"
       },
       {
         "id": "pulse-yulya",
         "workspace": "/home/node/.openclaw/workspace-pulse-yulya",
-        "model": "anthropic/claude-haiku-4-5"
+        "model": "openrouter/minimax/minimax-m2.7"
       }
     ]
   },
@@ -94,7 +94,7 @@
   },
   "hooks": {
     "enabled": true,
-    "token": "fd5c8a699789ba6beb43c59b5ad6834a3830c6e8e683b429"
+    "token": "c1c6d8e7f9a0b1c2d3e4f5a6b7c8d9e0"
   },
   "tools": {
     "sessions": {
@@ -136,7 +136,7 @@
     },
     "auth": {
       "mode": "token",
-      "token": "f3aaf74ffcf602768b12f8890fed9b9b85e4f81ab31ce8f8"
+      "token": "fd5c8a699789ba6beb43c59b5ad6834a3830c6e8e683b429"
     }
   }
 }

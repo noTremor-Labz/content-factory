@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "canonical": {
+    "kimi": "moonshotai/kimi-k2.5",
+    "minimax": "minimax/minimax-m2.7"
+  },
+  "_comment": "canonical — одни и те же логические имена vendor/model для документации и сравнения каталогов. marketplaces.* — полные id для OpenClaw (sessions_spawn, agents.model). Подставь реальные id из каталога выбранного маркетплейса при смене провайдера.",
+  "marketplaces": {
+    "openrouter": {
+      "kimi": "openrouter/moonshotai/kimi-k2.5",
+      "minimax": "openrouter/minimax/minimax-m2.7"
+    },
+    "commonstack": {
+      "kimi": "commonstack/moonshotai/kimi-k2.5",
+      "minimax": "commonstack/minimax/minimax-m2.7"
+    },
+    "together": {
+      "kimi": "together/moonshotai/kimi-k2.5",
+      "minimax": "together/minimax/minimax-m2.7"
+    }
+  }
+}
