@@ -29,6 +29,9 @@ Usage: bash scripts/test-workflow.sh [опции]
   --approval     POST на webhook approval-send (нужен n8n; сообщение в TG владельцу)
   --pixel        python3 shared/scripts/pixel_upload.py (нужны FAL/R2 в .env)
 
+Полная проверка веток approval-send + router: bash scripts/verify-approval-media.sh
+  (опционально VERIFY_ROUTER=1 — approve_a и published.lock)
+
 Переменные: BLOGGER (default tomas-food), PLATFORM (default tg),
   OPENCLAW_GATEWAY_URL, N8N_URL
 
