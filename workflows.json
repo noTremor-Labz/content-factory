@@ -524,7 +524,7 @@
     "id": "f2962009-42b4-4696-be22-dd149037be0a",
     "name": "stuck-alerts",
     "description": null,
-    "active": false,
+    "active": true,
     "isArchived": false,
     "nodes": [
       {
