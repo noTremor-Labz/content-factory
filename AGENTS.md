@@ -38,7 +38,7 @@ VERIFY_ROUTER=1 bash scripts/verify-approval-media.sh
 - **Куда слать кнопки:** задай **`APPROVE_CHAT_ID`** (числовой id чата approval: личка или группа). Узел **Parse approval body** в approval-send берёт `chat_id` **только** из `process.env.APPROVE_CHAT_ID` / `TELEGRAM_APPROVAL_CHAT_ID`, не из тела webhook — иначе сообщения уезжают в чат Директора.
 - Если в POST на `approval-send` не передали `media_url`, но в `shared/bloggers/{blogger}/jobs/{job_id}/ready.md` есть строки `media_url:` / `image_url:` или `PIXEL_URL:` — workflow подставит URL из файла (после `pixel_upload.py` там всегда есть оба поля).
 - **Webhook Telegram:** у **approval-бота** в BotFather/`setWebhook` должен быть URL вебхука n8n на workflow **telegram-router** (тот же хост, что и для POST approval-send). Если вебхук указывает на другого бота или старый URL, колбэки и сообщения пойдут не туда.
-- Все вызовы `api.telegram.org` в workflow берут токен из `$env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN` — не хардкодь токен в JSON.
+- Все вызовы `api.telegram.org` в **approval-send** и **telegram-router** используют только **`$env.TELEGRAM_APPROVAL_BOT_TOKEN`** (без fallback на Director).
 - После отправки поста на согласование workflow **approval-send** пишет состояние в  
   `shared/bloggers/{blogger}/jobs/{job_id}/job-state.json`: `approve_text_message_id`, `approve_media_message_ids` (альбом/одно фото), `approval_ui_kind` (`album` | `single_photo` | `text_only`), `status`.
 - Кнопки: **Опубликовать** (`approve_*` / `approve_a` / `approve_b`), **Правки** (`revise_{job_id}`), **Отклонить** (`reject_*`). Обработка колбэков и следующего сообщения редактора — **telegram-router**.

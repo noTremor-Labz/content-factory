@@ -26,7 +26,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const fs = require('fs');\nconst body = $input.first().json.body || {};\nconst job_id = body.job_id;\nconst blogger = body.blogger;\nconst platform = body.platform;\nconst channel_id = body.channel_id;\nconst content = body.content || '';\nlet media_url = String(body.media_url || body.image_url || '').trim();\nlet media_url_b = String(body.media_url_b || '').trim();\nconst chat_id = String(process.env.APPROVE_CHAT_ID || process.env.TELEGRAM_APPROVAL_CHAT_ID || '492912584');\nfunction fillFromReady() {\n  if (!job_id || !blogger) return;\n  try {\n    const p = `/home/node/shared/bloggers/${blogger}/jobs/${job_id}/ready.md`;\n    const text = fs.readFileSync(p, 'utf8');\n    function pick(key) {\n      const re = new RegExp('^\\\\s*[-*]?\\\\s*' + key + '\\\\s*:\\\\s*(\\\\S+)', 'im');\n      const m = text.match(re);\n      return m ? m[1].trim() : '';\n    }\n    if (!media_url) media_url = pick('media_url') || pick('image_url');\n    if (!media_url_b) media_url_b = pick('media_url_b') || pick('image_url_b');\n    if (!media_url) {\n      const px = text.match(/PIXEL_URL:\\\\s*(\\\\S+)/i);\n      if (px) media_url = px[1].trim();\n    }\n  } catch (e) {}\n}\nfillFromReady();\nreturn [{\n  json: {\n    job_id,\n    blogger,\n    platform,\n    channel_id,\n    content,\n    media_url,\n    media_url_b,\n    chat_id,\n    caption_single: `🖼 ${job_id} | ${blogger} | ${platform}`,\n    text_no_image: `⚠️ Картинка не сгенерирована\\n\\n${content}`\n  }\n}];"
+          "jsCode": "const fs = require('fs');\nconst body = $input.first().json.body || {};\nconst job_id = body.job_id;\nconst blogger = body.blogger;\nconst platform = body.platform;\nconst channel_id = body.channel_id;\nconst content = body.content || '';\nlet media_url = String(body.media_url || body.image_url || '').trim();\nlet media_url_b = String(body.media_url_b || '').trim();\nconst chatIdRaw = String(process.env.APPROVE_CHAT_ID || '').trim();\nif (!chatIdRaw) throw new Error('APPROVE_CHAT_ID не задан в .env');\nconst chat_id = chatIdRaw;\nfunction fillFromReady() {\n  if (!job_id || !blogger) return;\n  try {\n    const p = `/home/node/shared/bloggers/${blogger}/jobs/${job_id}/ready.md`;\n    const text = fs.readFileSync(p, 'utf8');\n    function pick(key) {\n      const re = new RegExp('^\\\\s*[-*]?\\\\s*' + key + '\\\\s*:\\\\s*(\\\\S+)', 'im');\n      const m = text.match(re);\n      return m ? m[1].trim() : '';\n    }\n    if (!media_url) media_url = pick('media_url') || pick('image_url');\n    if (!media_url_b) media_url_b = pick('media_url_b') || pick('image_url_b');\n    if (!media_url) {\n      const px = text.match(/PIXEL_URL:\\\\s*(\\\\S+)/i);\n      if (px) media_url = px[1].trim();\n    }\n  } catch (e) {}\n}\nfillFromReady();\nreturn [{\n  json: {\n    job_id,\n    blogger,\n    platform,\n    channel_id,\n    content,\n    media_url,\n    media_url_b,\n    chat_id,\n    caption_single: `🖼 ${job_id} | ${blogger} | ${platform}`,\n    text_no_image: `⚠️ Картинка не сгенерирована\\n\\n${content}`\n  }\n}];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -152,7 +152,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMediaGroup' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/sendMediaGroup' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, media: [{ type: 'photo', media: $json.media_url, caption: 'A' }, { type: 'photo', media: $json.media_url_b, caption: 'B' }] }) }}",
@@ -170,7 +170,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/sendMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ A', callback_data: 'approve_a_' + $json.job_id }, { text: '✅ B', callback_data: 'approve_b_' + $json.job_id }, { text: '✏️ Правки', callback_data: 'revise_' + $json.job_id }, { text: '❌', callback_data: 'reject_' + $json.job_id }]] } }) }}",
@@ -188,7 +188,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendPhoto' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/sendPhoto' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, photo: $json.media_url, caption: $json.caption_single }) }}",
@@ -206,7 +206,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/sendMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ Опубликовать', callback_data: 'approve_' + $json.job_id }, { text: '✏️ Правки', callback_data: 'revise_' + $json.job_id }, { text: '❌ Отклонить', callback_data: 'reject_' + $json.job_id }]] } }) }}",
@@ -224,7 +224,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/sendMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.text_no_image, reply_markup: { inline_keyboard: [[{ text: '✅ Опубликовать', callback_data: 'approve_' + $json.job_id }, { text: '✏️ Правки', callback_data: 'revise_' + $json.job_id }, { text: '❌ Отклонить', callback_data: 'reject_' + $json.job_id }]] } }) }}",

@@ -163,7 +163,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendPhoto' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/sendPhoto' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({chat_id: $json.channel_id, photo: $json.image_url, caption: $json.content}) }}",
@@ -207,7 +207,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/answerCallbackQuery' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/answerCallbackQuery' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({callback_query_id: $json.callback_query_id, text: \"✅ Опубликовано!\"}) }}",
@@ -225,7 +225,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/answerCallbackQuery' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/answerCallbackQuery' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({callback_query_id: $json.callback_query_id, text: \"❌ Отклонено\"}) }}",
@@ -346,7 +346,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/sendMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({chat_id: $json.channel_id, text: $json.content}) }}",
@@ -424,7 +424,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/answerCallbackQuery' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/answerCallbackQuery' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ callback_query_id: $json.callback_query_id, text: \"✏️\" }) }}",
@@ -442,7 +442,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/editMessageReplyMarkup' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/editMessageReplyMarkup' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.callback_chat_id, message_id: $json.approve_text_message_id, reply_markup: {} }) }}",
@@ -460,7 +460,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/sendMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, text: '✏️ Жду правки по посту ' + $json.job_id + ' (' + $json.blogger + ' | ' + $json.platform + ').\\n' + 'Следующим сообщением напиши что изменить — передам Quill через Director.' }) }}",
@@ -653,7 +653,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/deleteMessage' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/deleteMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, message_id: $json.del_wait_mid }) }}",
@@ -671,7 +671,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/editMessageReplyMarkup' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/editMessageReplyMarkup' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $('Cancel prepare').item.json.chat_id, message_id: $('Cancel prepare').item.json.text_mid, reply_markup: $('Cancel prepare').item.json.markup }) }}",
@@ -689,7 +689,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/editMessageReplyMarkup' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/editMessageReplyMarkup' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $('Cancel prepare').item.json.chat_id, message_id: $('Cancel prepare').item.json.text_mid, reply_markup: $('Cancel prepare').item.json.markup }) }}",
@@ -720,7 +720,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/sendMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, text: 'Отменено. Кнопки восстановлены.' }) }}",
@@ -785,7 +785,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/deleteMessage' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/deleteMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, message_id: $json.message_id }) }}",
@@ -844,7 +844,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "={{ 'https://api.telegram.org/bot' + ($env.TELEGRAM_APPROVAL_BOT_TOKEN || $env.TELEGRAM_BOT_TOKEN) + '/sendMessage' }}",
+          "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_APPROVAL_BOT_TOKEN + '/sendMessage' }}",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.status_text }) }}",
