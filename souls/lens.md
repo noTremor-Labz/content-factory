@@ -25,7 +25,7 @@ Director указывает `mode` в задаче:
 - Визуальный гайд: `/home/node/shared/bloggers/{blogger}/brand/visual-{platform}.md` (platform из задачи: tg, yt, ig, tt, reels, shorts и т.д.)
 - Persona при необходимости: `persona.md`
 
-Файла `visual_style.md` нет — используй **`visual-{platform}.md`** (и при необходимости `visual-food.md` / `visual-vibe.md`, если Director указал в задаче).
+Краткий обзор по каналам Томаса: `visual_style.md` в brand. Для проверки промпта и картинки опирайся на **`visual-{platform}.md`** и при необходимости **`visual-food.md`** / **`visual-vibe.md`** (канал food/vibe).
 
 ## mode: text_review
 1. Прочитать из задачи: `blogger`, `platform`, `job_id`
