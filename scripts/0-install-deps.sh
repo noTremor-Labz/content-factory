@@ -63,7 +63,7 @@ if [ ! -f "$ROOT/.env" ]; then
   echo ""
   echo "⚠️  Создан .env из .env.example"
   echo "   Заполни обязательные поля перед следующим шагом:"
-  echo "   - ANTHROPIC_API_KEY"
+  echo "   - OPENROUTER_API_KEY (или TOGETHER_API_KEY / COMMONSTACK_API_KEY для маркетплейсов)"
   echo "   - TELEGRAM_BOT_TOKEN"
   echo "   - TELEGRAM_OWNER_ID"
   echo "   - OPENCLAW_CONFIG_DIR, OPENCLAW_WORKSPACE_DIR (путь ~/.openclaw)"

@@ -11,19 +11,33 @@ load_env "$ROOT"
 echo "=== Шаг 1: Запуск OpenClaw Gateway ==="
 echo ""
 
-if [ -z "${ANTHROPIC_API_KEY:-}" ] || [[ "$ANTHROPIC_API_KEY" == "sk-ant-..." ]]; then
-  echo "❌ Нужен реальный ANTHROPIC_API_KEY (не плейсхолдер sk-ant-... из примера)."
-  echo "   Файл: $ROOT/.env или .env.local — сохрани в редакторе (Cmd+S), затем повтори скрипт."
-  exit 1
-fi
-if [ "${#ANTHROPIC_API_KEY}" -lt 30 ]; then
-  echo "❌ ANTHROPIC_API_KEY слишком короткий (${#ANTHROPIC_API_KEY} символов). Полный ключ из console.anthropic.com — длинная строка."
+has_marketplace_key() {
+  [ -n "${OPENROUTER_API_KEY:-}" ] && [ "${OPENROUTER_API_KEY}" != "sk-or-v1-..." ] && return 0
+  [ -n "${COMMONSTACK_API_KEY:-}" ] && return 0
+  [ -n "${TOGETHER_API_KEY:-}" ] && return 0
+  return 1
+}
+
+if ! has_marketplace_key; then
+  echo "❌ Нужен хотя бы один ключ маркетплейса в .env (не плейсхолдер):"
+  echo "   OPENROUTER_API_KEY, COMMONSTACK_API_KEY или TOGETHER_API_KEY"
   exit 1
 fi
 
 if [ ! -f ~/.openclaw/openclaw.json ]; then
   echo "Первый запуск — онбординг OpenClaw (без интерактива)..."
   echo ""
+
+  ONBOARD_EXTRA=(--skip-skills --skip-health)
+  if [ -n "${OPENROUTER_API_KEY:-}" ] && [ "${OPENROUTER_API_KEY}" != "sk-or-v1-..." ]; then
+    ONBOARD_EXTRA+=(--auth-choice openrouter-api-key --openrouter-api-key "$OPENROUTER_API_KEY")
+  elif [ -n "${TOGETHER_API_KEY:-}" ]; then
+    ONBOARD_EXTRA+=(--auth-choice together-api-key --together-api-key "$TOGETHER_API_KEY")
+  else
+    echo "❌ Для первого онбординга OpenClaw нужен OPENROUTER_API_KEY или TOGETHER_API_KEY."
+    echo "   (COMMONSTACK добавьте в ~/.openclaw/.../auth-profiles.json вручную или через install.sh с commonstack.ai)"
+    exit 1
+  fi
 
   docker compose run --rm -T --no-deps \
     --entrypoint node \
@@ -33,13 +47,10 @@ if [ ! -f ~/.openclaw/openclaw.json ]; then
     --accept-risk \
     --mode local \
     --no-install-daemon \
-    --auth-choice apiKey \
-    --anthropic-api-key "$ANTHROPIC_API_KEY" \
+    "${ONBOARD_EXTRA[@]}" \
     --secret-input-mode plaintext \
     --gateway-bind lan \
-    --gateway-port "${OPENCLAW_GATEWAY_PORT:-18789}" \
-    --skip-skills \
-    --skip-health
+    --gateway-port "${OPENCLAW_GATEWAY_PORT:-18789}"
 
   if [ -f ~/.openclaw/.env ]; then
     GENERATED_TOKEN=$(grep '^OPENCLAW_GATEWAY_TOKEN=' ~/.openclaw/.env | cut -d= -f2- || true)

@@ -18,12 +18,9 @@ services:
       - ${HOST_SHARED_PATH:-./shared}:/home/node/shared
     environment:
       - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - COMMONSTACK_API_KEY=${COMMONSTACK_API_KEY}
       - TOGETHER_API_KEY=${TOGETHER_API_KEY}
-      - MOONSHOTAI_API_KEY=${MOONSHOTAI_API_KEY}
-      - MINIMAX_API_KEY=${MINIMAX_API_KEY}
       # Pixel (fal.ai / Replicate) + media upload (Cloudflare R2) env vars
       - FAL_KEY=${FAL_KEY}
       - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}
@@ -52,12 +49,9 @@ services:
       - ${HOST_SHARED_PATH:-./shared}:/home/node/shared
     environment:
       - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - COMMONSTACK_API_KEY=${COMMONSTACK_API_KEY}
       - TOGETHER_API_KEY=${TOGETHER_API_KEY}
-      - MOONSHOTAI_API_KEY=${MOONSHOTAI_API_KEY}
-      - MINIMAX_API_KEY=${MINIMAX_API_KEY}
       # Keep same env vars in CLI container (some tools may reuse runtime)
       - FAL_KEY=${FAL_KEY}
       - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}
@@ -112,6 +106,8 @@ services:
       - N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE:-false}
       # Обязательно строка false: иначе $env в выражениях заблокирован (n8n-workflow: только === 'false' снимает блок)
       - N8N_BLOCK_ENV_ACCESS_IN_NODE=${N8N_BLOCK_ENV_ACCESS_IN_NODE:-false}
+      # Темы в daily-queue (HTTP → OpenRouter): $env.OPENROUTER_API_KEY
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - WEBHOOK_URL=https://spotted-pokingly-nichelle.ngrok-free.dev/
       - GENERIC_TIMEZONE=Europe/Tallinn
       # Из контейнера n8n → Agent Board в той же Docker-сети

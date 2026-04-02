@@ -1,0 +1,1993 @@
+[
+  {
+    "updatedAt": "2026-03-28T18:03:03.000Z",
+    "createdAt": "2026-03-28T17:46:30.926Z",
+    "id": "snlSFtZJnlyGXu2D",
+    "name": "daily-queue",
+    "description": null,
+    "active": false,
+    "isArchived": true,
+    "nodes": [
+      {
+        "parameters": {},
+        "id": "67848ac8-7292-4590-9ebc-e319c91edf0f",
+        "name": "When clicking \"Execute workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ]
+      }
+    ],
+    "connections": {},
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "meta": null,
+    "pinData": {},
+    "versionId": "4fe9a208-e9d6-4f31-b5cb-c7b5021def42",
+    "activeVersionId": null,
+    "versionCounter": 5,
+    "triggerCount": 0,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-03-28T17:46:30.928Z",
+        "createdAt": "2026-03-28T17:46:30.928Z",
+        "role": "workflow:owner",
+        "workflowId": "snlSFtZJnlyGXu2D",
+        "projectId": "tB3UHQaJuvOlSpuk",
+        "project": {
+          "updatedAt": "2026-03-28T09:03:01.212Z",
+          "createdAt": "2026-03-28T08:30:12.897Z",
+          "id": "tB3UHQaJuvOlSpuk",
+          "name": "Tomas Rabi <strong.rabii@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "b60ea93a-0490-42d3-95c8-fe5f505c11ed"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": null,
+      "description": null
+    }
+  },
+  {
+    "updatedAt": "2026-03-28T18:02:59.000Z",
+    "createdAt": "2026-03-28T17:48:12.522Z",
+    "id": "BN24gRM0JO5RDli6",
+    "name": "publish-log",
+    "description": null,
+    "active": false,
+    "isArchived": true,
+    "nodes": [
+      {
+        "parameters": {},
+        "id": "35750d84-3639-4940-8451-3df663157d36",
+        "name": "When clicking \"Execute workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ]
+      }
+    ],
+    "connections": {},
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "meta": null,
+    "pinData": {},
+    "versionId": "6623d306-492e-4dba-954c-b4e57b43c02b",
+    "activeVersionId": null,
+    "versionCounter": 2,
+    "triggerCount": 0,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-03-28T17:48:12.525Z",
+        "createdAt": "2026-03-28T17:48:12.525Z",
+        "role": "workflow:owner",
+        "workflowId": "BN24gRM0JO5RDli6",
+        "projectId": "tB3UHQaJuvOlSpuk",
+        "project": {
+          "updatedAt": "2026-03-28T09:03:01.212Z",
+          "createdAt": "2026-03-28T08:30:12.897Z",
+          "id": "tB3UHQaJuvOlSpuk",
+          "name": "Tomas Rabi <strong.rabii@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "b60ea93a-0490-42d3-95c8-fe5f505c11ed"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": null,
+      "description": null
+    }
+  },
+  {
+    "updatedAt": "2026-03-28T18:02:57.000Z",
+    "createdAt": "2026-03-28T17:48:23.077Z",
+    "id": "6MY4lxhL8JebDMMI",
+    "name": "stuck-alerts",
+    "description": null,
+    "active": false,
+    "isArchived": true,
+    "nodes": [
+      {
+        "parameters": {},
+        "id": "36f6a80d-269d-4e5d-9785-fdadeb4ab91b",
+        "name": "When clicking \"Execute workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ]
+      }
+    ],
+    "connections": {},
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "meta": null,
+    "pinData": {},
+    "versionId": "5c0c8760-b379-4233-9280-6334eae8b8fc",
+    "activeVersionId": null,
+    "versionCounter": 2,
+    "triggerCount": 0,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-03-28T17:48:23.079Z",
+        "createdAt": "2026-03-28T17:48:23.079Z",
+        "role": "workflow:owner",
+        "workflowId": "6MY4lxhL8JebDMMI",
+        "projectId": "tB3UHQaJuvOlSpuk",
+        "project": {
+          "updatedAt": "2026-03-28T09:03:01.212Z",
+          "createdAt": "2026-03-28T08:30:12.897Z",
+          "id": "tB3UHQaJuvOlSpuk",
+          "name": "Tomas Rabi <strong.rabii@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "b60ea93a-0490-42d3-95c8-fe5f505c11ed"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": null,
+      "description": null
+    }
+  },
+  {
+    "updatedAt": "2026-03-31T12:05:27.000Z",
+    "createdAt": "2026-03-28T17:56:30.116Z",
+    "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "name": "_test-http",
+    "description": null,
+    "active": false,
+    "isArchived": true,
+    "nodes": [
+      {
+        "parameters": {},
+        "id": "11111111-1111-1111-1111-111111111111",
+        "name": "When clicking \"Execute workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $env.AGENT_BOARD_URL }}/api/health",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-API-Key",
+                "value": "={{ $env.N8N_AGENT_BOARD_API_KEY }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "22222222-2222-2222-2222-222222222222",
+        "name": "Agent Board health",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          220,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "When clicking \"Execute workflow\"": {
+        "main": [
+          [
+            {
+              "node": "Agent Board health",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1"
+    },
+    "staticData": null,
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "pinData": null,
+    "versionId": "6011bdd9-af06-47ac-aeda-dc4723003525",
+    "activeVersionId": null,
+    "versionCounter": 2,
+    "triggerCount": 0,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-03-28T17:56:30.117Z",
+        "createdAt": "2026-03-28T17:56:30.117Z",
+        "role": "workflow:owner",
+        "workflowId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+        "projectId": "tB3UHQaJuvOlSpuk",
+        "project": {
+          "updatedAt": "2026-03-28T09:03:01.212Z",
+          "createdAt": "2026-03-28T08:30:12.897Z",
+          "id": "tB3UHQaJuvOlSpuk",
+          "name": "Tomas Rabi <strong.rabii@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "b60ea93a-0490-42d3-95c8-fe5f505c11ed"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": null,
+      "description": null
+    }
+  },
+  {
+    "updatedAt": "2026-04-01T12:05:58.295Z",
+    "createdAt": "2026-03-28T17:57:30.736Z",
+    "id": "9483f0f1-816f-49a2-8711-78b219fda61b",
+    "name": "daily-queue",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 9 * * *"
+              }
+            ]
+          }
+        },
+        "id": "7ee07094-c3f9-4064-8d63-c59955b035b3",
+        "name": "Every day 09:00",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "url": "={{ $env.AGENT_BOARD_URL }}/api/health",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-API-Key",
+                "value": "={{ $env.N8N_AGENT_BOARD_API_KEY }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "ab9db5e1-aa11-4854-8d80-8406d097a25f",
+        "name": "Ping Agent Board",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          272,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1BQJkq1H7Uz7m9FuKBoFjLEvw-s3MxqvFFsXLcVEBTPw",
+            "mode": "list",
+            "cachedResultName": "Content-Factory",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQJkq1H7Uz7m9FuKBoFjLEvw-s3MxqvFFsXLcVEBTPw/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 1172550106,
+            "mode": "list",
+            "cachedResultName": "topics",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQJkq1H7Uz7m9FuKBoFjLEvw-s3MxqvFFsXLcVEBTPw/edit#gid=1172550106"
+          },
+          "filtersUI": {
+            "values": []
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          480,
+          0
+        ],
+        "id": "6b0dcb84-c234-4d44-984c-c5f935df384c",
+        "name": "Get row(s) in sheet",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "ha3ZsWSkKIKZB6Uj",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const today = $now.toFormat('yyyy-MM-dd');\n\nreturn $input.all().filter(item => \n  item.json.date === today && \n  item.json.status === 'pending'\n);"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          688,
+          0
+        ],
+        "id": "cabebb5a-695e-49af-8d36-e72c167daa1f",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://openclaw-gateway:18789/hooks/agent",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Bearer fd5c8a699789ba6beb43c59b5ad6834a3830c6e8e683b429"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"message\": \"тема: {{ $json.topic }} | платформа: telegram | формат: пост | блогер: {{ $json.blogger }} | канал: {{ $json.platform }}\",\n  \"agentId\": \"director\",\n  \"wakeMode\": \"now\"\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          896,
+          0
+        ],
+        "id": "d9c1e7d4-cd98-48af-a83a-1e077275c92a",
+        "name": "HTTP Request"
+      },
+      {
+        "parameters": {
+          "method": "PUT",
+          "url": "=https://sheets.googleapis.com/v4/spreadsheets/1BQJkq1H7Uz7m9FuKBoFjLEvw-s3MxqvFFsXLcVEBTPw/values/topics!E{{ $('Get row(s) in sheet').item.json.row_number }}:E{{ $('Get row(s) in sheet').item.json.row_number }}?valueInputOption=RAW",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleSheetsOAuth2Api",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "{\"majorDimension\":\"ROWS\",\"values\":[[\"sent\"]]}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1104,
+          0
+        ],
+        "id": "4b4fc03a-308d-4833-9006-db7fe3629ac8",
+        "name": "HTTP Request1",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "ha3ZsWSkKIKZB6Uj",
+            "name": "Google Sheets account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Every day 09:00": {
+        "main": [
+          [
+            {
+              "node": "Ping Agent Board",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ping Agent Board": {
+        "main": [
+          [
+            {
+              "node": "Get row(s) in sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get row(s) in sheet": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTTP Request": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "pinData": {},
+    "versionId": "68d4d5d1-a604-442b-bc1a-cb1d2cfc3273",
+    "activeVersionId": "68d4d5d1-a604-442b-bc1a-cb1d2cfc3273",
+    "versionCounter": 121,
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-03-28T17:57:30.738Z",
+        "createdAt": "2026-03-28T17:57:30.738Z",
+        "role": "workflow:owner",
+        "workflowId": "9483f0f1-816f-49a2-8711-78b219fda61b",
+        "projectId": "tB3UHQaJuvOlSpuk",
+        "project": {
+          "updatedAt": "2026-03-28T09:03:01.212Z",
+          "createdAt": "2026-03-28T08:30:12.897Z",
+          "id": "tB3UHQaJuvOlSpuk",
+          "name": "Tomas Rabi <strong.rabii@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "b60ea93a-0490-42d3-95c8-fe5f505c11ed"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": "Version 68d4d5d1",
+      "description": ""
+    }
+  },
+  {
+    "updatedAt": "2026-03-28T17:58:15.554Z",
+    "createdAt": "2026-03-28T17:58:15.554Z",
+    "id": "f2962009-42b4-4696-be22-dd149037be0a",
+    "name": "stuck-alerts",
+    "description": null,
+    "active": false,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 */6 * * *"
+              }
+            ]
+          }
+        },
+        "id": "a1c2e3f4-1111-4222-8333-444455556666",
+        "name": "Every 6 hours",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $env.AGENT_BOARD_URL }}/api/health",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-API-Key",
+                "value": "={{ $env.N8N_AGENT_BOARD_API_KEY }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "b2d3f4a5-2222-5333-9444-555566667777",
+        "name": "Ping Agent Board",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          260,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "hint-stuck",
+                "name": "hint",
+                "value": "Добавь: проверка «зависших» задач (shared/, статусы проектов), алерт в Telegram при таймауте.",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "c3e4a5b6-3333-6444-a555-666677778888",
+        "name": "Next: stuck detection",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          520,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Every 6 hours": {
+        "main": [
+          [
+            {
+              "node": "Ping Agent Board",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ping Agent Board": {
+        "main": [
+          [
+            {
+              "node": "Next: stuck detection",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1"
+    },
+    "staticData": null,
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "pinData": null,
+    "versionId": "6bb8a1af-cd4b-41ac-9130-e8f8767f8fe8",
+    "activeVersionId": null,
+    "versionCounter": 2,
+    "triggerCount": 0,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-03-28T17:58:15.556Z",
+        "createdAt": "2026-03-28T17:58:15.556Z",
+        "role": "workflow:owner",
+        "workflowId": "f2962009-42b4-4696-be22-dd149037be0a",
+        "projectId": "tB3UHQaJuvOlSpuk",
+        "project": {
+          "updatedAt": "2026-03-28T09:03:01.212Z",
+          "createdAt": "2026-03-28T08:30:12.897Z",
+          "id": "tB3UHQaJuvOlSpuk",
+          "name": "Tomas Rabi <strong.rabii@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "b60ea93a-0490-42d3-95c8-fe5f505c11ed"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": null,
+      "description": null
+    }
+  },
+  {
+    "updatedAt": "2026-03-28T17:58:16.440Z",
+    "createdAt": "2026-03-28T17:58:16.440Z",
+    "id": "2b3b82ed-e4cf-48fd-afcb-2b3c693823f1",
+    "name": "publish-log",
+    "description": null,
+    "active": false,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "publish-log",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "id": "d4f5a6b7-4444-7555-b666-777788889999",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "publish-log-webhook-001"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ack",
+                "name": "ok",
+                "value": true,
+                "type": "boolean"
+              },
+              {
+                "id": "route",
+                "name": "webhook",
+                "value": "publish-log",
+                "type": "string"
+              },
+              {
+                "id": "hint-pub",
+                "name": "hint",
+                "value": "Подключи сюда запись в Google Sheets / Notion или вызов Agent Board после публикации.",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "e5a6b7c8-5558-8666-c777-888899990000",
+        "name": "Ack + hints",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          280,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Ack + hints",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1"
+    },
+    "staticData": null,
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "pinData": null,
+    "versionId": "b94771fe-4730-4ae4-8e18-277244f979ad",
+    "activeVersionId": null,
+    "versionCounter": 2,
+    "triggerCount": 0,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-03-28T17:58:16.441Z",
+        "createdAt": "2026-03-28T17:58:16.441Z",
+        "role": "workflow:owner",
+        "workflowId": "2b3b82ed-e4cf-48fd-afcb-2b3c693823f1",
+        "projectId": "tB3UHQaJuvOlSpuk",
+        "project": {
+          "updatedAt": "2026-03-28T09:03:01.212Z",
+          "createdAt": "2026-03-28T08:30:12.897Z",
+          "id": "tB3UHQaJuvOlSpuk",
+          "name": "Tomas Rabi <strong.rabii@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "b60ea93a-0490-42d3-95c8-fe5f505c11ed"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": null,
+      "description": null
+    }
+  },
+  {
+    "updatedAt": "2026-04-01T18:55:19.367Z",
+    "createdAt": "2026-03-31T12:05:35.086Z",
+    "id": "4lq3sy9j6qlzH99W",
+    "name": "approval-send",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "approval-send",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "fbec9af7-d0c8-498e-a2b5-21a6a1bf99cb",
+        "name": "Webhook",
+        "webhookId": "b65ee8af-8322-40a8-8adf-a039c8a58cc5"
+      },
+      {
+        "parameters": {
+          "jsCode": "const body = $input.first().json.body;\nreturn [{\n  json: {\n    chat_id: \"492912584\",\n    text: body.blogger + ' | ' + body.platform + '\\n\\n' + body.content,\n    job_id: body.job_id\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          176,
+          0
+        ],
+        "id": "69c49e98-fe72-46aa-9c5e-8c4d03fa8a50",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "chatId": "492912584",
+          "text": "={{ $json.text }}",
+          "replyMarkup": "inlineKeyboard",
+          "inlineKeyboard": {
+            "rows": [
+              {
+                "row": {
+                  "buttons": [
+                    {
+                      "text": "✅ Опубликовать",
+                      "additionalFields": {
+                        "callback_data": "={{ 'approve_' + $json.job_id }}"
+                      }
+                    },
+                    {
+                      "text": "✏️ Правки",
+                      "additionalFields": {
+                        "callback_data": "={{ 'revise_' + $json.job_id }}"
+                      }
+                    },
+                    {
+                      "text": "❌ Отклонить",
+                      "additionalFields": {
+                        "callback_data": "={{ 'reject_' + $json.job_id }}"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          384,
+          0
+        ],
+        "id": "19252b95-5e27-4cc2-989a-53f535c43898",
+        "name": "Send a text message",
+        "webhookId": "7bf20759-6f3d-45a9-95f9-cb1649a061f4",
+        "credentials": {
+          "telegramApi": {
+            "id": "ycrjqRhDUEQ24XoZ",
+            "name": "Approval TG Bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "pinData": {},
+    "versionId": "5c1b8baa-e0ae-48b4-9248-839f873b2fd8",
+    "activeVersionId": "5c1b8baa-e0ae-48b4-9248-839f873b2fd8",
+    "versionCounter": 148,
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-03-31T12:05:35.090Z",
+        "createdAt": "2026-03-31T12:05:35.090Z",
+        "role": "workflow:owner",
+        "workflowId": "4lq3sy9j6qlzH99W",
+        "projectId": "tB3UHQaJuvOlSpuk",
+        "project": {
+          "updatedAt": "2026-03-28T09:03:01.212Z",
+          "createdAt": "2026-03-28T08:30:12.897Z",
+          "id": "tB3UHQaJuvOlSpuk",
+          "name": "Tomas Rabi <strong.rabii@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "b60ea93a-0490-42d3-95c8-fe5f505c11ed"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": "Version 5c1b8baa",
+      "description": ""
+    }
+  },
+  {
+    "updatedAt": "2026-03-31T12:24:17.000Z",
+    "createdAt": "2026-03-31T12:13:40.577Z",
+    "id": "QvOnF4Mts5nqZJ4D",
+    "name": "approval-callback",
+    "description": null,
+    "active": false,
+    "isArchived": true,
+    "nodes": [
+      {
+        "parameters": {
+          "updates": [
+            "callback_query"
+          ],
+          "additionalFields": {}
+        },
+        "type": "n8n-nodes-base.telegramTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ],
+        "id": "7a2907af-807b-4d69-b4b3-256e3f0d5d5d",
+        "name": "Telegram Trigger",
+        "webhookId": "44351b21-cf94-4593-9c21-755312c9858f",
+        "credentials": {
+          "telegramApi": {
+            "id": "CpZ2QgUcNY586tMj",
+            "name": "Telegram account"
+          }
+        }
+      }
+    ],
+    "connections": {},
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "pinData": {},
+    "versionId": "9e888051-c8d9-4315-b7da-caba7b9573d9",
+    "activeVersionId": null,
+    "versionCounter": 4,
+    "triggerCount": 0,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-03-31T12:13:40.581Z",
+        "createdAt": "2026-03-31T12:13:40.581Z",
+        "role": "workflow:owner",
+        "workflowId": "QvOnF4Mts5nqZJ4D",
+        "projectId": "tB3UHQaJuvOlSpuk",
+        "project": {
+          "updatedAt": "2026-03-28T09:03:01.212Z",
+          "createdAt": "2026-03-28T08:30:12.897Z",
+          "id": "tB3UHQaJuvOlSpuk",
+          "name": "Tomas Rabi <strong.rabii@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "b60ea93a-0490-42d3-95c8-fe5f505c11ed"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": null,
+      "description": null
+    }
+  },
+  {
+    "updatedAt": "2026-04-02T05:14:01.496Z",
+    "createdAt": "2026-03-31T12:24:42.264Z",
+    "id": "TwB0v8AOQ8CQmJCg",
+    "name": "telegram-router",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {
+          "jsCode": "const data = $input.first().json.body;\n\nif (data.callback_query) {\n  const cb = data.callback_query;\n  const cbData = cb.data;\n  const underscoreIdx = cbData.indexOf('_');\n  const action = cbData.substring(0, underscoreIdx);\n  const jobId = cbData.substring(underscoreIdx + 1);\n  \n  return [{\n    json: {\n      event_type: 'callback',\n      action: action,\n      job_id: jobId,\n      message_id: cb.message.message_id,\n      chat_id: cb.from.id,\n      callback_query_id: cb.id\n    }\n  }];\n}\n\nif (data.message) {\n  return [{\n    json: {\n      event_type: 'message',\n      text: data.message.text || '',\n      chat_id: data.message.chat.id,\n      from_id: data.message.from.id,\n      message_id: data.message.message_id\n    }\n  }];\n}\n\nreturn [{ json: { event_type: 'unknown' } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          416,
+          0
+        ],
+        "id": "9536ec76-8052-4429-a7ff-065da9a8b118",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "approve",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "4d2cc785-405d-466c-b8c5-f86810c731ee"
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "approve"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "bee38171-2d51-4015-81be-77988d7b2823",
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "revise",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "revise"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "49cddd30-c848-4eee-a9b4-2ae6308b5456",
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "reject",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "reject"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.4,
+        "position": [
+          1040,
+          -192
+        ],
+        "id": "e563a647-5004-432a-be56-ab9965a6a933",
+        "name": "Switch1"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendPhoto",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({chat_id: $json.channel_id, photo: $json.image_url, caption: $json.content}) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1632,
+          -416
+        ],
+        "id": "69a8c5e6-dd99-4396-a7e3-44da95163d74",
+        "name": "HTTP Request"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\n\nconst blogger = $json.blogger;\nconst jobId = $json.job_id;\nif (!blogger || !jobId) return [{ json: $json }];\n\nconst reportPath = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}/launch_report.md`;\nconst marker = '## Telegram API result';\n\n// n8n HTTP Request often exposes Telegram response either at root ($json) or in $json.body\nconst telegram = $json.result ? $json : ($json.body?.result ? { result: $json.body.result } : $json);\nconst result = telegram.result || {};\nconst messageId = result.message_id;\n\nlet report = '';\ntry {\n  report = fs.existsSync(reportPath) ? fs.readFileSync(reportPath, 'utf8') : '';\n} catch (e) {\n  // ignore read errors\n}\n\nconst block = `\\n\\n${marker}\\n- message_id: ${messageId ?? ''}\\n`;\nif (report) {\n  if (!report.includes(marker)) {\n    fs.writeFileSync(reportPath, report.trimEnd() + block);\n  } else {\n    // best-effort: replace message_id line if present\n    const replaced = report.replace(/- message_id:\\s*.*\\n/, `- message_id: ${messageId ?? ''}\\n`);\n    fs.writeFileSync(reportPath, replaced);\n  }\n} else {\n  // minimal fallback\n  fs.writeFileSync(reportPath, block);\n}\n\nreturn [{ json: $json }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1800,
+          -416
+        ],
+        "id": "d1ed5000-3e29-4589-be09-4c6de1b18a0c",
+        "name": "Write Telegram message_id (photo)"
+      },
+      {
+        "parameters": {
+          "jsCode": "const jobId = $json.job_id;\nconst fs = require('fs');\nconst filePath = `/home/node/shared/approvals/${jobId}.json`;\n\nlet approvalData;\ntry {\n  approvalData = JSON.parse(fs.readFileSync(filePath, 'utf8'));\n} catch(e) {\n  throw new Error(`Файл не найден: ${filePath}`);\n}\n\nreturn [{\n  json: {\n    ...approvalData,\n    job_id: jobId,\n    message_id: $json.message_id,\n    chat_id_user: $json.chat_id,\n    callback_query_id: $json.callback_query_id\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1232,
+          -336
+        ],
+        "id": "51d30bfd-9f01-44b6-8cba-cd6f7c2a5ece",
+        "name": "Code in JavaScript1"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/answerCallbackQuery",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({callback_query_id: $json.callback_query_id, text: \"✅ Опубликовано!\"}) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1824,
+          -336
+        ],
+        "id": "200b3c6b-f843-48d6-859b-ba730d881a3b",
+        "name": "HTTP Request1"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({chat_id: \"492912584\", text: \"✏️ Напиши правки для job \" + $json.job_id + \" и отправь мне сообщение в формате:\\nправки \" + $json.job_id + \": [текст правок]\"}) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1232,
+          -176
+        ],
+        "id": "715b1c7e-4d45-4862-a951-57ee9fc4a75c",
+        "name": "HTTP Request2"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/answerCallbackQuery",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({callback_query_id: $json.callback_query_id, text: \"❌ Отклонено\"}) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1232,
+          -16
+        ],
+        "id": "fd06a7f0-fc4b-4763-b287-361edc336fc2",
+        "name": "HTTP Request3"
+      },
+      {
+        "parameters": {
+          "jsCode": "const text = $json.text;\n\n// Парсим формат: \"правки JOB_ID: текст правок\"\nconst match = text.match(/^правки\\s+(\\S+):\\s*(.+)$/s);\n\nif (!match) {\n  return [{\n    json: {\n      valid: false,\n      raw_text: text\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    valid: true,\n    job_id: match[1],\n    revision_text: match[2],\n    chat_id: $json.chat_id\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1040,
+          192
+        ],
+        "id": "2b6d0fc1-62e1-4664-ab1d-b636fc578303",
+        "name": "Code in JavaScript2"
+      },
+      {
+        "parameters": {
+          "jsCode": "const jobId = $json.job_id;\nconst revisionText = $json.revision_text;\nconst fs = require('fs');\n\n// Читаем данные задачи\nconst filePath = `/home/node/shared/approvals/${jobId}.json`;\nlet approvalData;\ntry {\n  approvalData = JSON.parse(fs.readFileSync(filePath, 'utf8'));\n} catch(e) {\n  throw new Error(`Файл не найден: ${filePath}`);\n}\n\nreturn [{\n  json: {\n    ...approvalData,\n    job_id: jobId,\n    revision_text: revisionText,\n    hook_message: `Правки от редактора для job ${jobId}: ${revisionText}. Верни Quill на доработку.`\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1232,
+          192
+        ],
+        "id": "01de3436-ed44-4f3c-beeb-19d1351a5bb5",
+        "name": "Code in JavaScript3"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://openclaw-gateway:18789/hooks/agent",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Bearer fd5c8a699789ba6beb43c59b5ad6834a3830c6e8e683b429"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "{\n  \"message\": \"={{ $json.hook_message }}\",\n  \"agentId\": \"director\",\n  \"wakeMode\": \"now\"\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1440,
+          192
+        ],
+        "id": "2521681c-a2f0-480c-bc55-5cfbcfc1faf7",
+        "name": "HTTP Request4"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "telegram-router",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          208,
+          0
+        ],
+        "id": "f1413307-a05d-4520-8897-8b7925a3d4c8",
+        "name": "Webhook",
+        "webhookId": "fef0967e-a531-4e66-913b-90959be3ddae"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "807bbdc5-bcb8-4196-911c-de0d1f093493",
+                "leftValue": "={{ $json.image_url }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1440,
+          -336
+        ],
+        "id": "b06c86fd-06eb-49b0-81b9-fcb21f20a614",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({chat_id: $json.channel_id, text: $json.content}) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1632,
+          -256
+        ],
+        "id": "15db0c76-a11c-4796-bacb-0bc24606251d",
+        "name": "HTTP Request5"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\n\nconst blogger = $json.blogger;\nconst jobId = $json.job_id;\nif (!blogger || !jobId) return [{ json: $json }];\n\nconst reportPath = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}/launch_report.md`;\nconst marker = '## Telegram API result';\n\nconst telegram = $json.result ? $json : ($json.body?.result ? { result: $json.body.result } : $json);\nconst result = telegram.result || {};\nconst messageId = result.message_id;\n\nlet report = '';\ntry {\n  report = fs.existsSync(reportPath) ? fs.readFileSync(reportPath, 'utf8') : '';\n} catch (e) {}\n\nconst block = `\\n\\n${marker}\\n- message_id: ${messageId ?? ''}\\n`;\nif (report) {\n  if (!report.includes(marker)) {\n    fs.writeFileSync(reportPath, report.trimEnd() + block);\n  } else {\n    const replaced = report.replace(/- message_id:\\s*.*\\n/, `- message_id: ${messageId ?? ''}\\n`);\n    fs.writeFileSync(reportPath, replaced);\n  }\n} else {\n  fs.writeFileSync(reportPath, block);\n}\n\nreturn [{ json: $json }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1800,
+          -256
+        ],
+        "id": "14efbff9-1cd7-4d82-8df2-806db96ddb08",
+        "name": "Write Telegram message_id (text)"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "e458e7f6-68ab-4936-88e6-2e71a20a4293",
+                "leftValue": "={{ $json.event_type }}",
+                "rightValue": "callback",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          624,
+          0
+        ],
+        "id": "03d94d52-b5b7-4f93-98a0-86318868966a",
+        "name": "If1"
+      }
+    ],
+    "connections": {
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "If1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Switch1": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "HTTP Request2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "HTTP Request3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript1": {
+        "main": [
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTTP Request": {
+        "main": [
+          [
+            {
+              "node": "Write Telegram message_id (photo)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript2": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript3": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "HTTP Request5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTTP Request5": {
+        "main": [
+          [
+            {
+              "node": "Write Telegram message_id (text)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If1": {
+        "main": [
+          [
+            {
+              "node": "Switch1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Code in JavaScript2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate",
+      "callerPolicy": "workflowsFromSameOwner",
+      "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "pinData": {},
+    "versionId": "8166dfba-fbe3-419c-8f72-ebe7c4670e05",
+    "activeVersionId": "8166dfba-fbe3-419c-8f72-ebe7c4670e05",
+    "versionCounter": 175,
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-03-31T12:24:42.268Z",
+        "createdAt": "2026-03-31T12:24:42.268Z",
+        "role": "workflow:owner",
+        "workflowId": "TwB0v8AOQ8CQmJCg",
+        "projectId": "tB3UHQaJuvOlSpuk",
+        "project": {
+          "updatedAt": "2026-03-28T09:03:01.212Z",
+          "createdAt": "2026-03-28T08:30:12.897Z",
+          "id": "tB3UHQaJuvOlSpuk",
+          "name": "Tomas Rabi <strong.rabii@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "b60ea93a-0490-42d3-95c8-fe5f505c11ed"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": null,
+      "description": null
+    }
+  },
+  {
+    "updatedAt": "2026-04-01T12:42:58.976Z",
+    "createdAt": "2026-04-01T10:14:42.757Z",
+    "id": "Gr2eoPyy4UcO6OBm",
+    "name": "weekly-planner",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "triggerAtHour": 8
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          0,
+          0
+        ],
+        "id": "115823a1-0f32-44a1-a50a-d835e4876c54",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "jsCode": "const now = new Date();\nnow.setDate(now.getDate() + 1);\nconst weekStart = now.toISOString().split('T')[0];\n\nconst channels = [\n  { blogger: 'tomas-food', platform: 'tg', niche: 'food тренды', posts_per_day: 2 },\n  { blogger: 'tomas-vibe', platform: 'tg', niche: 'AI/tech тренды', posts_per_day: 2 },\n  { blogger: 'misha', platform: 'yt', niche: 'барная индустрия, кофе, HoReCa, Большая Азия, бариста', posts_per_day: 3 },\n  { blogger: 'nasik', platform: 'tt', niche: 'барная индустрия, кофе, HoReCa, Большая Азия, бариста', posts_per_day: 3 },\n  { blogger: 'yulya', platform: 'ig', niche: 'барная индустрия, кофе, HoReCa, Большая Азия, бариста', posts_per_day: 3 },\n];\n\nreturn channels.map(ch => ({ json: { ...ch, week_start: weekStart } }));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1040,
+          0
+        ],
+        "id": "32af180b-6ab1-4de1-856e-55faf84e5fbc",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://openrouter.ai/api/v1/chat/completions",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "={{ 'Bearer ' + $env.OPENROUTER_API_KEY }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"model\": \"anthropic/claude-haiku-4.5\",\n  \"max_tokens\": 2000,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Сгенерируй {{ $json.posts_per_day * 7 }} тем для постов в нише '{{ $json.niche }}' для блогера {{ $json.blogger }} на платформе {{ $json.platform }}. Начиная с даты {{ $json.week_start }} на 7 дней вперёд, по {{ $json.posts_per_day }} темы в день.\\n\\nТребования:\\n- Темы конкретные и цепляющие, не абстрактные\\n- Разные углы: факт, мнение, лайфхак, тренд, разбор\\n- Не повторять один угол два дня подряд\\n\\nВерни ТОЛЬКО JSON массив, без пояснений:\\n[{\\\"date\\\": \\\"YYYY-MM-DD\\\", \\\"blogger\\\": \\\"{{ $json.blogger }}\\\", \\\"platform\\\": \\\"{{ $json.platform }}\\\", \\\"topic\\\": \\\"тема\\\", \\\"status\\\": \\\"pending\\\"}]\"\n    }\n  ]\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1248,
+          0
+        ],
+        "id": "df8151fc-341b-46fc-8ce1-7ab282040a01",
+        "name": "HTTP Request"
+      },
+      {
+        "parameters": {
+          "jsCode": "const results = [];\n\nfor (const item of $input.all()) {\n  const raw = item.json.body ?? item.json;\n  const text = raw.content?.[0]?.text || raw.choices?.[0]?.message?.content || '';\n  \n  const match = text.match(/\\[[\\s\\S]*\\]/);\n  if (!match) continue;\n  \n  try {\n    const topics = JSON.parse(match[0]);\n    for (const t of topics) {\n      results.push({ json: t });\n    }\n  } catch(e) {\n    continue;\n  }\n}\n\nreturn results;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1456,
+          0
+        ],
+        "id": "1e607b66-ab93-4f08-9eda-6d41c07b2ade",
+        "name": "Code in JavaScript1"
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1BQJkq1H7Uz7m9FuKBoFjLEvw-s3MxqvFFsXLcVEBTPw",
+            "mode": "list",
+            "cachedResultName": "Content-Factory",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQJkq1H7Uz7m9FuKBoFjLEvw-s3MxqvFFsXLcVEBTPw/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 1172550106,
+            "mode": "list",
+            "cachedResultName": "topics",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQJkq1H7Uz7m9FuKBoFjLEvw-s3MxqvFFsXLcVEBTPw/edit#gid=1172550106"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "date": "={{ $json.date }}",
+              "blogger": "={{ $json.blogger }}",
+              "platform": "={{ $json.platform }}",
+              "topic": "={{ $json.topic }}",
+              "status": "={{ $json.status }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "date",
+                "displayName": "date",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "blogger",
+                "displayName": "blogger",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "platform",
+                "displayName": "platform",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "topic",
+                "displayName": "topic",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "status",
+                "displayName": "status",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          1664,
+          0
+        ],
+        "id": "358a7009-0549-4f68-a9a0-745f227a940c",
+        "name": "Append row in sheet",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "ha3ZsWSkKIKZB6Uj",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1BQJkq1H7Uz7m9FuKBoFjLEvw-s3MxqvFFsXLcVEBTPw",
+            "mode": "list",
+            "cachedResultName": "Content-Factory",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQJkq1H7Uz7m9FuKBoFjLEvw-s3MxqvFFsXLcVEBTPw/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 1172550106,
+            "mode": "list",
+            "cachedResultName": "topics",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQJkq1H7Uz7m9FuKBoFjLEvw-s3MxqvFFsXLcVEBTPw/edit#gid=1172550106"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          208,
+          0
+        ],
+        "id": "2b9efaad-a786-4256-90b1-cc82519bdda0",
+        "name": "Get row(s) in sheet",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "ha3ZsWSkKIKZB6Uj",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const today = new Date().toISOString().split('T')[0];\n\nconst rowsToDelete = $input.all().filter(item => {\n  return item.json.date < today;\n});\n\nreturn rowsToDelete.map(item => ({ json: { row_number: item.json.row_number } }));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          416,
+          0
+        ],
+        "id": "26d9b640-002d-40e6-8172-f7545146b915",
+        "name": "Code in JavaScript2"
+      },
+      {
+        "parameters": {
+          "operation": "delete",
+          "documentId": {
+            "__rl": true,
+            "value": "1BQJkq1H7Uz7m9FuKBoFjLEvw-s3MxqvFFsXLcVEBTPw",
+            "mode": "list",
+            "cachedResultName": "Content-Factory",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQJkq1H7Uz7m9FuKBoFjLEvw-s3MxqvFFsXLcVEBTPw/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 1172550106,
+            "mode": "list",
+            "cachedResultName": "topics",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQJkq1H7Uz7m9FuKBoFjLEvw-s3MxqvFFsXLcVEBTPw/edit#gid=1172550106"
+          },
+          "startIndex": "={{ $json.row_number }}"
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          832,
+          0
+        ],
+        "id": "6e2be841-c844-43e8-8d0b-4eb632e359d9",
+        "name": "Delete rows or columns from sheet",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "ha3ZsWSkKIKZB6Uj",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          624,
+          0
+        ],
+        "id": "98d51dc0-70d9-4109-b41e-549554db9934",
+        "name": "Loop Over Items"
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "name": "Replace Me",
+        "typeVersion": 1,
+        "position": [
+          832,
+          208
+        ],
+        "id": "f858d3d3-2249-4fb1-87db-696f7140544f",
+        "placeholder": true
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Get row(s) in sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTTP Request": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript1": {
+        "main": [
+          [
+            {
+              "node": "Append row in sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get row(s) in sheet": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript2": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Delete rows or columns from sheet": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Over Items": {
+        "main": [
+          [
+            {
+              "node": "Delete rows or columns from sheet",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Replace Me",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Replace Me": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": {
+      "node:Schedule Trigger": {
+        "recurrenceRules": []
+      }
+    },
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "pinData": {},
+    "versionId": "cfaae1ca-2673-4d47-ab3d-c0bd5e8e8641",
+    "activeVersionId": "0fd55982-a2c8-4c6e-9dfc-093b2627a78a",
+    "versionCounter": 69,
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-04-01T10:14:42.760Z",
+        "createdAt": "2026-04-01T10:14:42.760Z",
+        "role": "workflow:owner",
+        "workflowId": "Gr2eoPyy4UcO6OBm",
+        "projectId": "tB3UHQaJuvOlSpuk",
+        "project": {
+          "updatedAt": "2026-03-28T09:03:01.212Z",
+          "createdAt": "2026-03-28T08:30:12.897Z",
+          "id": "tB3UHQaJuvOlSpuk",
+          "name": "Tomas Rabi <strong.rabii@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "b60ea93a-0490-42d3-95c8-fe5f505c11ed"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": null,
+      "description": null
+    }
+  }
+]
