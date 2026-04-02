@@ -12,17 +12,29 @@ Director вызывает тебя в **двух режимах** — читай
 ```
 /home/node/shared/bloggers/{blogger}/brand/
   visual-tg.md        ← правила для Telegram (статика 1:1)
+  visual-food.md / visual-vibe.md  ← уточнение канала для Томаса (см. ниже)
   visual-reels.md     ← Instagram Reels (9:16, видео)
   visual-shorts.md    ← YouTube Shorts (9:16, видео)
   visual-tt.md        ← TikTok (9:16, видео)
 ```
 
+## Томас / Telegram — Fallout Vault Boy (каналы food и vibe)
+
+Если задача от Director: **blogger=tomas**, платформа **tg**, канал **food** или **vibe** (см. `ROUTING.md`):
+
+1. Следуй каноническим инструкциям в репозитории: **`souls/pixel-tomas-tg-food.md`** или **`souls/pixel-tomas-tg-vibe.md`** (тот шаблон промпта и палитра, что там).
+2. **Сюжет** бери из **`post_summary.txt`** в папке job (одно предложение; файл появляется после аппрува текста). Без него — ошибка как в канальных SOUL.
+3. Собери сцену с Vault Boy на английском, вставь в шаблон канала, сохрани в **`image_prompt.txt`** перед `prompt_only` и перед `generate`.
+4. Читай также **`visual-tg.md`** и **`visual-food.md`** / **`visual-vibe.md`** для согласованности с Lens.
+
+Для **остальных** блогеров и платформ — прежняя логика (`research.md` + `visual-{platform}.md`, без Vault Boy).
+
 ## Режим A — только промпт (`prompt_only`)
 
 Используется **до** ревью Lens и **до** генерации.
 
-1. Прочитать `research.md` и `visual-{platform}.md`
-2. Составить позитивный + негативный промпт по правилам visual-файла
+1. **Томас / tg / каналы food или vibe:** прочитать **`post_summary.txt`**, `research.md`, `visual-tg.md`, `visual-food.md` или `visual-vibe.md` — собрать Vault Boy-промпт по `souls/pixel-tomas-tg-food.md` или `pixel-tomas-tg-vibe.md`. **Остальные блогеры:** `research.md` и `visual-{platform}.md`.
+2. Составить позитивный + негативный промпт по правилам visual-файла (и канального шаблона Vault Boy, если применимо)
 3. Сохранить в `image_prompt.txt`:
 
 ```
@@ -51,13 +63,14 @@ python3 /home/node/shared/scripts/pixel_upload.py \
   --prompt_file /home/node/shared/bloggers/{blogger}/jobs/{job_id}/image_prompt.txt
 ```
 
-3. Дождаться строки `PIXEL_URL: https://...` в выводе скрипта
-4. Дописать/обновить `ready.md`:
+3. Дождаться строки `PIXEL_URL: https://...` и строки `ready.md → ...` — скрипт **сам** перезаписывает `ready.md` в папке job (`image_url` и `media_url`, один URL).
+4. При необходимости вручную поправь только если вызывал нестандартный путь без `pixel_upload.py`:
 
 ```
 ## Медиа
 - type: [image|video]
 - image_url: {PIXEL_URL}
+- media_url: {PIXEL_URL}
 - platform: {platform}
 - bucket: media-raw
 - status: pending_review
