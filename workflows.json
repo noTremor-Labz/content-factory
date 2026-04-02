@@ -578,7 +578,7 @@
               {
                 "id": "hint-stuck",
                 "name": "hint",
-                "value": "Добавь: проверка «зависших» задач (shared/, статусы проектов), алерт в Telegram при таймауте.",
+                "value": "Дальше: POST на $env.OPENCLAW_GATEWAY_INTERNAL_URL/hooks/agent с agentId «scheduler», message с контекстом (зависшие job в shared/bloggers/…/jobs/, Agent Board). Роль Scheduler — мониторинг/retry; см. souls/scheduler.md и workspace-scheduler/SOUL.md.",
                 "type": "string"
               }
             ]
@@ -942,7 +942,7 @@
           "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ Approve A', callback_data: 'approve_a_' + $json.job_id }, { text: '✅ Approve B', callback_data: 'approve_b_' + $json.job_id }, { text: '❌ Reject', callback_data: 'reject_' + $json.job_id }]] } }) }}",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ A', callback_data: 'approve_a_' + $json.job_id }, { text: '✅ B', callback_data: 'approve_b_' + $json.job_id }, { text: '✏️ Правки', callback_data: 'revise_' + $json.job_id }, { text: '❌', callback_data: 'reject_' + $json.job_id }]] } }) }}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
@@ -978,7 +978,7 @@
           "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: 'approve_' + $json.job_id }, { text: '❌ Reject', callback_data: 'reject_' + $json.job_id }]] } }) }}",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ Опубликовать', callback_data: 'approve_' + $json.job_id }, { text: '✏️ Правки', callback_data: 'revise_' + $json.job_id }, { text: '❌ Отклонить', callback_data: 'reject_' + $json.job_id }]] } }) }}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
@@ -996,7 +996,7 @@
           "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.text_no_image, reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: 'approve_' + $json.job_id }, { text: '❌ Reject', callback_data: 'reject_' + $json.job_id }]] } }) }}",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.text_no_image, reply_markup: { inline_keyboard: [[{ text: '✅ Опубликовать', callback_data: 'approve_' + $json.job_id }, { text: '✏️ Правки', callback_data: 'revise_' + $json.job_id }, { text: '❌ Отклонить', callback_data: 'reject_' + $json.job_id }]] } }) }}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
@@ -1007,6 +1007,71 @@
         ],
         "id": "f3c8b7a6-9d0e-6f1a-2b5c-6e7f8a9b0c1d",
         "name": "TG no image msg"
+      },
+      {
+        "parameters": {
+          "jsCode": "const parse = $('Parse approval body').first().json;\nconst res = $input.first().json;\nconst body = res.body !== undefined ? res.body : res;\nconst result = body.result || [];\nconst ids = Array.isArray(result) ? result.map((m) => m.message_id) : [];\nreturn [{ json: { ...parse, approve_media_message_ids: ids } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          620,
+          -200
+        ],
+        "id": "a1f2e3d4-5c6b-4a5f-8e9d-0c1b2a3f4e5d",
+        "name": "After mediaGroup merge"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\nconst path = require('path');\nconst parse = $('Parse approval body').first().json;\nconst album = $('After mediaGroup merge').first().json;\nconst http = $input.first().json;\nconst body = http.body !== undefined ? http.body : http;\nconst textMsgId = body.result && body.result.message_id;\nconst jobId = parse.job_id;\nconst blogger = parse.blogger;\nconst dir = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}`;\nif (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });\nconst state = {\n  job_id: jobId,\n  blogger: parse.blogger,\n  platform: parse.platform,\n  chat_id: String(parse.chat_id),\n  approve_media_message_ids: album.approve_media_message_ids || [],\n  approve_text_message_id: textMsgId,\n  approval_ui_kind: 'album',\n  status: 'pending_approval',\n  updated_at: new Date().toISOString()\n};\nfs.writeFileSync(path.join(dir, 'job-state.json'), JSON.stringify(state, null, 2));\nreturn [{ json: { ok: true, job_id: jobId } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1160,
+          -200
+        ],
+        "id": "b2f3e4d5-6c7b-5a6f-9e0d-1d2c3b4a5f6e",
+        "name": "Write job-state (album)"
+      },
+      {
+        "parameters": {
+          "jsCode": "const parse = $('Parse approval body').first().json;\nconst res = $input.first().json;\nconst body = res.body !== undefined ? res.body : res;\nconst mid = body.result && body.result.message_id;\nconst ids = mid ? [mid] : [];\nreturn [{ json: { ...parse, approve_media_message_ids: ids } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          620,
+          0
+        ],
+        "id": "c3f4e5d6-7c8b-6a7f-0e1d-2e3d4c5b6a7f",
+        "name": "After sendPhoto merge"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\nconst path = require('path');\nconst parse = $('Parse approval body').first().json;\nconst photo = $('After sendPhoto merge').first().json;\nconst http = $input.first().json;\nconst body = http.body !== undefined ? http.body : http;\nconst textMsgId = body.result && body.result.message_id;\nconst jobId = parse.job_id;\nconst blogger = parse.blogger;\nconst dir = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}`;\nif (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });\nconst state = {\n  job_id: jobId,\n  blogger: parse.blogger,\n  platform: parse.platform,\n  chat_id: String(parse.chat_id),\n  approve_media_message_ids: photo.approve_media_message_ids || [],\n  approve_text_message_id: textMsgId,\n  approval_ui_kind: 'single_photo',\n  status: 'pending_approval',\n  updated_at: new Date().toISOString()\n};\nfs.writeFileSync(path.join(dir, 'job-state.json'), JSON.stringify(state, null, 2));\nreturn [{ json: { ok: true, job_id: jobId } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1160,
+          0
+        ],
+        "id": "d4f5e6d7-8c9b-7a8f-1e2d-3f4e5d6c8b9a",
+        "name": "Write job-state (one)"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\nconst path = require('path');\nconst parse = $('Parse approval body').first().json;\nconst http = $input.first().json;\nconst body = http.body !== undefined ? http.body : http;\nconst textMsgId = body.result && body.result.message_id;\nconst jobId = parse.job_id;\nconst blogger = parse.blogger;\nconst dir = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}`;\nif (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });\nconst state = {\n  job_id: jobId,\n  blogger: parse.blogger,\n  platform: parse.platform,\n  chat_id: String(parse.chat_id),\n  approve_media_message_ids: [],\n  approve_text_message_id: textMsgId,\n  approval_ui_kind: 'text_only',\n  status: 'pending_approval',\n  updated_at: new Date().toISOString()\n};\nfs.writeFileSync(path.join(dir, 'job-state.json'), JSON.stringify(state, null, 2));\nreturn [{ json: { ok: true, job_id: jobId } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          940,
+          200
+        ],
+        "id": "e5f6e7d8-9c0b-8a9f-2e3d-4a5f6e7d9c0b1",
+        "name": "Write job-state (none)"
       }
     ],
     "connections": {
@@ -1061,7 +1126,7 @@
         "main": [
           [
             {
-              "node": "TG album + buttons msg",
+              "node": "After mediaGroup merge",
               "type": "main",
               "index": 0
             }
@@ -1072,7 +1137,62 @@
         "main": [
           [
             {
+              "node": "After sendPhoto merge",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "After mediaGroup merge": {
+        "main": [
+          [
+            {
+              "node": "TG album + buttons msg",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG album + buttons msg": {
+        "main": [
+          [
+            {
+              "node": "Write job-state (album)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "After sendPhoto merge": {
+        "main": [
+          [
+            {
               "node": "TG one image buttons",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG one image buttons": {
+        "main": [
+          [
+            {
+              "node": "Write job-state (one)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG no image msg": {
+        "main": [
+          [
+            {
+              "node": "Write job-state (none)",
               "type": "main",
               "index": 0
             }
@@ -1201,7 +1321,7 @@
     "nodes": [
       {
         "parameters": {
-          "jsCode": "const data = $input.first().json.body;\n\nif (data.callback_query) {\n  const cb = data.callback_query;\n  const cbData = String(cb.data || '');\n  let action;\n  let jobId;\n  if (cbData.startsWith('approve_a_')) {\n    action = 'approve_a';\n    jobId = cbData.slice('approve_a_'.length);\n  } else if (cbData.startsWith('approve_b_')) {\n    action = 'approve_b';\n    jobId = cbData.slice('approve_b_'.length);\n  } else if (cbData.startsWith('approve_')) {\n    action = 'approve';\n    jobId = cbData.slice('approve_'.length);\n  } else if (cbData.startsWith('reject_')) {\n    action = 'reject';\n    jobId = cbData.slice('reject_'.length);\n  } else if (cbData.startsWith('revise_')) {\n    action = 'revise';\n    jobId = cbData.slice('revise_'.length);\n  } else {\n    const underscoreIdx = cbData.indexOf('_');\n    action = underscoreIdx === -1 ? cbData : cbData.substring(0, underscoreIdx);\n    jobId = underscoreIdx === -1 ? '' : cbData.substring(underscoreIdx + 1);\n  }\n  return [{\n    json: {\n      event_type: 'callback',\n      action,\n      job_id: jobId,\n      message_id: cb.message.message_id,\n      chat_id: cb.from.id,\n      callback_query_id: cb.id\n    }\n  }];\n}\n\nif (data.message) {\n  return [{\n    json: {\n      event_type: 'message',\n      text: data.message.text || '',\n      chat_id: data.message.chat.id,\n      from_id: data.message.from.id,\n      message_id: data.message.message_id\n    }\n  }];\n}\n\nreturn [{ json: { event_type: 'unknown' } }];"
+          "jsCode": "const raw = $input.first().json;\nconst data = raw.body !== undefined ? raw.body : raw;\n\nif (data.callback_query) {\n  const cb = data.callback_query;\n  const cbData = String(cb.data || '');\n  let action;\n  let jobId;\n  if (cbData.startsWith('approve_a_')) {\n    action = 'approve_a';\n    jobId = cbData.slice('approve_a_'.length);\n  } else if (cbData.startsWith('approve_b_')) {\n    action = 'approve_b';\n    jobId = cbData.slice('approve_b_'.length);\n  } else if (cbData.startsWith('approve_')) {\n    action = 'approve';\n    jobId = cbData.slice('approve_'.length);\n  } else if (cbData.startsWith('reject_')) {\n    action = 'reject';\n    jobId = cbData.slice('reject_'.length);\n  } else if (cbData.startsWith('revise_')) {\n    action = 'revise';\n    jobId = cbData.slice('revise_'.length);\n  } else {\n    const underscoreIdx = cbData.indexOf('_');\n    action = underscoreIdx === -1 ? cbData : cbData.substring(0, underscoreIdx);\n    jobId = underscoreIdx === -1 ? '' : cbData.substring(underscoreIdx + 1);\n  }\n  return [{\n    json: {\n      event_type: 'callback',\n      action,\n      job_id: jobId,\n      message_id: cb.message.message_id,\n      chat_id: cb.from.id,\n      callback_chat_id: cb.message.chat.id,\n      callback_message_id: cb.message.message_id,\n      callback_query_id: cb.id\n    }\n  }];\n}\n\nif (data.message) {\n  const m = data.message;\n  return [{\n    json: {\n      event_type: 'message',\n      text: m.text || '',\n      chat_id: m.chat.id,\n      from_id: m.from && m.from.id,\n      message_id: m.message_id\n    }\n  }];\n}\n\nreturn [{ json: { event_type: 'unknown' } }];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1416,24 +1536,6 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
-          "sendBody": true,
-          "specifyBody": "json",
-          "jsonBody": "={{ ({chat_id: \"492912584\", text: \"✏️ Напиши правки для job \" + $json.job_id + \" и отправь мне сообщение в формате:\\nправки \" + $json.job_id + \": [текст правок]\"}) }}",
-          "options": {}
-        },
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.4,
-        "position": [
-          1232,
-          -176
-        ],
-        "id": "715b1c7e-4d45-4862-a951-57ee9fc4a75c",
-        "name": "HTTP Request2"
-      },
-      {
-        "parameters": {
-          "method": "POST",
           "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/answerCallbackQuery",
           "sendBody": true,
           "specifyBody": "json",
@@ -1616,6 +1718,227 @@
         ],
         "id": "03d94d52-b5b7-4f93-98a0-86318868966a",
         "name": "If1"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\nconst jobId = $json.job_id;\nconst approval = JSON.parse(fs.readFileSync(`/home/node/shared/approvals/${jobId}.json`, 'utf8'));\nconst blogger = approval.blogger;\nconst jobDir = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}`;\nconst statePath = `${jobDir}/job-state.json`;\nlet state = {};\ntry { state = JSON.parse(fs.readFileSync(statePath, 'utf8')); } catch (e) {}\nconst chatId = state.chat_id || String(approval.chat_id || '492912584');\nconst textMid = state.approve_text_message_id || $json.callback_message_id;\nreturn [{ json: {\n  job_id: jobId,\n  callback_query_id: $json.callback_query_id,\n  callback_chat_id: $json.callback_chat_id,\n  chat_id: chatId,\n  approve_text_message_id: textMid,\n  job_state_path: statePath,\n  blogger,\n  platform: approval.platform\n}}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1100,
+          -176
+        ],
+        "id": "f1000001-0000-4000-8000-000000000001",
+        "name": "Revise load context"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/answerCallbackQuery",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ callback_query_id: $json.callback_query_id, text: \"✏️\" }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1280,
+          -176
+        ],
+        "id": "f1000002-0000-4000-8000-000000000002",
+        "name": "TG answerCb revise"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/editMessageReplyMarkup",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.callback_chat_id, message_id: $json.approve_text_message_id, reply_markup: {} }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1460,
+          -176
+        ],
+        "id": "f1000003-0000-4000-8000-000000000003",
+        "name": "TG editMarkup revise"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: '✏️ Жду правки по посту ' + $json.job_id + ' (' + $json.blogger + ' | ' + $json.platform + ').\\n' + 'Следующим сообщением напиши что изменить — передам Quill через Director.' }) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1640,
+          -176
+        ],
+        "id": "f1000004-0000-4000-8000-000000000004",
+        "name": "TG sendInvite revise"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\nconst prev = $('Revise load context').first().json;\nconst http = $input.first().json;\nconst body = http.body !== undefined ? http.body : http;\nconst waitMid = body.result && body.result.message_id;\nlet state = {};\ntry { state = JSON.parse(fs.readFileSync(prev.job_state_path, 'utf8')); } catch (e) {}\nconst jobDir = `/home/node/shared/bloggers/${prev.blogger}/jobs/${prev.job_id}`;\nif (!fs.existsSync(jobDir)) fs.mkdirSync(jobDir, { recursive: true });\nconst next = {\n  ...state,\n  job_id: prev.job_id,\n  blogger: prev.blogger,\n  platform: prev.platform,\n  chat_id: String(prev.chat_id),\n  status: 'awaiting_revision',\n  awaiting_revision_message_id: waitMid,\n  updated_at: new Date().toISOString()\n};\nfs.writeFileSync(prev.job_state_path, JSON.stringify(next, null, 2));\nreturn [{ json: { ok: true, job_id: prev.job_id } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1820,
+          -176
+        ],
+        "id": "f1000005-0000-4000-8000-000000000005",
+        "name": "Revise save job-state"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\nconst path = require('path');\nfunction walk(dir, acc) {\n  if (!fs.existsSync(dir)) return acc;\n  for (const n of fs.readdirSync(dir)) {\n    const p = path.join(dir, n);\n    let st;\n    try { st = fs.statSync(p); } catch (e) { continue; }\n    if (st.isDirectory()) walk(p, acc);\n    else if (n === 'job-state.json') acc.push(p);\n  }\n  return acc;\n}\nconst files = walk('/home/node/shared/bloggers', []);\nconst chatId = String($json.chat_id);\nconst fromId = String($json.from_id || '');\nconst ownerId = '492912584';\nif (fromId && fromId !== ownerId) {\n  return [{ json: { ...$json, is_awaiting: false, not_owner: true } }];\n}\nfor (const fp of files) {\n  try {\n    const st = JSON.parse(fs.readFileSync(fp, 'utf8'));\n    if (st.status === 'awaiting_revision' && String(st.chat_id) === chatId) {\n      return [{ json: { ...$json, is_awaiting: true, awaiting_job: st, job_state_path: fp } }];\n    }\n  } catch (e) {}\n}\nreturn [{ json: { ...$json, is_awaiting: false } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          720,
+          192
+        ],
+        "id": "f100000a-0000-4000-8000-00000000000a",
+        "name": "Msg scan awaiting"
+      },
+      {
+        "parameters": {
+          "jsCode": "if (!$json.is_awaiting) {\n  return [{ json: { ...$json, route: 'legacy' } }];\n}\nconst t = ($json.text || '').trim();\nconst first = (t.split(/\\s+/)[0] || '');\nif (first === '/cancel' || first.indexOf('/cancel@') === 0) {\n  return [{ json: { ...$json, route: 'cancel' } }];\n}\nreturn [{ json: { ...$json, route: 'revision' } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          880,
+          192
+        ],
+        "id": "f100000b-0000-4000-8000-00000000000b",
+        "name": "Route message kind"
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.route }}",
+                      "rightValue": "legacy",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "r1"
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "legacy"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.route }}",
+                      "rightValue": "cancel",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "r2"
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "cancel"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.route }}",
+                      "rightValue": "revision",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "r3"
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "revision"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.4,
+        "position": [
+          1040,
+          192
+        ],
+        "id": "f1000009-0000-4000-8000-000000000009",
+        "name": "Switch message route"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\nconst token = '8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA';\nreturn (async () => {\n  const st = $json.awaiting_job;\n  const pathState = $json.job_state_path;\n  const jobId = st.job_id;\n  const chatId = st.chat_id;\n  const jobIdStr = String(jobId);\n\n  if (st.awaiting_revision_message_id) {\n    await fetch(`https://api.telegram.org/bot${token}/deleteMessage`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ chat_id: chatId, message_id: st.awaiting_revision_message_id }),\n    });\n  }\n\n  const kind = st.approval_ui_kind || 'single_photo';\n  let markup;\n  if (kind === 'album') {\n    markup = { inline_keyboard: [[\n      { text: '✅ A', callback_data: 'approve_a_' + jobIdStr },\n      { text: '✅ B', callback_data: 'approve_b_' + jobIdStr },\n      { text: '✏️ Правки', callback_data: 'revise_' + jobIdStr },\n      { text: '❌', callback_data: 'reject_' + jobIdStr },\n    ]] };\n  } else {\n    markup = { inline_keyboard: [[\n      { text: '✅ Опубликовать', callback_data: 'approve_' + jobIdStr },\n      { text: '✏️ Правки', callback_data: 'revise_' + jobIdStr },\n      { text: '❌ Отклонить', callback_data: 'reject_' + jobIdStr },\n    ]] };\n  }\n\n  if (st.approve_text_message_id) {\n    await fetch(`https://api.telegram.org/bot${token}/editMessageReplyMarkup`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ chat_id: chatId, message_id: st.approve_text_message_id, reply_markup: markup }),\n    });\n  }\n\n  const next = { ...st, status: 'pending_approval', awaiting_revision_message_id: undefined, updated_at: new Date().toISOString() };\n  fs.writeFileSync(pathState, JSON.stringify(next, null, 2));\n\n  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({ chat_id: chatId, text: 'Отменено. Кнопки восстановлены.' }),\n  });\n\n  return [{ json: { ok: true } }];\n})();"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1220,
+          96
+        ],
+        "id": "f100000c-0000-4000-8000-00000000000c",
+        "name": "Cancel revision flow"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\nconst token = '8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA';\nconst openclawUrl = 'http://openclaw-gateway:18789/hooks/agent';\nreturn (async () => {\n  const st = $json.awaiting_job;\n  const pathState = $json.job_state_path;\n  const text = ($json.text || '').trim();\n  const chatId = st.chat_id;\n  const jobId = st.job_id;\n  const blogger = st.blogger;\n  const platform = st.platform;\n  const jobDir = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}`;\n\n  for (const mid of (st.approve_media_message_ids || [])) {\n    await fetch(`https://api.telegram.org/bot${token}/deleteMessage`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ chat_id: chatId, message_id: mid }),\n    });\n  }\n  if (st.approve_text_message_id) {\n    await fetch(`https://api.telegram.org/bot${token}/deleteMessage`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ chat_id: chatId, message_id: st.approve_text_message_id }),\n    });\n  }\n  if (st.awaiting_revision_message_id) {\n    await fetch(`https://api.telegram.org/bot${token}/deleteMessage`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ chat_id: chatId, message_id: st.awaiting_revision_message_id }),\n    });\n  }\n\n  const revisedAt = new Date().toISOString();\n  const approvalPath = `/home/node/shared/approvals/${jobId}.json`;\n  let approval = {};\n  try { approval = JSON.parse(fs.readFileSync(approvalPath, 'utf8')); } catch (e) {}\n\n  const nextState = {\n    ...st,\n    status: 'revision_requested',\n    revision_comment: text,\n    revised_at: revisedAt,\n    awaiting_revision_message_id: undefined,\n    updated_at: revisedAt,\n  };\n  fs.writeFileSync(pathState, JSON.stringify(nextState, null, 2));\n\n  const draftPath = `${jobDir}/draft_approved.md`;\n  fs.writeFileSync(draftPath, approval.content || '', 'utf8');\n\n  const directorMsg = `Пользователь запросил правки по job ${jobId}.\\nКомментарий: ${text}\\nФайл: ${draftPath}\\nПередай правки Lens, затем Quill для переработки.`;\n  await fetch(openclawUrl, {\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json',\n      Authorization: 'Bearer fd5c8a699789ba6beb43c59b5ad6834a3830c6e8e683b429',\n    },\n    body: JSON.stringify({ message: directorMsg, agentId: 'director', wakeMode: 'now' }),\n  });\n\n  const ts = revisedAt.replace('T', ' ').slice(0, 19);\n  const statusText = `✏️ Правки переданы\\n👤 ${blogger} | 📢 ${platform} | 🗂 ${jobId}\\n💬 ${text}\\n🕐 ${ts}`;\n  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({ chat_id: chatId, text: statusText }),\n  });\n\n  return [{ json: { ok: true, job_id: jobId } }];\n})();"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1220,
+          288
+        ],
+        "id": "f100000d-0000-4000-8000-00000000000d",
+        "name": "Revision message flow"
       }
     ],
     "connections": {
@@ -1655,7 +1978,7 @@
           ],
           [
             {
-              "node": "HTTP Request2",
+              "node": "Revise load context",
               "type": "main",
               "index": 0
             }
@@ -1764,7 +2087,98 @@
           ],
           [
             {
+              "node": "Msg scan awaiting",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Msg scan awaiting": {
+        "main": [
+          [
+            {
+              "node": "Route message kind",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Route message kind": {
+        "main": [
+          [
+            {
+              "node": "Switch message route",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Switch message route": {
+        "main": [
+          [
+            {
               "node": "Code in JavaScript2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Cancel revision flow",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Revision message flow",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Revise load context": {
+        "main": [
+          [
+            {
+              "node": "TG answerCb revise",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG answerCb revise": {
+        "main": [
+          [
+            {
+              "node": "TG editMarkup revise",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG editMarkup revise": {
+        "main": [
+          [
+            {
+              "node": "TG sendInvite revise",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG sendInvite revise": {
+        "main": [
+          [
+            {
+              "node": "Revise save job-state",
               "type": "main",
               "index": 0
             }

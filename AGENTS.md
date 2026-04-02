@@ -32,6 +32,13 @@ bash scripts/verify-approval-media.sh
 VERIFY_ROUTER=1 bash scripts/verify-approval-media.sh
 ```
 
+## Согласование в Telegram (approval-send / telegram-router)
+
+- После отправки поста на согласование workflow **approval-send** пишет состояние в  
+  `shared/bloggers/{blogger}/jobs/{job_id}/job-state.json`: `approve_text_message_id`, `approve_media_message_ids` (альбом/одно фото), `approval_ui_kind` (`album` | `single_photo` | `text_only`), `status`.
+- Кнопки: **Опубликовать** (`approve_*` / `approve_a` / `approve_b`), **Правки** (`revise_{job_id}`), **Отклонить** (`reject_*`). Обработка колбэков и следующего сообщения редактора — **telegram-router** (тот же URL webhook, что настроен у бота).
+- Режим «Жду правки»: `status: awaiting_revision`; после текста правок — `revision_requested`, пишется `draft_approved.md` и вызывается Director через `hooks/agent`. Отмена: сообщение `/cancel` восстанавливает клавиатуру (см. workflow).
+
 ## Прочее
 
 - Пайплайн контента и роли агентов: каталог `souls/`.

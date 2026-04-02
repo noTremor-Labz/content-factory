@@ -67,9 +67,9 @@ TWO=$(python3 -c "import json,sys; b=json.loads(sys.argv[1]); b['media_url']='ht
 ONE=$(python3 -c "import json,sys; b=json.loads(sys.argv[1]); b['media_url']='https://via.placeholder.com/150'; print(json.dumps(b))" "$BASE_OBJ")
 NONE=$(python3 -c "import json,sys; b=json.loads(sys.argv[1]); print(json.dumps(b))" "$BASE_OBJ")
 
-post_approval "(a) два URL (альбом + 3 кнопки)" "$TWO"
-post_approval "(b) один URL (фото + 2 кнопки)" "$ONE"
-post_approval "(c) без media_url (текст + предупреждение + 2 кнопки)" "$NONE"
+post_approval "(a) два URL (альбом + 4 кнопки: A / B / Правки / Отклонить)" "$TWO"
+post_approval "(b) один URL (фото + 3 кнопки)" "$ONE"
+post_approval "(c) без media_url (текст + предупреждение + 3 кнопки)" "$NONE"
 
 if [[ "${VERIFY_ROUTER:-}" == "1" ]]; then
   say "telegram-router: approve_a → published.lock"

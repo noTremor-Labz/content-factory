@@ -173,7 +173,7 @@
           "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ Approve A', callback_data: 'approve_a_' + $json.job_id }, { text: '✅ Approve B', callback_data: 'approve_b_' + $json.job_id }, { text: '❌ Reject', callback_data: 'reject_' + $json.job_id }]] } }) }}",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ A', callback_data: 'approve_a_' + $json.job_id }, { text: '✅ B', callback_data: 'approve_b_' + $json.job_id }, { text: '✏️ Правки', callback_data: 'revise_' + $json.job_id }, { text: '❌', callback_data: 'reject_' + $json.job_id }]] } }) }}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
@@ -209,7 +209,7 @@
           "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: 'approve_' + $json.job_id }, { text: '❌ Reject', callback_data: 'reject_' + $json.job_id }]] } }) }}",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.content, reply_markup: { inline_keyboard: [[{ text: '✅ Опубликовать', callback_data: 'approve_' + $json.job_id }, { text: '✏️ Правки', callback_data: 'revise_' + $json.job_id }, { text: '❌ Отклонить', callback_data: 'reject_' + $json.job_id }]] } }) }}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
@@ -227,7 +227,7 @@
           "url": "https://api.telegram.org/bot8791844060:AAEY6cZt-CmanY3jyw6ui1tqRSHrAN-wUzA/sendMessage",
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.text_no_image, reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: 'approve_' + $json.job_id }, { text: '❌ Reject', callback_data: 'reject_' + $json.job_id }]] } }) }}",
+          "jsonBody": "={{ ({ chat_id: $json.chat_id, text: $json.text_no_image, reply_markup: { inline_keyboard: [[{ text: '✅ Опубликовать', callback_data: 'approve_' + $json.job_id }, { text: '✏️ Правки', callback_data: 'revise_' + $json.job_id }, { text: '❌ Отклонить', callback_data: 'reject_' + $json.job_id }]] } }) }}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
@@ -238,6 +238,71 @@
         ],
         "id": "f3c8b7a6-9d0e-6f1a-2b5c-6e7f8a9b0c1d",
         "name": "TG no image msg"
+      },
+      {
+        "parameters": {
+          "jsCode": "const parse = $('Parse approval body').first().json;\nconst res = $input.first().json;\nconst body = res.body !== undefined ? res.body : res;\nconst result = body.result || [];\nconst ids = Array.isArray(result) ? result.map((m) => m.message_id) : [];\nreturn [{ json: { ...parse, approve_media_message_ids: ids } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          620,
+          -200
+        ],
+        "id": "a1f2e3d4-5c6b-4a5f-8e9d-0c1b2a3f4e5d",
+        "name": "After mediaGroup merge"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\nconst path = require('path');\nconst parse = $('Parse approval body').first().json;\nconst album = $('After mediaGroup merge').first().json;\nconst http = $input.first().json;\nconst body = http.body !== undefined ? http.body : http;\nconst textMsgId = body.result && body.result.message_id;\nconst jobId = parse.job_id;\nconst blogger = parse.blogger;\nconst dir = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}`;\nif (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });\nconst state = {\n  job_id: jobId,\n  blogger: parse.blogger,\n  platform: parse.platform,\n  chat_id: String(parse.chat_id),\n  approve_media_message_ids: album.approve_media_message_ids || [],\n  approve_text_message_id: textMsgId,\n  approval_ui_kind: 'album',\n  status: 'pending_approval',\n  updated_at: new Date().toISOString()\n};\nfs.writeFileSync(path.join(dir, 'job-state.json'), JSON.stringify(state, null, 2));\nreturn [{ json: { ok: true, job_id: jobId } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1160,
+          -200
+        ],
+        "id": "b2f3e4d5-6c7b-5a6f-9e0d-1d2c3b4a5f6e",
+        "name": "Write job-state (album)"
+      },
+      {
+        "parameters": {
+          "jsCode": "const parse = $('Parse approval body').first().json;\nconst res = $input.first().json;\nconst body = res.body !== undefined ? res.body : res;\nconst mid = body.result && body.result.message_id;\nconst ids = mid ? [mid] : [];\nreturn [{ json: { ...parse, approve_media_message_ids: ids } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          620,
+          0
+        ],
+        "id": "c3f4e5d6-7c8b-6a7f-0e1d-2e3d4c5b6a7f",
+        "name": "After sendPhoto merge"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\nconst path = require('path');\nconst parse = $('Parse approval body').first().json;\nconst photo = $('After sendPhoto merge').first().json;\nconst http = $input.first().json;\nconst body = http.body !== undefined ? http.body : http;\nconst textMsgId = body.result && body.result.message_id;\nconst jobId = parse.job_id;\nconst blogger = parse.blogger;\nconst dir = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}`;\nif (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });\nconst state = {\n  job_id: jobId,\n  blogger: parse.blogger,\n  platform: parse.platform,\n  chat_id: String(parse.chat_id),\n  approve_media_message_ids: photo.approve_media_message_ids || [],\n  approve_text_message_id: textMsgId,\n  approval_ui_kind: 'single_photo',\n  status: 'pending_approval',\n  updated_at: new Date().toISOString()\n};\nfs.writeFileSync(path.join(dir, 'job-state.json'), JSON.stringify(state, null, 2));\nreturn [{ json: { ok: true, job_id: jobId } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1160,
+          0
+        ],
+        "id": "d4f5e6d7-8c9b-7a8f-1e2d-3f4e5d6c8b9a",
+        "name": "Write job-state (one)"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs = require('fs');\nconst path = require('path');\nconst parse = $('Parse approval body').first().json;\nconst http = $input.first().json;\nconst body = http.body !== undefined ? http.body : http;\nconst textMsgId = body.result && body.result.message_id;\nconst jobId = parse.job_id;\nconst blogger = parse.blogger;\nconst dir = `/home/node/shared/bloggers/${blogger}/jobs/${jobId}`;\nif (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });\nconst state = {\n  job_id: jobId,\n  blogger: parse.blogger,\n  platform: parse.platform,\n  chat_id: String(parse.chat_id),\n  approve_media_message_ids: [],\n  approve_text_message_id: textMsgId,\n  approval_ui_kind: 'text_only',\n  status: 'pending_approval',\n  updated_at: new Date().toISOString()\n};\nfs.writeFileSync(path.join(dir, 'job-state.json'), JSON.stringify(state, null, 2));\nreturn [{ json: { ok: true, job_id: jobId } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          940,
+          200
+        ],
+        "id": "e5f6e7d8-9c0b-8a9f-2e3d-4a5f6e7d9c0b1",
+        "name": "Write job-state (none)"
       }
     ],
     "connections": {
@@ -292,7 +357,7 @@
         "main": [
           [
             {
-              "node": "TG album + buttons msg",
+              "node": "After mediaGroup merge",
               "type": "main",
               "index": 0
             }
@@ -303,7 +368,62 @@
         "main": [
           [
             {
+              "node": "After sendPhoto merge",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "After mediaGroup merge": {
+        "main": [
+          [
+            {
+              "node": "TG album + buttons msg",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG album + buttons msg": {
+        "main": [
+          [
+            {
+              "node": "Write job-state (album)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "After sendPhoto merge": {
+        "main": [
+          [
+            {
               "node": "TG one image buttons",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG one image buttons": {
+        "main": [
+          [
+            {
+              "node": "Write job-state (one)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG no image msg": {
+        "main": [
+          [
+            {
+              "node": "Write job-state (none)",
               "type": "main",
               "index": 0
             }
