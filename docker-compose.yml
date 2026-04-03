@@ -13,7 +13,6 @@ services:
     volumes:
       - ${OPENCLAW_CONFIG_DIR:-~/.openclaw}:/home/node/.openclaw
       - ${OPENCLAW_WORKSPACE_DIR:-~/.openclaw/workspace}:/home/node/.openclaw/workspace
-      - n8n-data:/home/node/.n8n
       - ./shared:/home/node/shared
       - ${HOST_SHARED_PATH:-./shared}:/home/node/shared
     environment:
@@ -88,61 +87,6 @@ services:
       openclaw-gateway:
         condition: service_healthy
 
-  n8n:
-    image: n8nio/n8n:latest
-    platform: linux/arm64
-    container_name: n8n
-    restart: unless-stopped
-    ports:
-      - "5678:5678"
-    volumes:
-      - n8n-data:/home/node/.n8n
-      - ./shared:/home/node/shared
-    environment:
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-admin}
-      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-localdev123}
-      # HTTP без TLS: иначе браузер не примет secure-cookie (ошибка на скрине)
-      - N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE:-false}
-      # Обязательно строка false: иначе $env в выражениях заблокирован (n8n-workflow: только === 'false' снимает блок)
-      - N8N_BLOCK_ENV_ACCESS_IN_NODE=${N8N_BLOCK_ENV_ACCESS_IN_NODE:-false}
-      # Темы в daily-queue (HTTP → OpenRouter): $env.OPENROUTER_API_KEY
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
-      - WEBHOOK_URL=https://spotted-pokingly-nichelle.ngrok-free.dev/
-      - GENERIC_TIMEZONE=Europe/Tallinn
-      # Из контейнера n8n → Agent Board в той же Docker-сети
-      - AGENT_BOARD_URL=${AGENT_BOARD_URL:-http://agent-board:3456}
-      # Ключ из пары sk-n8n:n8n в AGENTBOARD_API_KEYS (см. .env.example)
-      - N8N_AGENT_BOARD_API_KEY=${N8N_AGENT_BOARD_API_KEY:-sk-n8n}
-      # Для HTTP-узлов к OpenClaw gateway из n8n (хуки — по доке OpenClaw / вашему сценарию)
-      - OPENCLAW_GATEWAY_INTERNAL_URL=${OPENCLAW_GATEWAY_INTERNAL_URL:-http://openclaw-gateway:18789}
-      # Bearer к /hooks/agent из workflow (HTTP Director revision и др.)
-      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN:-}
-      # Bearer к POST /hooks/agent — ~/.openclaw/openclaw.json → hooks.token (см. .env.example)
-      - OPENCLAW_HOOKS_TOKEN=${OPENCLAW_HOOKS_TOKEN:-}
-      - OPENCLAW_HOOK_TOKEN=${OPENCLAW_HOOK_TOKEN:-}
-      # Токен бота References (тот же, что в Credentials n8n для этого workflow)
-      - TELEGRAM_REFERENCES_BOT_TOKEN=${TELEGRAM_REFERENCES_BOT_TOKEN:-}
-      # Согласование постов: approval-бот (пусто → fallback на TELEGRAM_BOT_TOKEN в выражениях n8n)
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
-      - TELEGRAM_APPROVAL_BOT_TOKEN=${TELEGRAM_APPROVAL_BOT_TOKEN:-}
-      # Куда слать кнопки согласования (личный чат / группа approval). Обязательно задать в .env
-      - APPROVE_CHAT_ID=${APPROVE_CHAT_ID:-}
-      - TELEGRAM_APPROVAL_CHAT_ID=${TELEGRAM_APPROVAL_CHAT_ID:-}
-      # workflow references-style-examples: привязка chat_id → блогер (опционально)
-      - TELEGRAM_STYLE_CHAT_TOMAS=${TELEGRAM_STYLE_CHAT_TOMAS:-}
-      - TELEGRAM_STYLE_CHAT_MISHA=${TELEGRAM_STYLE_CHAT_MISHA:-}
-      - TELEGRAM_STYLE_CHAT_YULYA=${TELEGRAM_STYLE_CHAT_YULYA:-}
-      - TELEGRAM_STYLE_CHAT_NASIK=${TELEGRAM_STYLE_CHAT_NASIK:-}
-      - N8N_EDITOR_BASE_URL=http://127.0.0.1:5678
-      - N8N_PROTOCOL=http
-      - N8N_HOST=127.0.0.1
-      - N8N_PORT=5678
-      # Разрешаем fs в Code-нодах (task runner sandbox запрещает по умолчанию)
-      - NODE_FUNCTION_ALLOW_BUILTIN=fs,path
-      - N8N_RUNNERS_ALLOW_BUILTIN_MODULES=fs,path
-
-
   filebrowser:
     image: filebrowser/filebrowser:latest
     platform: linux/arm64
@@ -176,5 +120,4 @@ services:
 
 volumes:
   agent-board-data:
-  n8n-data:
   filebrowser-data:

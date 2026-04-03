@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
-# Primary: TELEGRAM_ADMIN_CHAT_ID; fallbacks align with content-factory / n8n naming
+# Primary: TELEGRAM_ADMIN_CHAT_ID; fallbacks align with content-factory naming
 _raw_admin = (
     os.environ.get("TELEGRAM_ADMIN_CHAT_ID")
     or os.environ.get("APPROVE_CHAT_ID")

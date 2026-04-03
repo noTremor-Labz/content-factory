@@ -1,0 +1,4 @@
+# генерируется scripts/n8n-import-references.sh (токен)
+references-credential-import.json
+.tmp-creds-decrypted.json
+references-workflow-import.json

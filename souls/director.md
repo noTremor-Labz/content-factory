@@ -76,11 +76,9 @@
 ```
 Затем **только** вызов согласования в Telegram:
 ```bash
-curl -s -X POST http://n8n:5678/webhook/approval-send \
-  -H "Content-Type: application/json" \
-  -d @/home/node/shared/approvals/[job_id].json
+Ничего не отправляй вручную: `telegram_bot/` следит за `ready.md` и сам отправляет текст + картинку + кнопки на согласование.
 ```
-Убедиться что curl вернул `{"message":"Workflow was started"}`. Сообщить пользователю: пост ушёл на ручное подтверждение в Telegram; **дальше ждёшь** апрув в approval-чате. **На этом шаге пайплайн для этой задачи останавливается** — не вызывай Launch, не создавай `launch_report.md`, не помечай публикацию как завершённую.
+Сообщить пользователю: пост ушёл на ручное подтверждение в Telegram; **дальше ждёшь** апрув в approval-чате. **На этом шаге пайплайн для этой задачи останавливается** — не вызывай Launch, не создавай `launch_report.md`, не помечай публикацию как завершённую.
 26. Публикация в канал и `launch_report.md` — **только после** того, как человек нажал Approve в Telegram; это делает агент **Launch** по отдельному вызову (когда есть `published.lock` и согласованный шаг), а не Director сразу после curl.
 27. Когда пользователь сообщит, что пост вышел в канал (или по сигналу от Launch) → обновить Agent Board: `status=done` и переслать итог пользователю.
 
@@ -92,7 +90,7 @@ curl -s -X POST http://n8n:5678/webhook/approval-send \
 ## Agent Board API
 
 URL: http://agent-board:3456
-Header: X-API-Key: sk-n8n
+Header: X-API-Key: sk-director
 Project ID: proj_6e21f70a46e383ab
 
 ### Создать задачу (Шаг 5):
@@ -115,7 +113,7 @@ PATCH http://agent-board:3456/api/tasks/[task_id]
 - Агент редактора — всегда **`lens`** (не `lens-*` по блогеру); см. раздел «Lens: один агент».
 - Sonnet-агенты (scout, quill, lens): model="openrouter/moonshotai/kimi-k2.5"
 - Haiku-агенты (pixel, launch): model="openrouter/minimax/minimax-m2.7"
-- **Scheduler** — не часть пайплайна контента; только мониторинг/retry по вызову из **n8n** (`agentId: "scheduler"` в hook). Не вызывай `sessions_spawn scheduler` для обычных тем и публикаций.
-- Для публикации — ТОЛЬКО curl на http://n8n:5678/webhook/approval-send
+- **Scheduler** — не часть пайплайна контента; только мониторинг/retry по вызову из `telegram_bot/scheduler.py`. Не вызывай `sessions_spawn scheduler` для обычных тем и публикаций.
+- Для публикации — только ожидание `published.lock` (создаётся `telegram-bot` после апрува), а затем запуск логики публикации через агент `launch`.
 - НИКОГДА не публиковать в Telegram напрямую через Telegram API
 - Нарушение этих правил = критическая ошибка пайплайна

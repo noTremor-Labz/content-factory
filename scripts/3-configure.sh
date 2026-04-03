@@ -102,9 +102,9 @@ else
 fi
 
 if [ -n "${TELEGRAM_REFERENCES_BOT_TOKEN:-}" ] && [[ "${TELEGRAM_REFERENCES_BOT_TOKEN}" != "..." ]]; then
-  echo "✅ TELEGRAM_REFERENCES_BOT_TOKEN задан — в n8n укажи этот токен в Credentials для workflow references-style-examples (отдельно от Director)"
+  echo "✅ TELEGRAM_REFERENCES_BOT_TOKEN задан — укажи токен в Credentials для references-style-examples (отдельно от Director)"
 else
-  echo "ℹ️  Бот References (референсы → style-examples): BotFather → токен в TELEGRAM_REFERENCES_BOT_TOKEN, импорт n8n/workflows/references-style-examples.json"
+  echo "ℹ️  Бот References (референсы → style-examples): BotFather → токен в TELEGRAM_REFERENCES_BOT_TOKEN, импорт references-style-examples.json"
 fi
 
 echo ""
@@ -113,8 +113,8 @@ cli openclaw gateway restart 2>/dev/null || docker compose restart openclaw-gate
 sleep 5
 
 echo ""
-echo "Запуск Agent Board, n8n, FileBrowser..."
-docker compose up -d agent-board n8n filebrowser
+echo "Запуск Agent Board, telegram-bot, FileBrowser..."
+docker compose up -d agent-board telegram-bot filebrowser
 
 echo ""
 echo "Ожидание запуска сервисов..."
