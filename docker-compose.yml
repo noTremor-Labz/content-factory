@@ -155,6 +155,25 @@ services:
       - ${HOST_FILEBROWSER_ROOT:-.}:/srv
       - filebrowser-data:/database
 
+  telegram-bot:
+    build: ./telegram_bot
+    platform: linux/arm64
+    container_name: telegram-bot
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Пути внутри контейнера (см. telegram_bot/config.py)
+      - SHARED_BASE_PATH=/shared/bloggers
+      - GOOGLE_SA_JSON_PATH=/secrets/gsa.json
+      # Cron APScheduler: локальное время контейнера (например Europe/Tallinn в .env)
+      - TZ=${TZ:-UTC}
+    volumes:
+      - ${HOST_SHARED_PATH:-./shared}:/shared
+      - ${GOOGLE_SA_JSON_HOST_PATH:-./secrets/gsa.json}:/secrets/gsa.json:ro
+    depends_on:
+      openclaw-gateway:
+        condition: service_healthy
+
 volumes:
   agent-board-data:
   n8n-data:
