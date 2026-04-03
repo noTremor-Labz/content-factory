@@ -199,27 +199,46 @@ echo "📝 Обновляем souls/routing-director.md..."
 cat > "$SOULS/routing-director.md" << 'EOF'
 # Роутинг агентов по блогерам и каналам
 
-## tomas
-- food: quill (универсальный), lens, pixel, launch-tomas-tg-food
-- vibe: quill, lens, pixel, launch-tomas-tg-vibe
+## Quill (универсально)
+- Агент OpenClaw: **`quill`** (один на всех блогеров), workspace `workspace-quill`. Голос и стиль — из `/home/node/shared/bloggers/{blogger}/brand/` для переданного `blogger`; отдельные агенты `quill-*` не используются.
+
+## Редактор Lens (универсально)
+- Агент OpenClaw: **`lens`** (один на всех блогеров), workspace `workspace-lens`.
+- Стиль и критерии — только из `/home/node/shared/bloggers/{blogger}/brand/` для переданного `blogger`; отдельные агенты `lens-*` не используются.
+
+## Launch (универсально)
+- Агент OpenClaw: **`launch`** (один на всех блогеров и площадок), workspace `workspace-launch`. Канал, токены и публикация — из папки задачи (`config.json`, `job-state.json`, `published.lock`); отдельные агенты `launch-*` не используются.
+
+## tomas-food
+- platform: tg
+- pipeline: quill → lens(text) → lens(prompt) → pixel(generate) → lens(image) → launch  
+  (параллельно после ресёрча: quill + pixel только `image_prompt.txt`)
+
+## tomas-vibe
+- platform: tg
+- pipeline: как у tomas-food
 
 ## misha
-- yt: quill, lens, pixel, launch-misha-yt
+- platform: yt
+- pipeline: quill → lens(text) → lens(prompt) → pixel(generate) → lens(image) → launch
 
 ## yulya
-- ig: quill, lens, pixel, launch-yulya-ig
+- platform: ig
+- pipeline: quill → lens(text) → lens(prompt) → pixel(generate) → lens(image) → launch
 
 ## nasik
-- tt: quill, lens, pixel, launch-nasik-tt
+- platform: tt
+- pipeline: quill → lens(text) → lens(prompt) → pixel(generate) → lens(image) → launch
 
-## Формат задачи
-тема: [тема] | платформа: [telegram|youtube-shorts|instagram-reels|tiktok] | формат: пост | блогер: [tomas|misha|yulya|nasik] | канал: [food|vibe|yt|ig|tt]
+## Формат задачи для Director'а
+тема: [тема] | платформа: [tg|yt|ig|tt] | формат: пост | блогер: [tomas-food|tomas-vibe|misha|yulya|nasik]
 
-## Примечания
-- pixel — универсальный агент, один для всех блоггеров и площадок
-- pixel читает визуальный бренд из /home/node/shared/bloggers/{блогер}/brand/
-- pixel читает правила площадки из /home/node/shared/platform-specs/{платформа}.md
-- Все поля формата задачи обязательны для корректной работы pixel
+## Что передавать агентам
+Каждому агенту в задаче передавать:
+- blogger: [имя блогера]
+- platform: [платформа]
+- job_id: [уникальный id задачи]
+- путь к папке задачи
 EOF
 
 echo "✅ souls/routing-director.md обновлён"

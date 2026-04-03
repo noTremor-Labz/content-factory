@@ -38,7 +38,7 @@
 1. Подтвердить: "Принял. Запускаю: [topic] для [blogger] на [platform]"
 2. Создать job_id (YYYYMMDD-001, инкремент если папка существует)
 3. Создать папку: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/
-4. По ROUTING.md определить агентов: **quill** (универсальный), **lens** (всегда id `lens`), **pixel**, launch (per-канал при необходимости — см. ROUTING)
+4. По ROUTING.md определить агентов: **quill** (универсальный), **lens** (всегда id `lens`), **pixel** (универсальный), **launch** (всегда id `launch`)
 5. Создать задачу в Agent Board (см. ниже) → сохранить task_id
 6. sessions_spawn scout model=openrouter/moonshotai/kimi-k2.5 → "Ресёрч темы: [topic]. Путь: /home/node/shared/bloggers/[blogger]/jobs/[job_id]/research.md"
 7. Обновить Agent Board: assignee=scout, status=doing

@@ -7,6 +7,9 @@
 - Агент OpenClaw: **`lens`** (один на всех блогеров), workspace `workspace-lens`.
 - Стиль и критерии — только из `/home/node/shared/bloggers/{blogger}/brand/` для переданного `blogger`; отдельные агенты `lens-*` не используются.
 
+## Launch (универсально)
+- Агент OpenClaw: **`launch`** (один на всех блогеров и площадок), workspace `workspace-launch`. Канал, токены и публикация — из папки задачи (`config.json`, `job-state.json`, `published.lock`); отдельные агенты `launch-*` не используются.
+
 ## tomas-food
 - platform: tg
 - pipeline: quill → lens(text) → lens(prompt) → pixel(generate) → lens(image) → launch  
