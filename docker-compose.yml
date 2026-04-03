@@ -17,6 +17,11 @@ services:
       - ${HOST_SHARED_PATH:-./shared}:/home/node/shared
     environment:
       - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - OPENCLAW_HOOKS_TOKEN=${OPENCLAW_HOOKS_TOKEN}
+      - TELEGRAM_DIRECTOR_BOT_TOKEN=${TELEGRAM_DIRECTOR_BOT_TOKEN}
+      - TELEGRAM_APPROVAL_BOT_TOKEN=${TELEGRAM_APPROVAL_BOT_TOKEN}
+      - TELEGRAM_CHANNEL_TOMAS_FOOD=${TELEGRAM_CHANNEL_TOMAS_FOOD}
+      - TELEGRAM_CHANNEL_TOMAS_VIBE=${TELEGRAM_CHANNEL_TOMAS_VIBE}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - COMMONSTACK_API_KEY=${COMMONSTACK_API_KEY}
       - TOGETHER_API_KEY=${TOGETHER_API_KEY}
@@ -109,6 +114,8 @@ services:
       # Пути внутри контейнера (см. telegram_bot/config.py)
       - SHARED_BASE_PATH=/shared/bloggers
       - GOOGLE_SA_JSON_PATH=/secrets/gsa.json
+      # Внутри compose-сети localhost не ведёт к openclaw-gateway; переопределяем .env
+      - OPENCLAW_API_URL=http://openclaw-gateway:18789
       # Cron APScheduler: локальное время контейнера (например Europe/Tallinn в .env)
       - TZ=${TZ:-UTC}
     volumes:

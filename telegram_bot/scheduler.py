@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
@@ -9,31 +10,42 @@ import httpx
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from alerter import check_and_alert
-from config import BLOGGERS, HTTP_TIMEOUT_SECONDS, OPENCLAW_API_URL
+import config
+from config import (
+    BLOGGERS,
+    OPENCLAW_HOOKS_TOKEN,
+)
 
 logger = logging.getLogger(__name__)
 
 
 async def call_openclaw_agent(agent_id: str, payload: dict[str, Any]) -> Any:
-    """POST {OPENCLAW_API_URL}/agents/{agent_id}/run with JSON body."""
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            f"{OPENCLAW_API_URL}/agents/{agent_id}/run",
-            json=payload,
-            timeout=HTTP_TIMEOUT_SECONDS,
+    """POST {OPENCLAW_API_URL}/hooks/agent — канонический HTTP-вход OpenClaw (не /agents/.../run)."""
+    if not OPENCLAW_HOOKS_TOKEN:
+        logger.error("OPENCLAW_HOOKS_TOKEN is empty; cannot call /hooks/agent")
+        return {"error": "missing OPENCLAW_HOOKS_TOKEN"}
+    url = f"{config.OPENCLAW_API_URL}/hooks/agent"
+    headers = {
+        "Authorization": f"Bearer {OPENCLAW_HOOKS_TOKEN}",
+        "Content-Type": "application/json",
+    }
+    body = {
+        "agentId": agent_id,
+        "message": json.dumps(payload, ensure_ascii=False),
+        "wakeMode": "wake",
+    }
+    async with httpx.AsyncClient(timeout=30) as client:
+        response = await client.post(url, json=body, headers=headers)
+        logger.info(
+            "OpenClaw %s → HTTP %d: %s",
+            agent_id,
+            response.status_code,
+            response.text[:200],
         )
         try:
-            data = response.json()
+            return response.json()
         except Exception:
-            data = {"raw": response.text}
-        if response.status_code >= 400:
-            logger.warning(
-                "OpenClaw agent %s HTTP %s: %s",
-                agent_id,
-                response.status_code,
-                data,
-            )
-        return data
+            return {"raw": response.text, "status_code": response.status_code}
 
 scheduler = AsyncIOScheduler()
 _scheduler_configured = False

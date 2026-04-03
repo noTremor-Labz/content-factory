@@ -58,20 +58,95 @@ async def handle_callback(callback: CallbackQuery) -> None:
         if lock.exists() or flag.exists() or rej.exists():
             await callback.answer("Уже обработано", show_alert=True)
             return
-        # published.lock используется downstream-агентом для публикации.
-        payload = {
+        # Все артефакты ниже — синхронно, до любых await (launch читает их с диска).
+        now_iso = datetime.now(timezone.utc).isoformat()
+        channel_id = get_publish_channel(blogger, channel_type)
+
+        # 1. published.lock
+        lock_payload = {
             "decision": "approve",
-            "approved_at": datetime.now(timezone.utc).isoformat(),
+            "approved_at": now_iso,
             "channel_type": channel_type,
-            "channel_id": get_publish_channel(blogger, channel_type),
+            "channel_id": channel_id,
         }
-        lock.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-        await callback.message.edit_reply_markup(reply_markup=None)
+        lock.write_text(json.dumps(lock_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        # 2. config.json
+        config_payload = {
+            "blogger": blogger,
+            "channel_type": channel_type,
+            "channel_id": channel_id,
+            "platform": "telegram",
+            "bot_token_env": "TELEGRAM_DIRECTOR_BOT_TOKEN",
+        }
+        (job_dir / "config.json").write_text(
+            json.dumps(config_payload, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        logger.info("Created config.json for %s / %s", blogger, job_id)
+
+        # 3. job-state.json
+        job_state = {
+            "decision": "approve",
+            "status": "approved",
+            "approved_at": now_iso,
+            "blogger": blogger,
+            "job_id": job_id,
+        }
+        (job_dir / "job-state.json").write_text(
+            json.dumps(job_state, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+        # 4. final.md — копия из черновика, если ещё нет
+        final_path = job_dir / "final.md"
+        if not final_path.exists():
+            for src_name in ("draft_final.md", "draft_approved.md", "draft_v1.md"):
+                src_path = job_dir / src_name
+                if src_path.exists():
+                    final_path.write_text(src_path.read_text(encoding="utf-8"), encoding="utf-8")
+                    logger.info("Wrote final.md from %s for %s / %s", src_name, blogger, job_id)
+                    break
+
+        # Удаляем сообщение с кнопками
+        try:
+            await callback.message.delete()
+        except Exception:
+            await callback.message.edit_reply_markup(reply_markup=None)
+
+        # Удаляем исходное approval-сообщение, если есть meta
+        meta_path = job_dir / "approval_meta.json"
+        if meta_path.exists():
+            try:
+                meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                from bot_app import bot as _bot
+
+                await _bot.delete_message(
+                    chat_id=meta["chat_id"],
+                    message_id=meta["message_id"],
+                )
+            except Exception as e:
+                logger.warning("Could not delete approval message: %s", e)
+
         await callback.answer("✅ Отправлено на публикацию")
-        await callback.message.reply(
-            f"✅ Апрувнуто: {blogger} / {job_id}",
+        await callback.message.answer(
+            f"✅ Апрувнуто: {blogger} / {job_id} (канал: {channel_type})",
         )
         logger.info("Approved %s / %s", blogger, job_id)
+
+        # Вызвать launch-агента
+        try:
+            await call_openclaw_agent(
+                "launch",
+                {
+                    "task": "publish",
+                    "blogger": blogger,
+                    "job_id": job_id,
+                },
+            )
+            logger.info("Launch agent called for %s / %s", blogger, job_id)
+        except Exception as e:
+            logger.error("Failed to call launch agent: %s", e)
 
     elif action == "revise":
         af = job_dir / APPROVAL_SENT_FLAG
