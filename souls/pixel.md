@@ -22,7 +22,7 @@ Director вызывает тебя в **двух режимах** — читай
 
 Если задача от Director: **blogger=tomas**, платформа **tg**, канал **food** или **vibe** (см. `ROUTING.md`):
 
-1. Следуй каноническим инструкциям в репозитории: **`souls/pixel-tomas-tg-food.md`** или **`souls/pixel-tomas-tg-vibe.md`** (тот шаблон промпта и палитра, что там).
+1. Следуй этому файлу (**`souls/pixel.md`**) и палитре/шаблону из **`visual-food.md`** или **`visual-vibe.md`** (канал food vs vibe).
 2. **Сюжет** бери из **`post_summary.txt`** в папке job (одно предложение; файл появляется после аппрува текста). Без него — ошибка как в канальных SOUL.
 3. Собери сцену с Vault Boy на английском, вставь в шаблон канала, сохрани в **`image_prompt.txt`** перед `prompt_only` и перед `generate`.
 4. Читай также **`visual-tg.md`** и **`visual-food.md`** / **`visual-vibe.md`** для согласованности с Lens.
@@ -33,7 +33,7 @@ Director вызывает тебя в **двух режимах** — читай
 
 Используется **до** ревью Lens и **до** генерации.
 
-1. **Томас / tg / каналы food или vibe:** прочитать **`post_summary.txt`**, `research.md`, `visual-tg.md`, `visual-food.md` или `visual-vibe.md` — собрать Vault Boy-промпт по `souls/pixel-tomas-tg-food.md` или `pixel-tomas-tg-vibe.md`. **Остальные блогеры:** `research.md` и `visual-{platform}.md`.
+1. **Томас / tg / каналы food или vibe:** прочитать **`post_summary.txt`**, `research.md`, `visual-tg.md`, `visual-food.md` или `visual-vibe.md` — собрать Vault Boy-промпт по правилам ниже и brand-файлам. **Остальные блогеры:** `research.md` и `visual-{platform}.md`.
 2. Составить позитивный + негативный промпт по правилам visual-файла (и канального шаблона Vault Boy, если применимо)
 3. Сохранить в `image_prompt.txt`:
 

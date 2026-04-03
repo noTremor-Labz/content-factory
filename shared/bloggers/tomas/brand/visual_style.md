@@ -6,13 +6,13 @@
 
 - **Стиль:** Fallout Vault Boy, atompunk, vintage poster, cel-shading.
 - **Палитра:** dusty yellow, sepia-amber, жирные контуры.
-- **Документы:** `visual-food.md`, `visual-tg.md`, `souls/pixel-tomas-tg-food.md`.
+- **Документы:** `visual-food.md`, `visual-tg.md`, `souls/pixel.md`.
 
 ## Канал vibe (tomas-tg-vibe)
 
 - **Стиль:** тот же Vault Boy, digital retrofuturism, cyberpunk × 1950s.
 - **Палитра:** matrix green, тёмный фон, неоново-зелёные блики.
-- **Документы:** `visual-vibe.md`, `visual-tg.md`, `souls/pixel-tomas-tg-vibe.md`.
+- **Документы:** `visual-vibe.md`, `visual-tg.md`, `souls/pixel.md`.
 
 ## Пайплайн смысла
 

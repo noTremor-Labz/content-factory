@@ -152,7 +152,7 @@ with open('$HOME/.openclaw/openclaw.json') as f:
 d['agents']['list'].append({
     'id': 'pixel',
     'workspace': '/home/node/.openclaw/workspace-pixel',
-    'model': 'anthropic/claude-haiku-4-5'
+    'model': 'minimax/minimax-m2.7'
 })
 with open('$HOME/.openclaw/openclaw.json', 'w') as f:
     json.dump(d, f, indent=2, ensure_ascii=False)
@@ -167,9 +167,7 @@ print('Done')
 mkdir -p ~/.openclaw/workspace-pixel
 cp souls/pixel.md ~/.openclaw/workspace-pixel/SOUL.md
 
-# Убрать старые pixel-* из 3-configure.sh, оставить только один
-sed -i '' '/deploy_soul "pixel-tomas-tg-food"/d' scripts/3-configure.sh
-sed -i '' '/deploy_soul "pixel-tomas-tg-vibe"/d' scripts/3-configure.sh
+# Убрать старые pixel-* из 3-configure.sh, оставить только один (если ещё остались)
 sed -i '' '/deploy_soul "pixel-misha-yt"/d' scripts/3-configure.sh
 sed -i '' '/deploy_soul "pixel-yulya-ig"/d' scripts/3-configure.sh
 sed -i '' '/deploy_soul "pixel-nasik-tt"/d' scripts/3-configure.sh

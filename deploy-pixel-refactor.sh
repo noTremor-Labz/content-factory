@@ -227,8 +227,6 @@ echo "✅ souls/routing-director.md обновлён"
 # ── Удаляем старые pixel souls ────────────────────────────────
 echo "🗑️  Удаляем старые pixel souls..."
 OLD_PIXELS=(
-  "$SOULS/pixel-tomas-tg-food.md"
-  "$SOULS/pixel-tomas-tg-vibe.md"
   "$SOULS/pixel-tomas.md"
   "$SOULS/pixel-misha-yt.md"
   "$SOULS/pixel-yulya-ig.md"

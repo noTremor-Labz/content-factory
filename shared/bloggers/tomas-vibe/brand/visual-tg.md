@@ -6,8 +6,8 @@
 
 | Канал | Палитра | Подробности |
 |-------|---------|-------------|
-| **food** | dusty yellow, sepia-amber | `visual-food.md` + `souls/pixel-tomas-tg-food.md` |
-| **vibe** | matrix green, тёмный фон | `visual-vibe.md` + `souls/pixel-tomas-tg-vibe.md` |
+| **food** | dusty yellow, sepia-amber | `visual-food.md` + `souls/pixel.md` |
+| **vibe** | matrix green, тёмный фон | `visual-vibe.md` + `souls/pixel.md` |
 
 ## Общее для обоих
 
