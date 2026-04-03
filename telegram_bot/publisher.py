@@ -12,7 +12,7 @@ from config import (
     GOOGLE_SA_JSON_PATH,
     SHARED_BASE_PATH,
     SHEETS_SPREADSHEET_NAME,
-    TELEGRAM_ADMIN_CHAT_ID,
+    TELEGRAM_OWNER_ID,
 )
 from paths_util import extract_blogger_from_job_dir
 from sheets import log_published
@@ -24,7 +24,7 @@ SHEETS_LOGGED_FLAG = "sheets_logged.flag"
 
 async def notify_published(blogger: str, job_id: str) -> None:
     await bot.send_message(
-        TELEGRAM_ADMIN_CHAT_ID,
+        TELEGRAM_OWNER_ID,
         f"📢 Опубликовано в канале: {blogger} / {job_id}",
     )
 

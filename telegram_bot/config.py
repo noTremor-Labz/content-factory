@@ -9,15 +9,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
-# Primary: TELEGRAM_ADMIN_CHAT_ID; fallbacks align with content-factory naming
-_raw_admin = (
-    os.environ.get("TELEGRAM_ADMIN_CHAT_ID")
-    or os.environ.get("APPROVE_CHAT_ID")
-    or os.environ.get("TELEGRAM_APPROVAL_CHAT_ID")
-    or ""
-)
-TELEGRAM_ADMIN_CHAT_ID = _raw_admin.strip()
+# telegram_bot/ is the approval bot (previews + approve/revise/reject buttons)
+TELEGRAM_APPROVAL_BOT_TOKEN = os.environ.get("TELEGRAM_APPROVAL_BOT_TOKEN", "").strip()
+TELEGRAM_OWNER_ID = os.environ.get("TELEGRAM_OWNER_ID", "").strip()
 
 OPENCLAW_API_URL = (
     os.environ.get("OPENCLAW_API_URL")
@@ -34,16 +28,20 @@ if SHARED_BASE_PATH.name != "bloggers":
     if candidate.is_dir():
         SHARED_BASE_PATH = candidate
 
-TELEGRAM_CHANNEL_TOMAS = os.environ.get("TELEGRAM_CHANNEL_TOMAS", "").strip()
-TELEGRAM_CHANNEL_MISHA = os.environ.get("TELEGRAM_CHANNEL_MISHA", "").strip()
-TELEGRAM_CHANNEL_YULYA = os.environ.get("TELEGRAM_CHANNEL_YULYA", "").strip()
-TELEGRAM_CHANNEL_NASIK = os.environ.get("TELEGRAM_CHANNEL_NASIK", "").strip()
+TELEGRAM_CHANNEL_TOMAS_FOOD = os.environ.get("TELEGRAM_CHANNEL_TOMAS_FOOD", "").strip()
+TELEGRAM_CHANNEL_TOMAS_VIBE = os.environ.get("TELEGRAM_CHANNEL_TOMAS_VIBE", "").strip()
 
-BLOGGERS: dict[str, dict[str, str]] = {
-    "tomas": {"channel": TELEGRAM_CHANNEL_TOMAS},
-    "misha": {"channel": TELEGRAM_CHANNEL_MISHA},
-    "yulya": {"channel": TELEGRAM_CHANNEL_YULYA},
-    "nasik": {"channel": TELEGRAM_CHANNEL_NASIK},
+# Note: only `tomas` has 2 Telegram channels; other bloggers have none.
+BLOGGERS: dict[str, dict[str, dict[str, str]]] = {
+    "tomas": {
+        "channels": {
+            "food": TELEGRAM_CHANNEL_TOMAS_FOOD,
+            "vibe": TELEGRAM_CHANNEL_TOMAS_VIBE,
+        }
+    },
+    "misha": {"channels": {}},
+    "yulya": {"channels": {}},
+    "nasik": {"channels": {}},
 }
 
 GOOGLE_SA_JSON_PATH = os.environ.get("GOOGLE_SA_JSON_PATH", "").strip()

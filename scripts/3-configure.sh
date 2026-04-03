@@ -88,16 +88,16 @@ if [ -f "$ROOT/souls/routing-director.md" ]; then
   echo "[DONE] souls/routing-director.md → workspace-director/ROUTING.md"
 fi
 
-if [ -z "${TELEGRAM_BOT_TOKEN:-}" ] || [[ "$TELEGRAM_BOT_TOKEN" == "..." ]]; then
+if [ -z "${TELEGRAM_DIRECTOR_BOT_TOKEN:-}" ] || [[ "$TELEGRAM_DIRECTOR_BOT_TOKEN" == "..." ]]; then
   echo ""
-  echo "⚠️  TELEGRAM_BOT_TOKEN не заполнен — пропускаем подключение Telegram"
+  echo "⚠️  TELEGRAM_DIRECTOR_BOT_TOKEN не заполнен — пропускаем подключение Telegram"
   echo "   Заполни в .env и перезапусти scripts/3-configure.sh"
 else
   echo ""
   echo "Подключение Telegram к Director..."
   cli openclaw channels add \
     --channel telegram \
-    --token "$TELEGRAM_BOT_TOKEN"
+    --token "$TELEGRAM_DIRECTOR_BOT_TOKEN"
   echo "✅ Telegram (Director) подключён"
 fi
 

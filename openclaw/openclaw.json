@@ -76,7 +76,7 @@
     "telegram": {
       "accounts": {
         "default": {
-          "botToken": "${TELEGRAM_BOT_TOKEN}",
+          "botToken": "${TELEGRAM_DIRECTOR_BOT_TOKEN}",
           "dmPolicy": "allowlist",
           "allowFrom": ["tg:${TELEGRAM_OWNER_ID}"]
         }

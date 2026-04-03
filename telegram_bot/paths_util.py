@@ -20,3 +20,15 @@ def extract_blogger_and_job_from_ready(ready_path: Path) -> tuple[str, str]:
 
 def extract_blogger_from_job_dir(job_dir: Path) -> str:
     return job_dir.parent.parent.name
+
+
+def extract_blogger(path: Path) -> str:
+    """Extract blogger name from a ready-like file path."""
+    job_dir = path.parent
+    return job_dir.parent.parent.name
+
+
+def extract_job_id(path: Path) -> str:
+    """Extract job_id from a ready-like file path."""
+    job_dir = path.parent
+    return job_dir.name
