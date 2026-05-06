@@ -115,3 +115,4 @@
 |------|-------|---------|
 | 2026-05-06 | planning | Создан master rollout и отдельные phase-планы для pilot implementation |
 | 2026-05-06 | phase-1-bootstrap | Начата реализация Phase 1: поднят monorepo bootstrap, local infra baseline и OpenAPI contract generation |
+| 2026-05-06 | phase-1-control-plane-api | Продолжена реализация Phase 1: добавлены auth/RBAC, domain model, Alembic migration, upload/review/audit API и обновленные contracts |

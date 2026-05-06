@@ -5,7 +5,7 @@ def test_root_reports_bootstrap_status(api_client: TestClient) -> None:
     response = api_client.get("/")
 
     assert response.status_code == 200
-    assert response.json()["phase"] == "phase-1-bootstrap"
+    assert response.json()["phase"] == "phase-1-control-plane"
 
 
 def test_liveness_endpoint_reports_ok(api_client: TestClient) -> None:

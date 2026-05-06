@@ -1,7 +1,14 @@
 import { z } from "zod";
 
+const apiBaseUrlSchema = z.string().min(1).refine(
+  (value) => value.startsWith("/") || /^https?:\/\//.test(value),
+  {
+    message: "VITE_API_BASE_URL must be an absolute URL or a root-relative path",
+  },
+);
+
 const webEnvSchema = z.object({
-  VITE_API_BASE_URL: z.string().url().default("http://localhost:8000"),
+  VITE_API_BASE_URL: apiBaseUrlSchema.default("/"),
   VITE_APP_NAME: z.string().min(1).default("Content Factory Control Plane"),
 });
 

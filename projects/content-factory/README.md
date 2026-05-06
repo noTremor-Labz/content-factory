@@ -31,5 +31,11 @@ AI-сервис контент-завода для цифровых аватар
 - Python install: `make install-python BOOTSTRAP_PYTHON=/path/to/python3.12`
 - Web gates: `make lint-web && make typecheck-web && make test-web`
 - API/worker gates: `make lint-api && make typecheck-api && make test-api`
+- API migrations: `make migrate-api`
 - Contracts: `make generate-contracts`
 - Dev servers: `make dev-web` и `make dev-api`
+
+## Web Dev Notes
+
+- `VITE_API_BASE_URL=/` использует same-origin proxy Vite для `/api` и `/health`, чтобы local cockpit работал без отдельной CORS-настройки API.
+- Presigned upload URLs на локальный MinIO автоматически проксируются через dev server path `"/__storage_proxy"` для browser upload flow.

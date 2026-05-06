@@ -10,6 +10,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@content-factory/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       react:
         specifier: ^19.2.5
         version: 19.2.5

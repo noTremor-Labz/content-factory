@@ -1,7 +1,7 @@
 # Context: Content Factory
 
 **Last updated:** 2026-05-06
-**Status:** phase 1 in progress / workspace bootstrap complete / domain API next
+**Status:** phase 1 in progress / cockpit UI implemented / browser smoke next
 
 ## Stack
 
@@ -30,10 +30,13 @@ See:
 ## Current Work
 
 - Project bootstrap and planning artifacts remain intact.
-- `Phase 1 / Workspace Bootstrap And Shared Tooling` is now implemented.
+- `Phase 1 / Workspace Bootstrap And Shared Tooling` is implemented.
+- `Phase 1 / Domain Model, Auth, And Control-Plane API` is implemented.
+- `Phase 1 / Cockpit Shell And Review Queue UI` is functionally implemented, with browser-level smoke automation still pending.
 - Monorepo structure now exists under `apps/web`, `apps/api`, `apps/worker`, `packages/contracts`, and `infra`.
-- Web baseline, FastAPI health API, worker bootstrap, local infra compose, and OpenAPI contract generation are working and verified.
-- Domain model, auth/RBAC, asset ingress, and review lifecycle have not been started yet.
+- FastAPI now has SQLAlchemy/Alembic baseline, invite-only auth, cookie sessions, RBAC, pilot domain entities, upload initiation/finalization, content lifecycle, review tasks, and audit logs.
+- OpenAPI and generated TypeScript contracts include the control-plane API and identity-pack list endpoint.
+- Web cockpit UI now has protected session bootstrap, hash navigation, typed API client wiring, auth/bootstrap/invite forms, brand/asset intake, avatar/identity-pack screens, content lifecycle actions, review approve/rework, and audit view.
 
 ## Recent Decisions
 
@@ -44,23 +47,27 @@ See:
 - 2026-05-06: Recommended pilot stack recorded in `.memory/decisions/2026-05-06-pilot-stack-react-fastapi-comfyui.md`.
 - 2026-05-06: Added bulletproof research, spec, master rollout, and 4 separate phase plans under `.memory/sessions/`.
 - 2026-05-06: Implemented the first `Phase 1` slice: monorepo bootstrap, verified web/api/worker baseline, local infra compose, and generated contracts.
+- 2026-05-06: Implemented the second `Phase 1` slice: SQLAlchemy/Alembic domain model, invite-only auth/RBAC, asset upload contracts, content/review lifecycle, audit logs, and regenerated contracts.
+- 2026-05-06: Implemented the cockpit UI slice: protected SPA shell, typed API client, Vite proxy/storage proxy, brand/asset/avatar/content/review/audit screens, identity-pack listing, and mocked cockpit flow tests.
+- 2026-05-06: Reconciled phase-1 memory docs after parallel review: corrected Phase 3 file map, removed stale smoke gate, and fixed the clean-state browser smoke sequence.
 
 ## Known Issues
 
-- Auth, RBAC, pilot domain entities, upload flow, and review queue are still unimplemented.
+- Browser E2E smoke flow against real local API/storage is still not automated; current cockpit flow is covered by mocked Vitest component/integration tests.
+- Render pipeline, compliance engine, metrics, and publish package export remain future phases.
 - Compliance requirements for vape/nicotine-adjacent content still need legal review before pilot launch.
 - Cloud vendor selection is still open, but the reference topology is now fixed in planning artifacts.
 
 ## Environment
 
-- Setup: `pnpm` workspace, Python `.venv` bootstrap, and root `Makefile` commands are now in place.
-- `.env.example` now contains local defaults for web/api/worker/storage bootstrap.
+- Setup: `pnpm` workspace, Python `.venv` bootstrap, root `Makefile`, and Alembic migration command are now in place.
+- `.env.example` now contains local defaults for web/api/worker/storage/session/upload bootstrap, with `VITE_API_BASE_URL=/` for same-origin Vite proxy dev.
 - MCP preset: general filesystem/GitHub config in `.mcp.json`.
 
 ## Recommended Next Step
 
-Continue `Phase 1 — Foundation And Control Plane` with `Domain Model, Auth, And Control-Plane API` using:
+Finish `Phase 1` with browser-level smoke coverage for the implemented cockpit UI using `login/bootstrap -> create brand -> upload asset -> create avatar -> create content -> plan -> send to review -> approve`, then continue with render/compliance groundwork using:
 - `.memory/sessions/specs/2026-05-06-content-factory-pilot-implementation-rollout.md`
-- `.memory/sessions/plans/2026-05-06-content-factory-phase-1-control-plane.md`
+- `.memory/sessions/plans/2026-05-06-content-factory-rollout-master.md`
 
-Latest handoff: `.memory/sessions/2026-05-06-codex-phase-1-bootstrap-implementation.md`.
+Latest handoff: `.memory/sessions/2026-05-06-codex-phase-1-memory-sync-after-parallel-review.md`.

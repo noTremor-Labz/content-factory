@@ -5,7 +5,7 @@ PYTHON_SOURCES := apps/api/src apps/api/tests apps/worker/src apps/worker/tests
 PYTHON_TYPECHECK_SOURCES := apps/api/src apps/worker/src
 OPENAPI_OUTPUT := packages/contracts/openapi/content-factory.openapi.json
 
-.PHONY: install install-node install-python lint-web typecheck-web test-web lint-api typecheck-api test-api dev-web dev-api export-openapi generate-contracts
+.PHONY: install install-node install-python lint-web typecheck-web test-web lint-api typecheck-api test-api migrate-api dev-web dev-api export-openapi generate-contracts
 
 install: install-node install-python
 
@@ -34,6 +34,9 @@ typecheck-api:
 
 test-api:
 	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON_BIN) -m pytest
+
+migrate-api:
+	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON_BIN) -m alembic upgrade head
 
 dev-web:
 	pnpm --dir apps/web dev

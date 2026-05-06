@@ -3,6 +3,13 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
   "scripts": {
     "generate": "openapi-typescript ./openapi/content-factory.openapi.json -o ./src/generated/api.ts",
     "typecheck": "tsc --noEmit"

@@ -11,3 +11,6 @@ def test_export_openapi_schema_includes_health_routes(tmp_path: Path) -> None:
     assert output_path.exists()
     assert "/health/live" in schema["paths"]
     assert "/health/ready" in schema["paths"]
+    assert "/api/auth/login" in schema["paths"]
+    assert "/api/content-items/{content_item_id}/submit-review" in schema["paths"]
+    assert "/api/review/tasks/{task_id}/approve" in schema["paths"]

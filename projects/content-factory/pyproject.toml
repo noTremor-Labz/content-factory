@@ -8,11 +8,15 @@ version = "0.1.0"
 description = "Phase 1 bootstrap for the Content Factory control plane."
 requires-python = ">=3.12"
 dependencies = [
+  "alembic",
+  "boto3",
   "dramatiq[redis]",
   "fastapi",
   "pydantic-settings",
   "redis",
   "sentry-sdk",
+  "sqlalchemy",
+  "psycopg[binary]",
   "structlog",
   "uvicorn[standard]",
 ]
@@ -48,4 +52,3 @@ python_version = "3.12"
 strict = true
 ignore_missing_imports = true
 mypy_path = ["apps/api/src", "apps/worker/src"]
-
