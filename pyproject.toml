@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "content-factory-services"
+version = "0.1.0"
+description = "Phase 1 bootstrap for the Content Factory control plane."
+requires-python = ">=3.12"
+dependencies = [
+  "dramatiq[redis]",
+  "fastapi",
+  "pydantic-settings",
+  "redis",
+  "sentry-sdk",
+  "structlog",
+  "uvicorn[standard]",
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx",
+  "mypy",
+  "pytest",
+  "pytest-asyncio",
+  "ruff",
+]
+
+[tool.setuptools.packages.find]
+where = ["apps/api/src", "apps/worker/src"]
+include = ["content_factory_api*", "content_factory_worker*"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["apps/api/tests", "apps/worker/tests"]
+pythonpath = ["apps/api/src", "apps/worker/src"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["apps/api/src", "apps/api/tests", "apps/worker/src", "apps/worker/tests"]
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "UP"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+mypy_path = ["apps/api/src", "apps/worker/src"]
+
