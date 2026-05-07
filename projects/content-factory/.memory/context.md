@@ -1,7 +1,7 @@
 # Context: Content Factory
 
-**Last updated:** 2026-05-06
-**Status:** phase 1 in progress / cockpit UI implemented / browser smoke next
+**Last updated:** 2026-05-07
+**Status:** phase 2 in progress / provider adapter and live status slice complete / packaging-export next
 
 ## Stack
 
@@ -30,13 +30,22 @@ See:
 ## Current Work
 
 - Project bootstrap and planning artifacts remain intact.
-- `Phase 1 / Workspace Bootstrap And Shared Tooling` is implemented.
-- `Phase 1 / Domain Model, Auth, And Control-Plane API` is implemented.
-- `Phase 1 / Cockpit Shell And Review Queue UI` is functionally implemented, with browser-level smoke automation still pending.
+- `Phase 1 / Workspace Bootstrap And Shared Tooling` is complete.
+- `Phase 1 / Domain Model, Auth, And Control-Plane API` is complete.
+- `Phase 1 / Cockpit Shell And Review Queue UI` is complete and now covered by real-browser Playwright smoke.
+- `Phase 2 / Workflow Presets And Provider Contracts` is now complete.
 - Monorepo structure now exists under `apps/web`, `apps/api`, `apps/worker`, `packages/contracts`, and `infra`.
 - FastAPI now has SQLAlchemy/Alembic baseline, invite-only auth, cookie sessions, RBAC, pilot domain entities, upload initiation/finalization, content lifecycle, review tasks, and audit logs.
 - OpenAPI and generated TypeScript contracts include the control-plane API and identity-pack list endpoint.
 - Web cockpit UI now has protected session bootstrap, hash navigation, typed API client wiring, auth/bootstrap/invite forms, brand/asset intake, avatar/identity-pack screens, content lifecycle actions, review approve/rework, and audit view.
+- Playwright smoke now covers `login/bootstrap -> create brand -> upload asset -> create avatar -> create identity pack -> create content -> plan -> send to review -> approve -> audit` against live local API/storage.
+- API now also exposes immutable versioned `WorkflowPreset` creation/list/detail and queued `RenderJob` creation/detail/list with first-attempt seeding and resolved input snapshots.
+- Shared pipeline provider contracts now live in `content_factory_pipeline`, with default `comfyui` / `none` / `ffmpeg` registry reused by API validation and worker tests.
+- Worker orchestration now processes queued render attempts through a typed executor contract, persists attempt response payloads, transitions jobs through running/succeeded/failed states, enforces retry budget by queueing follow-up attempts, and skips terminal jobs idempotently.
+- Render job creation now enqueues a Dramatiq `render-jobs` message after the database job/attempt is committed.
+- Worker now has a settings-driven `ComfyUiRenderExecutor` with local/cloud-compatible HTTP submission, provider status polling, timeout/failure mapping, optional API key support, and persisted provider payloads.
+- API now exposes authenticated `GET /api/render-jobs/{render_job_id}/events` SSE snapshots for live render status.
+- Web cockpit now has a Render route that loads workflow presets/render jobs, creates render jobs for renderable content, subscribes to selected job SSE updates, and shows attempts/provider payloads.
 
 ## Recent Decisions
 
@@ -50,24 +59,30 @@ See:
 - 2026-05-06: Implemented the second `Phase 1` slice: SQLAlchemy/Alembic domain model, invite-only auth/RBAC, asset upload contracts, content/review lifecycle, audit logs, and regenerated contracts.
 - 2026-05-06: Implemented the cockpit UI slice: protected SPA shell, typed API client, Vite proxy/storage proxy, brand/asset/avatar/content/review/audit screens, identity-pack listing, and mocked cockpit flow tests.
 - 2026-05-06: Reconciled phase-1 memory docs after parallel review: corrected Phase 3 file map, removed stale smoke gate, and fixed the clean-state browser smoke sequence.
+- 2026-05-06: Closed Phase 1 with Playwright smoke automation, new `make test-web-e2e` gate, and real-browser verification of the cockpit lifecycle on live local infra.
+- 2026-05-06: Started Phase 2 by adding shared provider contracts, immutable workflow preset versioning, render job/job attempt tables, new render API routes, and regenerated OpenAPI/contracts.
+- 2026-05-07: Added Phase 2 worker orchestration with Dramatiq enqueue, attempt lifecycle processing, retry budget enforcement, response payload persistence, and regenerated contracts.
+- 2026-05-07: Added Phase 2 provider/live-status slice with ComfyUI HTTP executor, render job SSE stream, cockpit Render queue/detail UI, and regenerated contracts.
 
 ## Known Issues
 
-- Browser E2E smoke flow against real local API/storage is still not automated; current cockpit flow is covered by mocked Vitest component/integration tests.
-- Render pipeline, compliance engine, metrics, and publish package export remain future phases.
+- Operator retry/cancel/requeue actions, FFmpeg packaging/export, compliance engine, metrics, and publish package export remain future phases.
+- ComfyUI adapter submits the stored workflow definition and persists provider output payloads; richer input-to-node mutation remains a future preset mapping enhancement.
 - Compliance requirements for vape/nicotine-adjacent content still need legal review before pilot launch.
 - Cloud vendor selection is still open, but the reference topology is now fixed in planning artifacts.
 
 ## Environment
 
 - Setup: `pnpm` workspace, Python `.venv` bootstrap, root `Makefile`, and Alembic migration command are now in place.
-- `.env.example` now contains local defaults for web/api/worker/storage/session/upload bootstrap, with `VITE_API_BASE_URL=/` for same-origin Vite proxy dev.
+- `.env.example` now contains local defaults for web/api/worker/storage/session/upload bootstrap, with `VITE_API_BASE_URL=/` for same-origin Vite proxy dev and `COMFYUI_*` worker settings for optional provider execution.
 - MCP preset: general filesystem/GitHub config in `.mcp.json`.
 
 ## Recommended Next Step
 
-Finish `Phase 1` with browser-level smoke coverage for the implemented cockpit UI using `login/bootstrap -> create brand -> upload asset -> create avatar -> create content -> plan -> send to review -> approve`, then continue with render/compliance groundwork using:
+Continue `Phase 2 / Production Pipeline And Render Integration` with:
+- `.memory/sessions/plans/2026-05-06-content-factory-phase-2-production-pipeline.md`
 - `.memory/sessions/specs/2026-05-06-content-factory-pilot-implementation-rollout.md`
 - `.memory/sessions/plans/2026-05-06-content-factory-rollout-master.md`
+- immediate next slice: operator retry/cancel/requeue actions or FFmpeg publish-package/export pipeline on top of completed render execution/status visibility
 
-Latest handoff: `.memory/sessions/2026-05-06-codex-phase-1-memory-sync-after-parallel-review.md`.
+Latest handoff: `.memory/sessions/2026-05-07-codex-phase-2-provider-live-status.md`.

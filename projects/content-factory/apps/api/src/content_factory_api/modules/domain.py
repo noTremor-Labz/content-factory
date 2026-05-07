@@ -34,6 +34,33 @@ class ContentChannel(StrEnum):
     YOUTUBE_SHORTS = "youtube_shorts"
 
 
+class WorkflowProvider(StrEnum):
+    COMFYUI = "comfyui"
+
+
+class VoiceProvider(StrEnum):
+    NONE = "none"
+
+
+class PackagingProvider(StrEnum):
+    FFMPEG = "ffmpeg"
+
+
+class WorkflowInputSourceType(StrEnum):
+    CONTENT_ITEM = "content_item"
+    BRAND = "brand"
+    AVATAR = "avatar"
+    IDENTITY_PACK = "identity_pack"
+    LITERAL = "literal"
+
+
+class OutputArtifactType(StrEnum):
+    VIDEO = "video"
+    COVER_IMAGE = "cover_image"
+    CAPTION_TEXT = "caption_text"
+    MANIFEST = "manifest"
+
+
 class ContentStatus(StrEnum):
     DRAFT = "draft"
     PLANNED = "planned"
@@ -46,6 +73,22 @@ class ReviewTaskStatus(StrEnum):
     OPEN = "open"
     APPROVED = "approved"
     REWORK = "rework"
+    CANCELLED = "cancelled"
+
+
+class RenderJobStatus(StrEnum):
+    QUEUED = "queued"
+    RUNNING = "running"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class JobAttemptStatus(StrEnum):
+    QUEUED = "queued"
+    RUNNING = "running"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
     CANCELLED = "cancelled"
 
 

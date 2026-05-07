@@ -399,6 +399,93 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/workflow-presets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Workflow Presets */
+        get: operations["list_workflow_presets_api_workflow_presets_get"];
+        put?: never;
+        /** Create Workflow Preset */
+        post: operations["create_workflow_preset_api_workflow_presets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workflow-presets/{workflow_preset_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Workflow Preset */
+        get: operations["get_workflow_preset_api_workflow_presets__workflow_preset_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/render-jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Render Jobs */
+        get: operations["list_render_jobs_api_render_jobs_get"];
+        put?: never;
+        /** Create Render Job */
+        post: operations["create_render_job_api_render_jobs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/render-jobs/{render_job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Render Job */
+        get: operations["get_render_job_api_render_jobs__render_job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/render-jobs/{render_job_id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stream Render Job Events */
+        get: operations["stream_render_job_events_api_render_jobs__render_job_id__events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/review/tasks": {
         parameters: {
             query?: never;
@@ -799,6 +886,47 @@ export interface components {
              */
             expires_at: string;
         };
+        /** JobAttemptRead */
+        JobAttemptRead: {
+            /** Id */
+            id: string;
+            /** Render Job Id */
+            render_job_id: string;
+            /** Attempt Number */
+            attempt_number: number;
+            status: components["schemas"]["JobAttemptStatus"];
+            /** Provider Job Id */
+            provider_job_id: string | null;
+            /** Request Payload */
+            request_payload: {
+                [key: string]: unknown;
+            };
+            /** Response Payload */
+            response_payload: {
+                [key: string]: unknown;
+            };
+            /** Error Message */
+            error_message: string | null;
+            /** Started At */
+            started_at: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * JobAttemptStatus
+         * @enum {string}
+         */
+        JobAttemptStatus: "queued" | "running" | "succeeded" | "failed" | "cancelled";
         /** LoginRequest */
         LoginRequest: {
             /** Email */
@@ -806,6 +934,77 @@ export interface components {
             /** Password */
             password: string;
         };
+        /**
+         * OutputArtifactType
+         * @enum {string}
+         */
+        OutputArtifactType: "video" | "cover_image" | "caption_text" | "manifest";
+        /**
+         * PackagingProvider
+         * @enum {string}
+         */
+        PackagingProvider: "ffmpeg";
+        /** RenderJobCreateRequest */
+        RenderJobCreateRequest: {
+            /** Content Item Id */
+            content_item_id: string;
+            /** Workflow Preset Id */
+            workflow_preset_id: string;
+            /** Identity Pack Id */
+            identity_pack_id?: string | null;
+            /**
+             * Retry Budget
+             * @default 3
+             */
+            retry_budget: number;
+        };
+        /** RenderJobListResponse */
+        RenderJobListResponse: {
+            /** Items */
+            items: components["schemas"]["RenderJobRead"][];
+        };
+        /** RenderJobRead */
+        RenderJobRead: {
+            /** Id */
+            id: string;
+            /** Content Item Id */
+            content_item_id: string;
+            /** Workflow Preset Id */
+            workflow_preset_id: string;
+            /** Workflow Preset Key */
+            workflow_preset_key: string;
+            /** Workflow Preset Version */
+            workflow_preset_version: number;
+            workflow_provider: components["schemas"]["WorkflowProvider"];
+            voice_provider: components["schemas"]["VoiceProvider"];
+            packaging_provider: components["schemas"]["PackagingProvider"];
+            /** Input Snapshot */
+            input_snapshot: {
+                [key: string]: unknown;
+            };
+            status: components["schemas"]["RenderJobStatus"];
+            /** Retry Budget */
+            retry_budget: number;
+            /** Created By User Id */
+            created_by_user_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Attempts */
+            attempts: components["schemas"]["JobAttemptRead"][];
+        };
+        /**
+         * RenderJobStatus
+         * @enum {string}
+         */
+        RenderJobStatus: "queued" | "running" | "succeeded" | "failed" | "cancelled";
         /** ReviewDecisionRequest */
         ReviewDecisionRequest: {
             /** Decision Notes */
@@ -910,6 +1109,104 @@ export interface components {
             /** Context */
             ctx?: Record<string, never>;
         };
+        /**
+         * VoiceProvider
+         * @enum {string}
+         */
+        VoiceProvider: "none";
+        /** WorkflowInputBinding */
+        WorkflowInputBinding: {
+            source_type: components["schemas"]["WorkflowInputSourceType"];
+            /** Source Field */
+            source_field?: string | null;
+            /** Value */
+            value?: unknown | null;
+        };
+        /**
+         * WorkflowInputSourceType
+         * @enum {string}
+         */
+        WorkflowInputSourceType: "content_item" | "brand" | "avatar" | "identity_pack" | "literal";
+        /** WorkflowOutputBinding */
+        WorkflowOutputBinding: {
+            artifact_type: components["schemas"]["OutputArtifactType"];
+            /** Output Path */
+            output_path: string;
+        };
+        /** WorkflowPresetCreateRequest */
+        WorkflowPresetCreateRequest: {
+            /** Key */
+            key: string;
+            /** Name */
+            name: string;
+            /** Description */
+            description?: string | null;
+            workflow_provider: components["schemas"]["WorkflowProvider"];
+            voice_provider: components["schemas"]["VoiceProvider"];
+            packaging_provider: components["schemas"]["PackagingProvider"];
+            /** Workflow Definition */
+            workflow_definition: {
+                [key: string]: unknown;
+            };
+            /** Input Mapping */
+            input_mapping: {
+                [key: string]: components["schemas"]["WorkflowInputBinding"];
+            };
+            /** Output Mapping */
+            output_mapping: {
+                [key: string]: components["schemas"]["WorkflowOutputBinding"];
+            };
+        };
+        /** WorkflowPresetListResponse */
+        WorkflowPresetListResponse: {
+            /** Items */
+            items: components["schemas"]["WorkflowPresetRead"][];
+        };
+        /** WorkflowPresetRead */
+        WorkflowPresetRead: {
+            /** Id */
+            id: string;
+            /** Key */
+            key: string;
+            /** Version */
+            version: number;
+            /** Name */
+            name: string;
+            /** Description */
+            description: string | null;
+            workflow_provider: components["schemas"]["WorkflowProvider"];
+            voice_provider: components["schemas"]["VoiceProvider"];
+            packaging_provider: components["schemas"]["PackagingProvider"];
+            /** Workflow Definition */
+            workflow_definition: {
+                [key: string]: unknown;
+            };
+            /** Input Mapping */
+            input_mapping: {
+                [key: string]: components["schemas"]["WorkflowInputBinding"];
+            };
+            /** Output Mapping */
+            output_mapping: {
+                [key: string]: components["schemas"]["WorkflowOutputBinding"];
+            };
+            /** Created By User Id */
+            created_by_user_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * WorkflowProvider
+         * @enum {string}
+         */
+        WorkflowProvider: "comfyui";
     };
     responses: never;
     parameters: never;
@@ -1759,6 +2056,237 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReviewTaskRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_workflow_presets_api_workflow_presets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowPresetListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_workflow_preset_api_workflow_presets_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowPresetCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowPresetRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_workflow_preset_api_workflow_presets__workflow_preset_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workflow_preset_id: string;
+            };
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowPresetRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_render_jobs_api_render_jobs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RenderJobListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_render_job_api_render_jobs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenderJobCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RenderJobRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_render_job_api_render_jobs__render_job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                render_job_id: string;
+            };
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RenderJobRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    stream_render_job_events_api_render_jobs__render_job_id__events_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                render_job_id: string;
+            };
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Server-sent render job status snapshots. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": string;
                 };
             };
             /** @description Validation Error */

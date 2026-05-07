@@ -11,6 +11,8 @@ export type ReviewTask = components["schemas"]["ReviewTaskRead"];
 export type ContentItem = components["schemas"]["ContentItemRead"];
 export type ContentChannel = components["schemas"]["ContentChannel"];
 export type AuditLog = components["schemas"]["AuditLogRead"];
+export type WorkflowPreset = components["schemas"]["WorkflowPresetRead"];
+export type RenderJob = components["schemas"]["RenderJobRead"];
 export type InviteRole = components["schemas"]["InviteCreateRequest"]["role"];
 export type Invite = components["schemas"]["InviteCreateResponse"];
 export type InviteCreateResponse = components["schemas"]["InviteCreateResponse"];
@@ -29,6 +31,7 @@ export type AssetFinalizeRequest = components["schemas"]["AssetFinalizeRequest"]
 export type ContentItemCreateRequest = components["schemas"]["ContentItemCreateRequest"];
 export type ContentPlanRequest = components["schemas"]["ContentPlanRequest"];
 export type ReviewDecisionRequest = components["schemas"]["ReviewDecisionRequest"];
+export type RenderJobCreateRequest = components["schemas"]["RenderJobCreateRequest"];
 
 export interface CockpitData {
   brands: Brand[];
@@ -38,6 +41,8 @@ export interface CockpitData {
   contentItems: ContentItem[];
   reviewTasks: ReviewTask[];
   auditLogs: AuditLog[];
+  workflowPresets: WorkflowPreset[];
+  renderJobs: RenderJob[];
 }
 
 export const emptyCockpitData: CockpitData = {
@@ -48,4 +53,6 @@ export const emptyCockpitData: CockpitData = {
   contentItems: [],
   reviewTasks: [],
   auditLogs: [],
+  workflowPresets: [],
+  renderJobs: [],
 };

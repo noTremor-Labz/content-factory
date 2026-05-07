@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, DateTime, ForeignKey, String, Text
+from sqlalchemy import JSON, DateTime, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from content_factory_api.database import Base
@@ -14,9 +14,14 @@ from content_factory_api.modules.domain import (
     ContentChannel,
     ContentStatus,
     IdentityPackStatus,
+    JobAttemptStatus,
+    PackagingProvider,
+    RenderJobStatus,
     ReviewTaskStatus,
     UserRole,
     UserStatus,
+    VoiceProvider,
+    WorkflowProvider,
 )
 from content_factory_api.modules.security import utcnow
 
@@ -237,3 +242,99 @@ class AuditLog(Base):
     entity_id: Mapped[str] = mapped_column(String(36), index=True, nullable=False)
     payload: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+
+
+class WorkflowPreset(TimestampMixin, Base):
+    __tablename__ = "workflow_presets"
+    __table_args__ = (UniqueConstraint("key", "version", name="uq_workflow_presets_key_version"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    key: Mapped[str] = mapped_column(String(120), index=True, nullable=False)
+    version: Mapped[int] = mapped_column(nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    workflow_provider: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        default=WorkflowProvider.COMFYUI.value,
+    )
+    voice_provider: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        default=VoiceProvider.NONE.value,
+    )
+    packaging_provider: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        default=PackagingProvider.FFMPEG.value,
+    )
+    workflow_definition: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+    input_mapping: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+    output_mapping: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+    created_by_user_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+
+
+class RenderJob(TimestampMixin, Base):
+    __tablename__ = "render_jobs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    content_item_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("content_items.id"),
+        index=True,
+        nullable=False,
+    )
+    workflow_preset_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("workflow_presets.id"),
+        index=True,
+        nullable=False,
+    )
+    workflow_preset_key: Mapped[str] = mapped_column(String(120), nullable=False)
+    workflow_preset_version: Mapped[int] = mapped_column(nullable=False)
+    workflow_provider: Mapped[str] = mapped_column(String(64), nullable=False)
+    voice_provider: Mapped[str] = mapped_column(String(64), nullable=False)
+    packaging_provider: Mapped[str] = mapped_column(String(64), nullable=False)
+    input_snapshot: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default=RenderJobStatus.QUEUED.value,
+    )
+    retry_budget: Mapped[int] = mapped_column(nullable=False, default=3)
+    created_by_user_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+
+
+class JobAttempt(TimestampMixin, Base):
+    __tablename__ = "job_attempts"
+    __table_args__ = (
+        UniqueConstraint("render_job_id", "attempt_number", name="uq_job_attempts_job_attempt"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    render_job_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("render_jobs.id"),
+        index=True,
+        nullable=False,
+    )
+    attempt_number: Mapped[int] = mapped_column(nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default=JobAttemptStatus.QUEUED.value,
+    )
+    provider_job_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    request_payload: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+    response_payload: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

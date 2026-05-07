@@ -12,6 +12,7 @@ dependencies = [
   "boto3",
   "dramatiq[redis]",
   "fastapi",
+  "httpx",
   "pydantic-settings",
   "redis",
   "sentry-sdk",
@@ -23,7 +24,6 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-  "httpx",
   "mypy",
   "pytest",
   "pytest-asyncio",
@@ -32,7 +32,7 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["apps/api/src", "apps/worker/src"]
-include = ["content_factory_api*", "content_factory_worker*"]
+include = ["content_factory_api*", "content_factory_pipeline*", "content_factory_worker*"]
 
 [tool.pytest.ini_options]
 addopts = "-ra"

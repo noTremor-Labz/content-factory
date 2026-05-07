@@ -29,6 +29,8 @@ node_modules/
 .ruff_cache/
 coverage/
 htmlcov/
+playwright-report/
+test-results/
 *.tsbuildinfo
 __pycache__/
 *.py[cod]

@@ -1,7 +1,7 @@
 # Plan: Content Factory Phase 1 — Foundation And Control Plane
 
 **Spec:** `.memory/sessions/specs/2026-05-06-content-factory-pilot-implementation-rollout.md`
-**Status:** in_progress
+**Status:** completed
 
 ---
 
@@ -25,7 +25,7 @@
 | 2 | Нет модели пользователей и ролей | Ввести invite-only auth, cookie sessions и RBAC | completed |
 | 3 | Нет asset ingress и media metadata | Сделать signed upload flow в S3-compatible storage и finalize endpoint | completed |
 | 4 | Нет pilot domain model | Ввести сущности `Brand`, `Avatar`, `IdentityPack`, `Asset`, `ContentItem`, `ReviewTask`, `AuditLog` | completed |
-| 5 | Нет базового operator UI | Сделать cockpit shell, auth flow, asset/avatar/content screens, review queue | in_progress |
+| 5 | Нет базового operator UI | Сделать cockpit shell, auth flow, asset/avatar/content screens, review queue | completed |
 
 ## Phases
 
@@ -60,11 +60,12 @@
   ```
 
 ### Phase 3: Cockpit Shell And Review Queue UI
-- **Status:** in_progress
+- **Status:** completed
 - **Files:** `apps/web/src/app/*`, `apps/web/src/app/routes.ts`, `apps/web/src/features/auth/*`, `apps/web/src/features/brands-assets/*`, `apps/web/src/features/avatars/*`, `apps/web/src/features/content/*`, `apps/web/src/features/review/*`, `apps/web/src/features/audit/*`, `apps/web/src/shared/api/*`, `apps/web/src/test/*`, `apps/api/src/content_factory_api/modules/avatars.py`, `apps/api/src/content_factory_api/modules/schemas.py`, `apps/api/tests/test_control_plane.py`
-- **Changes:** protected cockpit shell, session bootstrap, hash navigation, asset upload UI через storage proxy, avatar identity screens, content lifecycle, review queue approve/rework flow и audit view реализованы; typed API client подключен к `packages/contracts`; backend дополнен identity-pack list endpoint
-- **TDD:** Vitest component/integration tests покрывают auth bootstrap и полный pilot cockpit flow `brand -> asset -> avatar -> identity pack -> content -> plan -> review -> approve -> audit`; browser smoke в реальном браузере все еще pending
-- **Gates:** `make lint-web` ✅ | `make typecheck-web` ✅ | `make test-web` ✅ | real-browser smoke scenario pending
+- **Files:** `apps/web/src/app/*`, `apps/web/src/app/routes.ts`, `apps/web/src/features/auth/*`, `apps/web/src/features/brands-assets/*`, `apps/web/src/features/avatars/*`, `apps/web/src/features/content/*`, `apps/web/src/features/review/*`, `apps/web/src/features/audit/*`, `apps/web/src/shared/api/*`, `apps/web/src/test/*`, `apps/web/e2e/cockpit.smoke.e2e.ts`, `apps/web/playwright.config.ts`, `apps/web/package.json`, `apps/web/tsconfig.node.json`, `package.json`, `Makefile`, `.gitignore`, `apps/api/src/content_factory_api/modules/avatars.py`, `apps/api/src/content_factory_api/modules/schemas.py`, `apps/api/tests/test_control_plane.py`
+- **Changes:** protected cockpit shell, session bootstrap, hash navigation, asset upload UI через storage proxy, avatar identity screens, content lifecycle, review queue approve/rework flow и audit view реализованы; typed API client подключен к `packages/contracts`; backend дополнен identity-pack list endpoint; добавлен Playwright smoke для полного pilot lifecycle на живых local API/storage
+- **TDD:** Vitest component/integration tests покрывают auth bootstrap и cockpit lifecycle; Playwright smoke покрывает реальный browser flow `login/bootstrap -> create brand -> upload asset -> create avatar -> identity pack -> create content -> plan -> review -> approve -> audit`
+- **Gates:** `make lint-web` ✅ | `make typecheck-web` ✅ | `make test-web` ✅ | `make test-web-e2e` ✅ | `make test-api` ✅
 - **Impact:** дает первый end-to-end control-plane контур без media generation
 - **Prompt for launch:**
   ```text
@@ -82,3 +83,4 @@
 | 2026-05-06 | workspace-bootstrap | Реализован bootstrap monorepo, web/api/worker baseline, infra compose и contract generation pipeline |
 | 2026-05-06 | domain-control-plane-api | Реализованы SQLAlchemy/Alembic domain model, invite-only auth/RBAC, presigned asset upload, content/review lifecycle, audit logs и обновленные OpenAPI contracts |
 | 2026-05-06 | cockpit-ui | Реализован защищенный cockpit UI, typed API client, Vite API/storage proxy, identity-pack list endpoint и Vitest flow через cockpit lifecycle |
+| 2026-05-06 | cockpit-browser-smoke | Добавлен Playwright smoke, `make test-web-e2e` gate и завершен real-browser verification для полного pilot lifecycle |

@@ -371,6 +371,19 @@ button:focus-visible {
   margin: 0;
 }
 
+.json-preview {
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid rgba(82, 96, 109, 0.14);
+  border-radius: 18px;
+  background: rgba(31, 41, 51, 0.04);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  margin: 0.85rem 0 0;
+  padding: 0.85rem;
+  white-space: pre-wrap;
+}
+
 .empty-state {
   border: 1px dashed rgba(82, 96, 109, 0.22);
   border-radius: 22px;

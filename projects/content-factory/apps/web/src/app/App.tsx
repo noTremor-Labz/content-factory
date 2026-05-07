@@ -7,10 +7,17 @@ import { AuditPanel } from "../features/audit/AuditPanel";
 import { AvatarsPanel } from "../features/avatars/AvatarsPanel";
 import { BrandsAssetsPanel } from "../features/brands-assets/BrandsAssetsPanel";
 import { ContentPanel } from "../features/content/ContentPanel";
+import { RenderPanel } from "../features/render/RenderPanel";
 import { ReviewPanel } from "../features/review/ReviewPanel";
 import { webEnv } from "../config/env";
 import { apiClient, describeApiBase, isApiError } from "../shared/api/client";
-import { emptyCockpitData, type AuthSession, type CockpitData, type UserRole } from "../shared/api/types";
+import {
+  emptyCockpitData,
+  type AuthSession,
+  type CockpitData,
+  type RenderJob,
+  type UserRole,
+} from "../shared/api/types";
 import { formatDateTime } from "../shared/format";
 import { cockpitRoutes, normalizeCockpitRoute, toCockpitHash, type CockpitRouteId } from "./routes";
 
@@ -18,6 +25,11 @@ type SessionState =
   | { kind: "loading" }
   | { kind: "anonymous" }
   | { kind: "authenticated"; session: AuthSession };
+
+interface RenderJobStatusEvent {
+  event: "render_job.snapshot";
+  render_job: RenderJob;
+}
 
 function canMutateRole(role: UserRole): boolean {
   return role === "owner" || role === "operator";
@@ -72,6 +84,10 @@ function nextStepForData(data: CockpitData): string {
     return "Review queue has open decisions waiting for a human approver.";
   }
 
+  if (countByStatus(data.contentItems, "approved") > 0 && data.renderJobs.length === 0) {
+    return "Approved content is ready for its first render job.";
+  }
+
   return "Cockpit is ready for the next operator pass.";
 }
 
@@ -83,15 +99,26 @@ export function App() {
   const [screenError, setScreenError] = useState<string | null>(null);
   const [flashMessage, setFlashMessage] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [liveRenderJobId, setLiveRenderJobId] = useState<string | null>(null);
 
   const refreshCockpit = useCallback(async (role: UserRole) => {
-    const [brandsResponse, avatarsResponse, assetsResponse, contentResponse, reviewResponse] =
+    const [
+      brandsResponse,
+      avatarsResponse,
+      assetsResponse,
+      contentResponse,
+      reviewResponse,
+      workflowPresetsResponse,
+      renderJobsResponse,
+    ] =
       await Promise.all([
         apiClient.listBrands(),
         apiClient.listAvatars(),
         apiClient.listAssets(),
         apiClient.listContentItems(),
         apiClient.listReviewTasks(),
+        apiClient.listWorkflowPresets(),
+        apiClient.listRenderJobs(),
       ]);
 
     const identityPackLists = await Promise.all(
@@ -118,6 +145,8 @@ export function App() {
         contentItems: contentResponse.items,
         reviewTasks: reviewResponse.items,
         auditLogs,
+        workflowPresets: workflowPresetsResponse.items,
+        renderJobs: renderJobsResponse.items,
       });
     });
   }, []);
@@ -172,6 +201,38 @@ export function App() {
     window.addEventListener("hashchange", syncRoute);
     return () => window.removeEventListener("hashchange", syncRoute);
   }, []);
+
+  useEffect(() => {
+    if (
+      sessionState.kind !== "authenticated" ||
+      liveRenderJobId === null ||
+      typeof EventSource === "undefined"
+    ) {
+      return;
+    }
+
+    const source = new EventSource(apiClient.renderJobEventsUrl(liveRenderJobId), {
+      withCredentials: true,
+    });
+    const handleSnapshot = (event: MessageEvent<string>) => {
+      const payload = JSON.parse(event.data) as RenderJobStatusEvent;
+      setCockpitData((current) => ({
+        ...current,
+        renderJobs: [
+          payload.render_job,
+          ...current.renderJobs.filter((renderJob) => renderJob.id !== payload.render_job.id),
+        ],
+      }));
+
+      if (["succeeded", "failed", "cancelled"].includes(payload.render_job.status)) {
+        source.close();
+      }
+    };
+
+    source.addEventListener("render_job.snapshot", handleSnapshot as EventListener);
+    source.onerror = () => source.close();
+    return () => source.close();
+  }, [liveRenderJobId, sessionState.kind]);
 
   async function completeAuthentication(session: AuthSession, successMessage: string) {
     setScreenError(null);
@@ -354,7 +415,7 @@ export function App() {
         <article className="metric-card surface">
           <span className="metric-label">Drafts in system</span>
           <strong>{cockpitData.contentItems.length}</strong>
-          <p>Content items across draft, plan, review, and approval states.</p>
+          <p>Content items across lifecycle states. Render jobs: {cockpitData.renderJobs.length}.</p>
         </article>
       </section>
 
@@ -526,6 +587,25 @@ export function App() {
                 )
               }
               reviewTasks={cockpitData.reviewTasks}
+            />
+          ) : null}
+
+          {route === "render" ? (
+            <RenderPanel
+              busy={busyLabel !== null}
+              canMutate={canMutate}
+              contentItems={cockpitData.contentItems}
+              identityPacks={cockpitData.identityPacks}
+              onCreateRenderJob={(payload) =>
+                runCockpitMutation(
+                  "create render job",
+                  () => apiClient.createRenderJob(payload),
+                  "Render job created.",
+                )
+              }
+              onSelectRenderJob={setLiveRenderJobId}
+              renderJobs={cockpitData.renderJobs}
+              workflowPresets={cockpitData.workflowPresets}
             />
           ) : null}
 

@@ -21,9 +21,12 @@ import type {
   LoginRequest,
   Invite,
   InviteCreateRequest,
+  RenderJob,
+  RenderJobCreateRequest,
   ReviewDecisionRequest,
   ReviewTask,
   User,
+  WorkflowPreset,
 } from "./types";
 
 export class ApiError extends Error {
@@ -208,6 +211,21 @@ export const apiClient = {
   },
   listReviewTasks() {
     return getList<ReviewTask>("/api/review/tasks");
+  },
+  listWorkflowPresets() {
+    return getList<WorkflowPreset>("/api/workflow-presets");
+  },
+  listRenderJobs() {
+    return getList<RenderJob>("/api/render-jobs");
+  },
+  getRenderJob(renderJobId: string) {
+    return requestJson<RenderJob>(`/api/render-jobs/${renderJobId}`);
+  },
+  createRenderJob(payload: RenderJobCreateRequest) {
+    return postJson<RenderJobCreateRequest, RenderJob>("/api/render-jobs", payload);
+  },
+  renderJobEventsUrl(renderJobId: string) {
+    return resolveApiUrl(`/api/render-jobs/${renderJobId}/events`);
   },
   approveReviewTask(taskId: string, payload: ReviewDecisionRequest) {
     return postJson<ReviewDecisionRequest, ReviewTask>(`/api/review/tasks/${taskId}/approve`, payload);

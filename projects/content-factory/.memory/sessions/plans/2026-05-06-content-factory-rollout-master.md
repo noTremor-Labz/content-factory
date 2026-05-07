@@ -24,13 +24,13 @@
 | 1 | Стек и repo topology не зафиксированы | Зафиксировать ADR и базовую monorepo-структуру | pending |
 | 2 | Нет поэтапного delivery path | Разделить реализацию на 4 последовательных этапа | pending |
 | 3 | Review/compliance могут оказаться "поздним модулем" | Встроить review lifecycle с фазы 1, compliance engine с фазы 3 | pending |
-| 4 | Async render pipeline не определен | Ввести worker-слой, provider adapters и render job lifecycle | pending |
+| 4 | Async render pipeline не определен | Ввести worker-слой, provider adapters и render job lifecycle | in_progress / execution + live status complete |
 | 5 | Нет baseline infra и gates | Зафиксировать local/dev topology, CI и quality gates | pending |
 
 ## Phases
 
 ### Phase 1: Foundation And Control Plane
-- **Status:** in_progress
+- **Status:** completed
 - **Files:** `.memory/sessions/plans/2026-05-06-content-factory-phase-1-control-plane.md`, будущие `apps/web`, `apps/api`, `apps/worker`, `packages/contracts`, `infra`
 - **Changes:** bootstrap monorepo, auth, RBAC, asset intake, avatar/content CRUD, review queue skeleton, audit trail, local infra, CI baseline
 - **TDD:** API tests для auth/RBAC/content state, frontend tests для cockpit shell и review queue, smoke E2E для login/upload/review
@@ -50,10 +50,10 @@
   ```
 
 ### Phase 2: Production Pipeline And Render Integration
-- **Status:** pending
+- **Status:** in_progress
 - **Files:** `.memory/sessions/plans/2026-05-06-content-factory-phase-2-production-pipeline.md`, будущие pipeline/render/export модули в `apps/api`, `apps/worker`, `apps/web`
-- **Changes:** workflow presets, provider adapters, render jobs, retries, live job status, FFmpeg packaging, publish package export
-- **TDD:** integration tests с ComfyUI mock adapter, worker orchestration tests, UI tests для queue/job detail/export flow
+- **Changes:** workflow presets, provider adapters, render jobs, worker attempt lifecycle/retries, live job status, FFmpeg packaging, publish package export
+- **TDD:** ComfyUI executor tests, worker orchestration tests, API SSE tests, UI tests для queue/job detail/export flow
 - **Gates:** phase 1 gates ✅ | worker integration suite ✅ | packaging/export regression suite ✅
 - **Impact:** впервые соединяет control plane с render plane, влияет на storage, queueing и domain state machine
 - **Prompt for launch:**
@@ -116,3 +116,7 @@
 | 2026-05-06 | planning | Создан master rollout и отдельные phase-планы для pilot implementation |
 | 2026-05-06 | phase-1-bootstrap | Начата реализация Phase 1: поднят monorepo bootstrap, local infra baseline и OpenAPI contract generation |
 | 2026-05-06 | phase-1-control-plane-api | Продолжена реализация Phase 1: добавлены auth/RBAC, domain model, Alembic migration, upload/review/audit API и обновленные contracts |
+| 2026-05-06 | phase-1-browser-smoke | Phase 1 закрыта Playwright smoke automation и live browser verification |
+| 2026-05-06 | phase-2-render-contract-layer | Phase 2 начата: добавлены workflow presets, render jobs/job attempts, provider registry и regenerated API contracts |
+| 2026-05-07 | phase-2-worker-orchestration | Добавлены Dramatiq enqueue, worker attempt lifecycle, retry budget enforcement и regenerated contracts |
+| 2026-05-07 | phase-2-provider-live-status | Добавлены ComfyUI HTTP executor, render job SSE stream, cockpit Render route и regenerated contracts |

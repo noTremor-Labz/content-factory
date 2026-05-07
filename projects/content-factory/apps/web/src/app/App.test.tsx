@@ -97,6 +97,56 @@ interface MockAuditLog {
   created_at: string;
 }
 
+interface MockWorkflowPreset {
+  id: string;
+  key: string;
+  version: number;
+  name: string;
+  description: string | null;
+  workflow_provider: "comfyui";
+  voice_provider: "none";
+  packaging_provider: "ffmpeg";
+  workflow_definition: Record<string, unknown>;
+  input_mapping: Record<string, unknown>;
+  output_mapping: Record<string, unknown>;
+  created_by_user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface MockJobAttempt {
+  id: string;
+  render_job_id: string;
+  attempt_number: number;
+  status: "queued" | "running" | "succeeded" | "failed" | "cancelled";
+  provider_job_id: string | null;
+  request_payload: Record<string, unknown>;
+  response_payload: Record<string, unknown>;
+  error_message: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface MockRenderJob {
+  id: string;
+  content_item_id: string;
+  workflow_preset_id: string;
+  workflow_preset_key: string;
+  workflow_preset_version: number;
+  workflow_provider: "comfyui";
+  voice_provider: "none";
+  packaging_provider: "ffmpeg";
+  input_snapshot: Record<string, unknown>;
+  status: "queued" | "running" | "succeeded" | "failed" | "cancelled";
+  retry_budget: number;
+  created_by_user_id: string;
+  created_at: string;
+  updated_at: string;
+  attempts: MockJobAttempt[];
+}
+
 interface MockApiState {
   session: MockSession | null;
   brands: MockBrand[];
@@ -106,6 +156,8 @@ interface MockApiState {
   contentItems: MockContentItem[];
   reviewTasks: MockReviewTask[];
   auditLogs: MockAuditLog[];
+  workflowPresets: MockWorkflowPreset[];
+  renderJobs: MockRenderJob[];
 }
 
 type RouteHandler = (
@@ -143,6 +195,25 @@ function createOwnerSession(): MockSession {
   };
 }
 
+function createWorkflowPreset(): MockWorkflowPreset {
+  return {
+    id: "workflow-preset-1",
+    key: "pilot-reels",
+    version: 1,
+    name: "Pilot Reels",
+    description: "Primary short-form render preset.",
+    workflow_provider: "comfyui",
+    voice_provider: "none",
+    packaging_provider: "ffmpeg",
+    workflow_definition: { nodes: {} },
+    input_mapping: { script_text: { source_type: "content_item", source_field: "script" } },
+    output_mapping: { video_file: { artifact_type: "video", output_path: "outputs.video" } },
+    created_by_user_id: "user-owner",
+    created_at: nowIso(0),
+    updated_at: nowIso(0),
+  };
+}
+
 function installMockApi(initialState: Partial<MockApiState> = {}) {
   const state: MockApiState = {
     session: initialState.session ?? null,
@@ -153,6 +224,8 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
     contentItems: initialState.contentItems ?? [],
     reviewTasks: initialState.reviewTasks ?? [],
     auditLogs: initialState.auditLogs ?? [],
+    workflowPresets: initialState.workflowPresets ?? [],
+    renderJobs: initialState.renderJobs ?? [],
   };
 
   let sequence = 0;
@@ -512,6 +585,73 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
           return jsonResponse(reviewTask);
         },
       ],
+      ["GET", /^\/api\/workflow-presets$/, async () => jsonResponse({ items: state.workflowPresets })],
+      ["GET", /^\/api\/render-jobs$/, async () => jsonResponse({ items: state.renderJobs })],
+      [
+        "GET",
+        /^\/api\/render-jobs\/[^/]+$/,
+        async (matchedPath) => {
+          const renderJobId = matchedPath.split("/")[3];
+          const renderJob = state.renderJobs.find((item) => item.id === renderJobId);
+
+          if (!renderJob) {
+            return jsonResponse({ detail: "Render job not found" }, 404);
+          }
+
+          return jsonResponse(renderJob);
+        },
+      ],
+      [
+        "POST",
+        /^\/api\/render-jobs$/,
+        async (_path, requestOptions) => {
+          const body = JSON.parse(String(requestOptions?.body));
+          const contentItem = state.contentItems.find((item) => item.id === body.content_item_id);
+          const workflowPreset = state.workflowPresets.find(
+            (item) => item.id === body.workflow_preset_id,
+          );
+
+          if (!contentItem || !workflowPreset) {
+            return jsonResponse({ detail: "Render job could not be created" }, 404);
+          }
+
+          const renderJobId = nextId("render");
+          const attempt: MockJobAttempt = {
+            id: nextId("attempt"),
+            render_job_id: renderJobId,
+            attempt_number: 1,
+            status: "queued",
+            provider_job_id: null,
+            request_payload: { inputs: { script_text: contentItem.script } },
+            response_payload: {},
+            error_message: null,
+            started_at: null,
+            finished_at: null,
+            created_at: nowIso(sequence),
+            updated_at: nowIso(sequence),
+          };
+          const renderJob: MockRenderJob = {
+            id: renderJobId,
+            content_item_id: contentItem.id,
+            workflow_preset_id: workflowPreset.id,
+            workflow_preset_key: workflowPreset.key,
+            workflow_preset_version: workflowPreset.version,
+            workflow_provider: workflowPreset.workflow_provider,
+            voice_provider: workflowPreset.voice_provider,
+            packaging_provider: workflowPreset.packaging_provider,
+            input_snapshot: { script_text: contentItem.script },
+            status: "queued",
+            retry_budget: body.retry_budget ?? 3,
+            created_by_user_id: state.session?.user.id ?? "system",
+            created_at: nowIso(sequence),
+            updated_at: nowIso(sequence),
+            attempts: [attempt],
+          };
+          state.renderJobs.unshift(renderJob);
+          recordAudit("render_job.created", "render_job", renderJob.id);
+          return jsonResponse(renderJob, 201);
+        },
+      ],
       [
         "GET",
         /^\/api\/audit\/logs$/,
@@ -569,8 +709,8 @@ describe("App", () => {
     ).toBeGreaterThan(0);
   });
 
-  test("runs the pilot cockpit flow from brand creation to approval", async () => {
-    installMockApi({ session: createOwnerSession() });
+  test("runs the pilot cockpit flow from brand creation to render queue", async () => {
+    installMockApi({ session: createOwnerSession(), workflowPresets: [createWorkflowPreset()] });
     window.location.hash = "#brands-assets";
 
     render(<App />);
@@ -660,5 +800,13 @@ describe("App", () => {
     await waitFor(() => {
       expect(screen.getByText(/review\.approved/i)).toBeVisible();
     });
+
+    fireEvent.click(screen.getByRole("button", { name: /^render$/i }));
+    expect(await screen.findByRole("heading", { name: /render queue/i })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: /create render job/i }));
+
+    expect(await screen.findByText(/render job created\./i)).toBeVisible();
+    expect((await screen.findAllByText(/pilot-reels v1/i)).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText(/^queued$/i)).length).toBeGreaterThan(0);
   });
 });

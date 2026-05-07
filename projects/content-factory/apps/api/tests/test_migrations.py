@@ -27,4 +27,7 @@ def test_alembic_upgrade_head_creates_control_plane_tables(tmp_path: Path) -> No
         "content_items",
         "review_tasks",
         "audit_logs",
+        "workflow_presets",
+        "render_jobs",
+        "job_attempts",
     }.issubset(table_names)

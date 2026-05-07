@@ -12,6 +12,8 @@ def test_worker_settings_use_local_defaults() -> None:
     assert settings.worker_name == "content-factory-worker"
     assert str(settings.redis_url) == "redis://localhost:6379/0"
     assert settings.worker_concurrency == 1
+    assert settings.comfyui_base_url is None
+    assert settings.comfyui_api_mode == "local"
 
 
 def test_worker_settings_reject_zero_concurrency(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -19,6 +21,14 @@ def test_worker_settings_reject_zero_concurrency(monkeypatch: pytest.MonkeyPatch
 
     with pytest.raises(ValidationError):
         get_worker_settings()
+
+
+def test_worker_settings_normalize_blank_comfyui_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("COMFYUI_BASE_URL", "  ")
+
+    settings = get_worker_settings()
+
+    assert settings.comfyui_base_url is None
 
 
 def test_worker_uses_stub_broker_in_test_environment() -> None:

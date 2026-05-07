@@ -1335,6 +1335,392 @@
         }
       }
     },
+    "/api/workflow-presets": {
+      "post": {
+        "tags": [
+          "workflows"
+        ],
+        "summary": "Create Workflow Preset",
+        "operationId": "create_workflow_preset_api_workflow_presets_post",
+        "parameters": [
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowPresetCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowPresetRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "workflows"
+        ],
+        "summary": "List Workflow Presets",
+        "operationId": "list_workflow_presets_api_workflow_presets_get",
+        "parameters": [
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowPresetListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workflow-presets/{workflow_preset_id}": {
+      "get": {
+        "tags": [
+          "workflows"
+        ],
+        "summary": "Get Workflow Preset",
+        "operationId": "get_workflow_preset_api_workflow_presets__workflow_preset_id__get",
+        "parameters": [
+          {
+            "name": "workflow_preset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Workflow Preset Id"
+            }
+          },
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowPresetRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/render-jobs": {
+      "post": {
+        "tags": [
+          "render"
+        ],
+        "summary": "Create Render Job",
+        "operationId": "create_render_job_api_render_jobs_post",
+        "parameters": [
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenderJobCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenderJobRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "render"
+        ],
+        "summary": "List Render Jobs",
+        "operationId": "list_render_jobs_api_render_jobs_get",
+        "parameters": [
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenderJobListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/render-jobs/{render_job_id}": {
+      "get": {
+        "tags": [
+          "render"
+        ],
+        "summary": "Get Render Job",
+        "operationId": "get_render_job_api_render_jobs__render_job_id__get",
+        "parameters": [
+          {
+            "name": "render_job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Render Job Id"
+            }
+          },
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenderJobRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/render-jobs/{render_job_id}/events": {
+      "get": {
+        "tags": [
+          "render"
+        ],
+        "summary": "Stream Render Job Events",
+        "operationId": "stream_render_job_events_api_render_jobs__render_job_id__events_get",
+        "parameters": [
+          {
+            "name": "render_job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Render Job Id"
+            }
+          },
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Server-sent render job status snapshots.",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/review/tasks": {
       "get": {
         "tags": [
@@ -2455,6 +2841,118 @@
         ],
         "title": "InviteCreateResponse"
       },
+      "JobAttemptRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "render_job_id": {
+            "type": "string",
+            "title": "Render Job Id"
+          },
+          "attempt_number": {
+            "type": "integer",
+            "title": "Attempt Number"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobAttemptStatus"
+          },
+          "provider_job_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Job Id"
+          },
+          "request_payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Request Payload"
+          },
+          "response_payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Response Payload"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "render_job_id",
+          "attempt_number",
+          "status",
+          "provider_job_id",
+          "request_payload",
+          "response_payload",
+          "error_message",
+          "started_at",
+          "finished_at",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "JobAttemptRead"
+      },
+      "JobAttemptStatus": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "running",
+          "succeeded",
+          "failed",
+          "cancelled"
+        ],
+        "title": "JobAttemptStatus"
+      },
       "LoginRequest": {
         "properties": {
           "email": {
@@ -2474,6 +2972,171 @@
           "password"
         ],
         "title": "LoginRequest"
+      },
+      "OutputArtifactType": {
+        "type": "string",
+        "enum": [
+          "video",
+          "cover_image",
+          "caption_text",
+          "manifest"
+        ],
+        "title": "OutputArtifactType"
+      },
+      "PackagingProvider": {
+        "type": "string",
+        "enum": [
+          "ffmpeg"
+        ],
+        "title": "PackagingProvider"
+      },
+      "RenderJobCreateRequest": {
+        "properties": {
+          "content_item_id": {
+            "type": "string",
+            "title": "Content Item Id"
+          },
+          "workflow_preset_id": {
+            "type": "string",
+            "title": "Workflow Preset Id"
+          },
+          "identity_pack_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Identity Pack Id"
+          },
+          "retry_budget": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Retry Budget",
+            "default": 3
+          }
+        },
+        "type": "object",
+        "required": [
+          "content_item_id",
+          "workflow_preset_id"
+        ],
+        "title": "RenderJobCreateRequest"
+      },
+      "RenderJobListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RenderJobRead"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "RenderJobListResponse"
+      },
+      "RenderJobRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "content_item_id": {
+            "type": "string",
+            "title": "Content Item Id"
+          },
+          "workflow_preset_id": {
+            "type": "string",
+            "title": "Workflow Preset Id"
+          },
+          "workflow_preset_key": {
+            "type": "string",
+            "title": "Workflow Preset Key"
+          },
+          "workflow_preset_version": {
+            "type": "integer",
+            "title": "Workflow Preset Version"
+          },
+          "workflow_provider": {
+            "$ref": "#/components/schemas/WorkflowProvider"
+          },
+          "voice_provider": {
+            "$ref": "#/components/schemas/VoiceProvider"
+          },
+          "packaging_provider": {
+            "$ref": "#/components/schemas/PackagingProvider"
+          },
+          "input_snapshot": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Input Snapshot"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RenderJobStatus"
+          },
+          "retry_budget": {
+            "type": "integer",
+            "title": "Retry Budget"
+          },
+          "created_by_user_id": {
+            "type": "string",
+            "title": "Created By User Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "attempts": {
+            "items": {
+              "$ref": "#/components/schemas/JobAttemptRead"
+            },
+            "type": "array",
+            "title": "Attempts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "content_item_id",
+          "workflow_preset_id",
+          "workflow_preset_key",
+          "workflow_preset_version",
+          "workflow_provider",
+          "voice_provider",
+          "packaging_provider",
+          "input_snapshot",
+          "status",
+          "retry_budget",
+          "created_by_user_id",
+          "created_at",
+          "updated_at",
+          "attempts"
+        ],
+        "title": "RenderJobRead"
+      },
+      "RenderJobStatus": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "running",
+          "succeeded",
+          "failed",
+          "cancelled"
+        ],
+        "title": "RenderJobStatus"
       },
       "ReviewDecisionRequest": {
         "properties": {
@@ -2745,6 +3408,263 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VoiceProvider": {
+        "type": "string",
+        "enum": [
+          "none"
+        ],
+        "title": "VoiceProvider"
+      },
+      "WorkflowInputBinding": {
+        "properties": {
+          "source_type": {
+            "$ref": "#/components/schemas/WorkflowInputSourceType"
+          },
+          "source_field": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Field"
+          },
+          "value": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_type"
+        ],
+        "title": "WorkflowInputBinding"
+      },
+      "WorkflowInputSourceType": {
+        "type": "string",
+        "enum": [
+          "content_item",
+          "brand",
+          "avatar",
+          "identity_pack",
+          "literal"
+        ],
+        "title": "WorkflowInputSourceType"
+      },
+      "WorkflowOutputBinding": {
+        "properties": {
+          "artifact_type": {
+            "$ref": "#/components/schemas/OutputArtifactType"
+          },
+          "output_path": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Output Path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "artifact_type",
+          "output_path"
+        ],
+        "title": "WorkflowOutputBinding"
+      },
+      "WorkflowPresetCreateRequest": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 3,
+            "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$",
+            "title": "Key"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 10000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "workflow_provider": {
+            "$ref": "#/components/schemas/WorkflowProvider"
+          },
+          "voice_provider": {
+            "$ref": "#/components/schemas/VoiceProvider"
+          },
+          "packaging_provider": {
+            "$ref": "#/components/schemas/PackagingProvider"
+          },
+          "workflow_definition": {
+            "additionalProperties": true,
+            "type": "object",
+            "minProperties": 1,
+            "title": "Workflow Definition"
+          },
+          "input_mapping": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/WorkflowInputBinding"
+            },
+            "type": "object",
+            "minProperties": 1,
+            "title": "Input Mapping"
+          },
+          "output_mapping": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/WorkflowOutputBinding"
+            },
+            "type": "object",
+            "minProperties": 1,
+            "title": "Output Mapping"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "name",
+          "workflow_provider",
+          "voice_provider",
+          "packaging_provider",
+          "workflow_definition",
+          "input_mapping",
+          "output_mapping"
+        ],
+        "title": "WorkflowPresetCreateRequest"
+      },
+      "WorkflowPresetListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WorkflowPresetRead"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "WorkflowPresetListResponse"
+      },
+      "WorkflowPresetRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "workflow_provider": {
+            "$ref": "#/components/schemas/WorkflowProvider"
+          },
+          "voice_provider": {
+            "$ref": "#/components/schemas/VoiceProvider"
+          },
+          "packaging_provider": {
+            "$ref": "#/components/schemas/PackagingProvider"
+          },
+          "workflow_definition": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Workflow Definition"
+          },
+          "input_mapping": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/WorkflowInputBinding"
+            },
+            "type": "object",
+            "title": "Input Mapping"
+          },
+          "output_mapping": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/WorkflowOutputBinding"
+            },
+            "type": "object",
+            "title": "Output Mapping"
+          },
+          "created_by_user_id": {
+            "type": "string",
+            "title": "Created By User Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "key",
+          "version",
+          "name",
+          "description",
+          "workflow_provider",
+          "voice_provider",
+          "packaging_provider",
+          "workflow_definition",
+          "input_mapping",
+          "output_mapping",
+          "created_by_user_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "WorkflowPresetRead"
+      },
+      "WorkflowProvider": {
+        "type": "string",
+        "enum": [
+          "comfyui"
+        ],
+        "title": "WorkflowProvider"
       }
     }
   }

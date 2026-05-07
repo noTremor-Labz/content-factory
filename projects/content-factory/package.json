@@ -6,6 +6,7 @@
     "lint-web": "pnpm --dir apps/web lint",
     "typecheck-web": "pnpm --dir apps/web typecheck",
     "test-web": "pnpm --dir apps/web test --run",
+    "test-web-e2e": "pnpm --dir apps/web test:e2e",
     "generate-contracts": "make generate-contracts"
   }
 }

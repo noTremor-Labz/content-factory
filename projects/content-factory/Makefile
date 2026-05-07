@@ -5,7 +5,7 @@ PYTHON_SOURCES := apps/api/src apps/api/tests apps/worker/src apps/worker/tests
 PYTHON_TYPECHECK_SOURCES := apps/api/src apps/worker/src
 OPENAPI_OUTPUT := packages/contracts/openapi/content-factory.openapi.json
 
-.PHONY: install install-node install-python lint-web typecheck-web test-web lint-api typecheck-api test-api migrate-api dev-web dev-api export-openapi generate-contracts
+.PHONY: install install-node install-python lint-web typecheck-web test-web test-web-e2e lint-api typecheck-api test-api migrate-api dev-web dev-api export-openapi generate-contracts
 
 install: install-node install-python
 
@@ -25,6 +25,9 @@ typecheck-web:
 
 test-web:
 	pnpm --dir apps/web test --run
+
+test-web-e2e:
+	pnpm --dir apps/web test:e2e
 
 lint-api:
 	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON_BIN) -m ruff check $(PYTHON_SOURCES)
