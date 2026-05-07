@@ -399,6 +399,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/compliance/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Compliance Rules */
+        get: operations["list_compliance_rules_api_compliance_rules_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/compliance/checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Compliance Checks */
+        get: operations["list_compliance_checks_api_compliance_checks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/compliance/content-items/{content_item_id}/checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rerun Compliance Check */
+        post: operations["rerun_compliance_check_api_compliance_content_items__content_item_id__checks_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/workflow-presets": {
         parameters: {
             query?: never;
@@ -899,6 +950,97 @@ export interface components {
              */
             updated_at: string;
         };
+        /** ComplianceCheckListResponse */
+        ComplianceCheckListResponse: {
+            /** Items */
+            items: components["schemas"]["ComplianceCheckRead"][];
+        };
+        /** ComplianceCheckRead */
+        ComplianceCheckRead: {
+            /** Id */
+            id: string;
+            /** Content Item Id */
+            content_item_id: string;
+            status: components["schemas"]["ComplianceCheckStatus"];
+            /** Risk Score */
+            risk_score: number;
+            /** Flags */
+            flags: components["schemas"]["ComplianceFlagRead"][];
+            /** Summary */
+            summary: string;
+            /** Evaluated By User Id */
+            evaluated_by_user_id: string | null;
+            /**
+             * Evaluated At
+             * Format: date-time
+             */
+            evaluated_at: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * ComplianceCheckStatus
+         * @enum {string}
+         */
+        ComplianceCheckStatus: "passed" | "flagged" | "failed";
+        /** ComplianceFlagRead */
+        ComplianceFlagRead: {
+            /** Rule Key */
+            rule_key: string;
+            severity: components["schemas"]["ComplianceRuleSeverity"];
+            /** Reason Code */
+            reason_code: string;
+            /** Message */
+            message: string;
+            /** Matched Terms */
+            matched_terms: string[];
+        };
+        /** ComplianceRuleListResponse */
+        ComplianceRuleListResponse: {
+            /** Items */
+            items: components["schemas"]["ComplianceRuleRead"][];
+        };
+        /** ComplianceRuleRead */
+        ComplianceRuleRead: {
+            /** Id */
+            id: string;
+            /** Key */
+            key: string;
+            /** Name */
+            name: string;
+            /** Description */
+            description: string | null;
+            severity: components["schemas"]["ComplianceRuleSeverity"];
+            /** Reason Code */
+            reason_code: string;
+            /** Pattern */
+            pattern: string;
+            /** Enabled */
+            enabled: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * ComplianceRuleSeverity
+         * @enum {string}
+         */
+        ComplianceRuleSeverity: "hard_fail" | "soft_flag";
         /**
          * ContentChannel
          * @enum {string}
@@ -1231,6 +1373,8 @@ export interface components {
         ReviewDecisionRequest: {
             /** Decision Notes */
             decision_notes?: string | null;
+            /** Compliance Override Reason */
+            compliance_override_reason?: string | null;
         };
         /** ReviewTaskListResponse */
         ReviewTaskListResponse: {
@@ -1248,6 +1392,10 @@ export interface components {
             status: components["schemas"]["ReviewTaskStatus"];
             /** Decision Notes */
             decision_notes: string | null;
+            /** Compliance Check Id */
+            compliance_check_id: string | null;
+            /** Compliance Override Reason */
+            compliance_override_reason: string | null;
             /** Completed At */
             completed_at: string | null;
             /**
@@ -2278,6 +2426,101 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReviewTaskRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_compliance_rules_api_compliance_rules_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComplianceRuleListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_compliance_checks_api_compliance_checks_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComplianceCheckListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rerun_compliance_check_api_compliance_content_items__content_item_id__checks_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                content_item_id: string;
+            };
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComplianceCheckRead"];
                 };
             };
             /** @description Validation Error */

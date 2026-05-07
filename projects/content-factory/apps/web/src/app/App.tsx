@@ -16,6 +16,8 @@ import {
   emptyCockpitData,
   type AuthSession,
   type CockpitData,
+  type ComplianceCheck,
+  type ContentItem,
   type RenderJob,
   type UserRole,
 } from "../shared/api/types";
@@ -68,6 +70,29 @@ function countByStatus<TItem extends { status: string }>(items: TItem[], status:
   return items.filter((item) => item.status === status).length;
 }
 
+function latestComplianceCheckForContent(
+  complianceChecks: ComplianceCheck[],
+  contentItemId: string,
+): ComplianceCheck | null {
+  return (
+    complianceChecks
+      .filter((check) => check.content_item_id === contentItemId)
+      .sort((left, right) => right.created_at.localeCompare(left.created_at))[0] ?? null
+  );
+}
+
+function hasFinalComplianceDecision(
+  contentItem: ContentItem | undefined,
+  complianceChecks: ComplianceCheck[],
+): boolean {
+  if (!contentItem || contentItem.status !== "approved") {
+    return false;
+  }
+
+  const check = latestComplianceCheckForContent(complianceChecks, contentItem.id);
+  return check?.status === "passed" || check?.status === "flagged";
+}
+
 function nextStepForData(data: CockpitData): string {
   if (data.brands.length === 0) {
     return "Create the first brand to open the intake and drafting loop.";
@@ -85,12 +110,23 @@ function nextStepForData(data: CockpitData): string {
     return "Review queue has open decisions waiting for a human approver.";
   }
 
+  if (countByStatus(data.complianceChecks, "failed") > 0) {
+    return "Compliance has hard failures that need a rework decision.";
+  }
+
   if (countByStatus(data.contentItems, "approved") > 0 && data.renderJobs.length === 0) {
     return "Approved content is ready for its first render job.";
   }
 
   if (
-    data.renderJobs.some((renderJob) => renderJob.status === "succeeded") &&
+    data.renderJobs.some(
+      (renderJob) =>
+        renderJob.status === "succeeded" &&
+        hasFinalComplianceDecision(
+          data.contentItems.find((item) => item.id === renderJob.content_item_id),
+          data.complianceChecks,
+        ),
+    ) &&
     data.publishPackages.length === 0
   ) {
     return "Succeeded renders are ready for export packaging.";
@@ -116,6 +152,7 @@ export function App() {
       assetsResponse,
       contentResponse,
       reviewResponse,
+      complianceChecksResponse,
       workflowPresetsResponse,
       renderJobsResponse,
       publishPackagesResponse,
@@ -126,6 +163,7 @@ export function App() {
         apiClient.listAssets(),
         apiClient.listContentItems(),
         apiClient.listReviewTasks(),
+        apiClient.listComplianceChecks(),
         apiClient.listWorkflowPresets(),
         apiClient.listRenderJobs(),
         apiClient.listPublishPackages(),
@@ -154,6 +192,7 @@ export function App() {
         assets: assetsResponse.items,
         contentItems: contentResponse.items,
         reviewTasks: reviewResponse.items,
+        complianceChecks: complianceChecksResponse.items,
         auditLogs,
         workflowPresets: workflowPresetsResponse.items,
         renderJobs: renderJobsResponse.items,
@@ -582,12 +621,24 @@ export function App() {
             <ReviewPanel
               busy={busyLabel !== null}
               canReview={canReview}
+              complianceChecks={cockpitData.complianceChecks}
               contentItems={cockpitData.contentItems}
-              onApprove={(taskId, decisionNotes) =>
+              onApprove={(taskId, decisionNotes, complianceOverrideReason) =>
                 runCockpitMutation(
                   "approve review",
-                  () => apiClient.approveReviewTask(taskId, { decision_notes: decisionNotes }),
+                  () =>
+                    apiClient.approveReviewTask(taskId, {
+                      decision_notes: decisionNotes,
+                      compliance_override_reason: complianceOverrideReason,
+                    }),
                   "Review task approved.",
+                )
+              }
+              onRerunCompliance={(contentItemId) =>
+                runCockpitMutation(
+                  "rerun compliance",
+                  () => apiClient.rerunComplianceCheck(contentItemId),
+                  "Compliance check refreshed.",
                 )
               }
               onRequestRework={(taskId, decisionNotes) =>
@@ -645,6 +696,7 @@ export function App() {
             <ExportPanel
               busy={busyLabel !== null}
               canMutate={canMutate}
+              complianceChecks={cockpitData.complianceChecks}
               contentItems={cockpitData.contentItems}
               onCreatePackage={(renderJobId) =>
                 runCockpitMutation(

@@ -27,6 +27,8 @@ def test_alembic_upgrade_head_creates_control_plane_tables(tmp_path: Path) -> No
         "content_items",
         "review_tasks",
         "audit_logs",
+        "compliance_checks",
+        "compliance_rules",
         "workflow_presets",
         "render_jobs",
         "job_attempts",

@@ -1,7 +1,7 @@
 # Context: Content Factory
 
 **Last updated:** 2026-05-07
-**Status:** phase 2 complete at code-contract level / dev watchdog added / local FFmpeg binary install still pending / compliance and metrics next
+**Status:** phase 3 compliance gate complete / metrics and economics next / local FFmpeg binary install still pending
 
 ## Stack
 
@@ -66,11 +66,18 @@ See:
 - Worker publish packaging now downloads same-bucket render video artifacts, runs them through an injectable FFmpeg normalizer, includes normalized `video.mp4` in the ZIP bundle, and records `normalized_artifacts` metadata in the manifest.
 - Worker settings now include `FFMPEG_PATH` and `FFMPEG_TIMEOUT_SECONDS`; tests use fake normalizers so local verification does not require a real FFmpeg binary.
 - Local/dev service recovery now has `scripts/dev_watchdog.py` and `make dev-watchdog`, monitoring infra/API/web and starting unhealthy parts through existing project commands.
+- Phase 3 compliance gate is now implemented:
+  - API has seeded deterministic `ComplianceRule` records, persisted `ComplianceCheck` records, risk flags, risk scores, and list/rerun endpoints under `/api/compliance`;
+  - `submit-review` runs a compliance check and links the open review task to it;
+  - review approval is blocked when the latest check is missing, has hard failures, or has soft flags without an explicit reviewer override reason;
+  - publish package create/retry and worker package processing now require approved content to have a final compliance decision;
+  - Web Review shows compliance status/risk/flags and an override field for soft flags;
+  - Web Export only offers succeeded approved renders whose content has a final compliance decision.
 - Local cockpit debugging stack is currently restored and verified:
   - Vite frontend on `127.0.0.1:5173`;
   - FastAPI on `0.0.0.0:8000`;
   - Docker Compose infra on `5432`, `6379`, `9000`, `9001`;
-  - dev Postgres migrated through `20260507_0004_publish_packages`;
+  - dev Postgres migrated through `20260507_0005_compliance_gate`;
   - browser smoke passed against `PLAYWRIGHT_BASE_URL=http://127.0.0.1:5173`.
 
 ## Recent Decisions
@@ -95,15 +102,16 @@ See:
 - 2026-05-07: Re-ran live Playwright cockpit smoke on `127.0.0.1:5173` after operator action UI changes; smoke passed.
 - 2026-05-07: Added Phase 2 FFmpeg media normalization contract with S3 artifact download, ZIP `video.mp4`, manifest `normalized_artifacts`, worker settings, and packaging tests.
 - 2026-05-07: Added local dev watchdog with dry-run/once modes, infra/API/web checks, managed API/web restart, Make target, docs, and tests.
+- 2026-05-07: Added Phase 3 compliance gate with seeded deterministic rules, persisted checks/risk flags, review approval blocking, soft-flag override, export/worker package defense-in-depth, reviewer/export UI summaries, regenerated contracts, and dev DB migration to `20260507_0005`.
 
 ## Known Issues
 
 - Local/worker runtime still needs a real `ffmpeg` binary installed before real media packages can become `ready`; without it package processing fails cleanly with an explicit error.
 - The dev watchdog is local/dev tooling only and does not replace future production supervision. It only terminates API/web processes it started itself.
-- Compliance engine, metrics, and direct package worker runtime operation remain future phases.
+- Metrics/economics, analytics dashboards, and direct package worker runtime operation remain future phases.
 - ComfyUI adapter submits the stored workflow definition and persists provider output payloads; richer input-to-node mutation remains a future preset mapping enhancement.
 - Publish-package ZIPs now include normalized `video.mp4` when FFmpeg runtime is available; cover-image copying and richer platform-specific media validation remain future enhancements.
-- Compliance requirements for vape/nicotine-adjacent content still need legal review before pilot launch.
+- Compliance rules are deterministic MVP guardrails, not legal advice; vape/nicotine-adjacent requirements still need legal review before pilot launch.
 - Cloud vendor selection is still open, but the reference topology is now fixed in planning artifacts.
 
 ## Environment
@@ -117,14 +125,14 @@ See:
   - API proxy target: `http://localhost:8000`;
   - infra: Postgres `5432`, Redis `6379`, MinIO `9000/9001`.
   - See `.memory/sessions/2026-05-07-codex-local-dev-stack-debug.md` for the recovery report.
-  - On 2026-05-07 this stack was migrated to include `publish_packages` and re-smoke-tested.
+  - On 2026-05-07 this stack was migrated through `20260507_0005_compliance_gate`; last browser smoke was before this compliance slice.
 
 ## Recommended Next Step
 
-Continue after `Phase 2 / Production Pipeline And Render Integration` with:
-- `.memory/sessions/plans/2026-05-06-content-factory-phase-2-production-pipeline.md`
+Continue Phase 3 after the compliance gate with:
+- `.memory/sessions/plans/2026-05-06-content-factory-phase-3-compliance-metrics.md`
 - `.memory/sessions/specs/2026-05-06-content-factory-pilot-implementation-rollout.md`
 - `.memory/sessions/plans/2026-05-06-content-factory-rollout-master.md`
-- immediate next slice: begin `Phase 3 / Compliance, Metrics, And Economics`, or install/provision `ffmpeg` in the worker runtime if real media-package execution is needed before Phase 3
+- immediate next slice: `Phase 3 / Metrics Import And Economics Tracking`, or install/provision `ffmpeg` in the worker runtime if real media-package execution is needed first
 
-Latest handoff: `.memory/sessions/2026-05-07-codex-dev-service-watchdog.md`.
+Latest handoff: `.memory/sessions/2026-05-07-codex-compliance-gate.md`.

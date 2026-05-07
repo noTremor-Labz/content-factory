@@ -1,10 +1,16 @@
 import { useState } from "react";
 
-import type { ContentItem, PublishPackage, RenderJob } from "../../shared/api/types";
+import type {
+  ComplianceCheck,
+  ContentItem,
+  PublishPackage,
+  RenderJob,
+} from "../../shared/api/types";
 import { formatDateTime, formatStatus } from "../../shared/format";
 
 interface ExportPanelProps {
   contentItems: ContentItem[];
+  complianceChecks: ComplianceCheck[];
   publishPackages: PublishPackage[];
   renderJobs: RenderJob[];
   canMutate: boolean;
@@ -22,6 +28,7 @@ const requeueablePackageStatuses = new Set(["queued"]);
 
 export function ExportPanel({
   contentItems,
+  complianceChecks,
   publishPackages,
   renderJobs,
   canMutate,
@@ -42,7 +49,9 @@ export function ExportPanel({
     const contentItem = contentItems.find((item) => item.id === renderJob.content_item_id);
     return (
       renderJob.status === "succeeded" &&
-      contentItem?.status === "approved" &&
+      contentItem !== undefined &&
+      contentItem.status === "approved" &&
+      hasFinalComplianceDecision(complianceChecks, contentItem.id) &&
       !packagedRenderJobIds.has(renderJob.id)
     );
   });
@@ -96,21 +105,31 @@ export function ExportPanel({
           {eligibleRenderJobs.length === 0 ? (
             <p className="empty-state">No succeeded approved renders waiting for package export.</p>
           ) : (
-            eligibleRenderJobs.map((renderJob) => (
-              <article className="list-card" key={renderJob.id}>
+            eligibleRenderJobs.map((renderJob) => {
+              const contentItem = contentItems.find((item) => item.id === renderJob.content_item_id);
+              const complianceCheck = contentItem
+                ? latestComplianceCheckForContent(complianceChecks, contentItem.id)
+                : null;
+
+              return (
+                <article className="list-card" key={renderJob.id}>
                 <div className="list-card-header">
                   <div>
                     <h3>{renderJob.workflow_preset_key} v{renderJob.workflow_preset_version}</h3>
-                    <p className="meta-copy">
-                      {contentItems.find((item) => item.id === renderJob.content_item_id)?.title ??
-                        renderJob.content_item_id}
-                    </p>
+                    <p className="meta-copy">{contentItem?.title ?? renderJob.content_item_id}</p>
                   </div>
                   <span className="status-badge">{formatStatus(renderJob.status)}</span>
                 </div>
                 <p className="meta-copy">Updated {formatDateTime(renderJob.updated_at)}</p>
-              </article>
-            ))
+                {complianceCheck ? (
+                  <p className="meta-copy">
+                    Compliance {formatStatus(complianceCheck.status)} · Risk{" "}
+                    {complianceCheck.risk_score}/100
+                  </p>
+                ) : null}
+                </article>
+              );
+            })
           )}
         </div>
       </section>
@@ -222,4 +241,23 @@ export function ExportPanel({
       </section>
     </div>
   );
+}
+
+function latestComplianceCheckForContent(
+  complianceChecks: ComplianceCheck[],
+  contentItemId: string,
+): ComplianceCheck | null {
+  return (
+    complianceChecks
+      .filter((check) => check.content_item_id === contentItemId)
+      .sort((left, right) => right.created_at.localeCompare(left.created_at))[0] ?? null
+  );
+}
+
+function hasFinalComplianceDecision(
+  complianceChecks: ComplianceCheck[],
+  contentItemId: string,
+): boolean {
+  const check = latestComplianceCheckForContent(complianceChecks, contentItemId);
+  return check?.status === "passed" || check?.status === "flagged";
 }

@@ -12,6 +12,7 @@ import type {
   BootstrapOwnerRequest,
   Brand,
   BrandCreateRequest,
+  ComplianceCheck,
   ContentItem,
   ContentItemCreateRequest,
   ContentPlanRequest,
@@ -214,6 +215,14 @@ export const apiClient = {
   },
   listReviewTasks() {
     return getList<ReviewTask>("/api/review/tasks");
+  },
+  listComplianceChecks() {
+    return getList<ComplianceCheck>("/api/compliance/checks");
+  },
+  rerunComplianceCheck(contentItemId: string) {
+    return requestJson<ComplianceCheck>(`/api/compliance/content-items/${contentItemId}/checks`, {
+      method: "POST",
+    });
   },
   listWorkflowPresets() {
     return getList<WorkflowPreset>("/api/workflow-presets");

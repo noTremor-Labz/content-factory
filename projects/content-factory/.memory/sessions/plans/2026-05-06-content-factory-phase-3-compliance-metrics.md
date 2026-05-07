@@ -21,8 +21,8 @@
 
 | # | Problem | Solution | Status |
 |---|---------|----------|--------|
-| 1 | Нет встроенной policy-модели | Ввести `ComplianceRule`, `ComplianceCheck`, `RiskFlag`, `ReviewDecision` | pending |
-| 2 | Нет объяснимого risk score | Комбинировать deterministic rules и soft-risk scoring с reason codes | pending |
+| 1 | Нет встроенной policy-модели | Ввести `ComplianceRule`, `ComplianceCheck`, `RiskFlag`, `ReviewDecision` | completed / deterministic MVP gate, persisted checks, and review override |
+| 2 | Нет объяснимого risk score | Комбинировать deterministic rules и soft-risk scoring с reason codes | completed / seeded rules, risk score, reason-coded flags |
 | 3 | Нет метрик публикаций | Начать с manual CSV import и mapping на `MetricSnapshot` | pending |
 | 4 | Не считаются cost/retry economics | Ввести стоимость попыток, full cost per final asset и approve-rate tracking | pending |
 | 5 | Нет аналитического интерфейса | Собрать dashboards для KPI, economics и playbook winners | pending |
@@ -30,7 +30,7 @@
 ## Phases
 
 ### Phase 1: Compliance Engine And Approval Gates
-- **Status:** pending
+- **Status:** completed / deterministic MVP gate
 - **Files:** `apps/api/app/modules/compliance/*`, `apps/api/app/modules/review/*`, `apps/worker/app/jobs/compliance/*`, `packages/contracts/*`, `apps/web/src/features/compliance/*`
 - **Changes:** реализовать hard-rule checks для запрещенных паттернов, soft-risk scoring с reason codes, risk score persistence, блокировку publish/export без финального review decision, compliance summary в UI
 - **TDD:** scenario tests на hard fails, soft flags и human override, permission tests на approve/rework flows, UI tests для reviewer screens
@@ -79,3 +79,4 @@
 | Date | Phase | Changes |
 |------|-------|---------|
 | 2026-05-06 | planning | Сформирован подробный plan для compliance, metrics и economics |
+| 2026-05-07 | phase-3-compliance-gate | Добавлены seeded deterministic compliance rules, persisted checks/risk flags, review approval blocking, soft override, API/worker export gates, reviewer/export UI summaries, regenerated contracts |

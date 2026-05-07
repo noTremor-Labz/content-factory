@@ -10,12 +10,14 @@ from sqlalchemy.orm import Session
 from content_factory_api.config import get_settings
 from content_factory_api.database import get_sessionmaker, init_database, reset_database_caches
 from content_factory_api.modules.domain import (
+    ComplianceCheckStatus,
     ContentChannel,
     ContentStatus,
     JobAttemptStatus,
     PackagingProvider,
     PublishPackageStatus,
     RenderJobStatus,
+    ReviewTaskStatus,
     UserRole,
     UserStatus,
     VoiceProvider,
@@ -24,10 +26,12 @@ from content_factory_api.modules.domain import (
 from content_factory_api.modules.models import (
     Avatar,
     Brand,
+    ComplianceCheck,
     ContentItem,
     JobAttempt,
     PublishPackage,
     RenderJob,
+    ReviewTask,
     User,
     WorkflowPreset,
 )
@@ -228,6 +232,35 @@ def test_cancelled_publish_package_is_not_processed(db_session: Session) -> None
     assert storage.objects == {}
 
 
+def test_process_publish_package_requires_final_compliance_decision(db_session: Session) -> None:
+    video_reference = "s3://content-factory-assets/renders/video.mp4"
+    publish_package = _seed_publish_package(
+        db_session,
+        response_payload={
+            "outputs": {
+                "video_file": video_reference,
+                "cover_file": "s3://content-factory-assets/renders/cover.jpg",
+            }
+        },
+        with_compliance_decision=False,
+    )
+
+    outcome = process_publish_package(
+        publish_package.id,
+        db_session=db_session,
+        packager=ZipPublishPackager(
+            storage=MemoryPackageStorage(artifacts={video_reference: b"raw render video"}),
+            media_normalizer=FakeMediaNormalizer(),
+        ),
+    )
+
+    db_session.refresh(publish_package)
+    assert outcome.status == "failed"
+    assert publish_package.status == PublishPackageStatus.FAILED.value
+    assert publish_package.error_message is not None
+    assert "compliance" in publish_package.error_message.lower()
+
+
 def test_ffmpeg_media_normalizer_reports_missing_binary() -> None:
     normalizer = FfmpegMediaNormalizer(
         ffmpeg_path="/definitely/missing/content-factory-ffmpeg",
@@ -245,6 +278,7 @@ def _seed_publish_package(
     db_session: Session,
     *,
     response_payload: dict[str, object],
+    with_compliance_decision: bool = True,
 ) -> PublishPackage:
     user = User(
         email="owner@inflave.test",
@@ -284,6 +318,26 @@ def _seed_publish_package(
     )
     db_session.add(content_item)
     db_session.flush()
+
+    if with_compliance_decision:
+        compliance_check = ComplianceCheck(
+            content_item_id=content_item.id,
+            status=ComplianceCheckStatus.PASSED.value,
+            risk_score=0,
+            flags=[],
+            summary="No compliance flags detected.",
+            evaluated_by_user_id=user.id,
+        )
+        db_session.add(compliance_check)
+        db_session.flush()
+        review_task = ReviewTask(
+            content_item_id=content_item.id,
+            status=ReviewTaskStatus.APPROVED.value,
+            decision_notes="Approved for manual publishing.",
+            compliance_check_id=compliance_check.id,
+        )
+        db_session.add(review_task)
+        db_session.flush()
 
     workflow_preset = WorkflowPreset(
         key="pilot-reels",

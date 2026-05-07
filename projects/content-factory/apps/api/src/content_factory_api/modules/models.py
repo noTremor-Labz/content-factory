@@ -4,13 +4,15 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, DateTime, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from content_factory_api.database import Base
 from content_factory_api.modules.domain import (
     AssetStatus,
     AvatarStatus,
+    ComplianceCheckStatus,
+    ComplianceRuleSeverity,
     ContentChannel,
     ContentStatus,
     IdentityPackStatus,
@@ -205,6 +207,49 @@ class ContentItem(TimestampMixin, Base):
     )
 
 
+class ComplianceRule(TimestampMixin, Base):
+    __tablename__ = "compliance_rules"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    key: Mapped[str] = mapped_column(String(120), unique=True, index=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    severity: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default=ComplianceRuleSeverity.SOFT_FLAG.value,
+    )
+    reason_code: Mapped[str] = mapped_column(String(120), nullable=False)
+    pattern: Mapped[str] = mapped_column(Text, nullable=False)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+
+class ComplianceCheck(TimestampMixin, Base):
+    __tablename__ = "compliance_checks"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    content_item_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("content_items.id"),
+        index=True,
+        nullable=False,
+    )
+    status: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default=ComplianceCheckStatus.PASSED.value,
+    )
+    risk_score: Mapped[int] = mapped_column(nullable=False, default=0)
+    flags: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list, nullable=False)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+    evaluated_by_user_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("users.id"),
+        nullable=True,
+    )
+    evaluated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+
+
 class ReviewTask(TimestampMixin, Base):
     __tablename__ = "review_tasks"
 
@@ -226,6 +271,12 @@ class ReviewTask(TimestampMixin, Base):
         default=ReviewTaskStatus.OPEN.value,
     )
     decision_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    compliance_check_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("compliance_checks.id"),
+        nullable=True,
+    )
+    compliance_override_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 

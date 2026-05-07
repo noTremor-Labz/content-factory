@@ -8,6 +8,8 @@ export type Avatar = components["schemas"]["AvatarRead"];
 export type IdentityPack = components["schemas"]["IdentityPackRead"];
 export type Asset = components["schemas"]["AssetRead"];
 export type ReviewTask = components["schemas"]["ReviewTaskRead"];
+export type ComplianceCheck = components["schemas"]["ComplianceCheckRead"];
+export type ComplianceRule = components["schemas"]["ComplianceRuleRead"];
 export type ContentItem = components["schemas"]["ContentItemRead"];
 export type ContentChannel = components["schemas"]["ContentChannel"];
 export type AuditLog = components["schemas"]["AuditLogRead"];
@@ -20,6 +22,7 @@ export type InviteCreateResponse = components["schemas"]["InviteCreateResponse"]
 export type UploadTarget = components["schemas"]["UploadTargetRead"];
 export type AssetUploadInitiateResponse = components["schemas"]["AssetUploadInitiateResponse"];
 export type PublishPackageDownloadResponse = components["schemas"]["PublishPackageDownloadResponse"];
+export type ComplianceCheckListResponse = components["schemas"]["ComplianceCheckListResponse"];
 
 export type BootstrapOwnerRequest = components["schemas"]["BootstrapOwnerRequest"];
 export type LoginRequest = components["schemas"]["LoginRequest"];
@@ -43,6 +46,7 @@ export interface CockpitData {
   assets: Asset[];
   contentItems: ContentItem[];
   reviewTasks: ReviewTask[];
+  complianceChecks: ComplianceCheck[];
   auditLogs: AuditLog[];
   workflowPresets: WorkflowPreset[];
   renderJobs: RenderJob[];
@@ -56,6 +60,7 @@ export const emptyCockpitData: CockpitData = {
   assets: [],
   contentItems: [],
   reviewTasks: [],
+  complianceChecks: [],
   auditLogs: [],
   workflowPresets: [],
   renderJobs: [],

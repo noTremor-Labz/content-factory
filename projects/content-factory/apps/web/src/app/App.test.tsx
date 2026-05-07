@@ -82,7 +82,30 @@ interface MockReviewTask {
   assigned_to_user_id: string | null;
   status: "open" | "approved" | "rework" | "cancelled";
   decision_notes: string | null;
+  compliance_check_id: string | null;
+  compliance_override_reason: string | null;
   completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface MockComplianceFlag {
+  rule_key: string;
+  severity: "hard_fail" | "soft_flag";
+  reason_code: string;
+  message: string;
+  matched_terms: string[];
+}
+
+interface MockComplianceCheck {
+  id: string;
+  content_item_id: string;
+  status: "passed" | "flagged" | "failed";
+  risk_score: number;
+  flags: MockComplianceFlag[];
+  summary: string;
+  evaluated_by_user_id: string | null;
+  evaluated_at: string;
   created_at: string;
   updated_at: string;
 }
@@ -169,6 +192,7 @@ interface MockApiState {
   assets: MockAsset[];
   contentItems: MockContentItem[];
   reviewTasks: MockReviewTask[];
+  complianceChecks: MockComplianceCheck[];
   auditLogs: MockAuditLog[];
   workflowPresets: MockWorkflowPreset[];
   renderJobs: MockRenderJob[];
@@ -229,6 +253,21 @@ function createWorkflowPreset(): MockWorkflowPreset {
   };
 }
 
+function createPassedComplianceCheck(contentItemId: string): MockComplianceCheck {
+  return {
+    id: `compliance-${contentItemId}`,
+    content_item_id: contentItemId,
+    status: "passed",
+    risk_score: 0,
+    flags: [],
+    summary: "No compliance flags detected.",
+    evaluated_by_user_id: "user-owner",
+    evaluated_at: nowIso(0),
+    created_at: nowIso(0),
+    updated_at: nowIso(0),
+  };
+}
+
 function installMockApi(initialState: Partial<MockApiState> = {}) {
   const state: MockApiState = {
     session: initialState.session ?? null,
@@ -238,6 +277,7 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
     assets: initialState.assets ?? [],
     contentItems: initialState.contentItems ?? [],
     reviewTasks: initialState.reviewTasks ?? [],
+    complianceChecks: initialState.complianceChecks ?? [],
     auditLogs: initialState.auditLogs ?? [],
     workflowPresets: initialState.workflowPresets ?? [],
     renderJobs: initialState.renderJobs ?? [],
@@ -261,6 +301,63 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
       payload: {},
       created_at: nowIso(sequence),
     });
+  }
+
+  function createComplianceCheck(contentItem: MockContentItem): MockComplianceCheck {
+    const text = `${contentItem.title}\n${contentItem.script}`.toLowerCase();
+    const flags: MockComplianceFlag[] = [];
+    if (/(buy|promo code|totally safe|under 18|school)/.test(text)) {
+      flags.push({
+        rule_key: "direct_purchase_cta",
+        severity: "hard_fail",
+        reason_code: "direct_purchase_cta",
+        message: "Direct purchase or promo CTA is not allowed for the pilot.",
+        matched_terms: ["buy"],
+      });
+    }
+    if (/(vape|nicotine|inflave)/.test(text)) {
+      flags.push({
+        rule_key: "nicotine_or_vape_reference",
+        severity: "soft_flag",
+        reason_code: "nicotine_or_vape_reference",
+        message: "Nicotine or vape-adjacent placement requires reviewer attention.",
+        matched_terms: ["vape"],
+      });
+    }
+
+    const hasHardFail = flags.some((flag) => flag.severity === "hard_fail");
+    const complianceCheck: MockComplianceCheck = {
+      id: nextId("compliance"),
+      content_item_id: contentItem.id,
+      status: hasHardFail ? "failed" : flags.length > 0 ? "flagged" : "passed",
+      risk_score: hasHardFail ? 100 : flags.length > 0 ? 40 : 0,
+      flags,
+      summary: hasHardFail
+        ? "1 hard compliance failure(s) detected."
+        : flags.length > 0
+          ? "1 soft compliance flag(s) require reviewer override."
+          : "No compliance flags detected.",
+      evaluated_by_user_id: state.session?.user.id ?? null,
+      evaluated_at: nowIso(sequence),
+      created_at: nowIso(sequence),
+      updated_at: nowIso(sequence),
+    };
+    state.complianceChecks.unshift(complianceCheck);
+    recordAudit("compliance.check_completed", "compliance_check", complianceCheck.id);
+    return complianceCheck;
+  }
+
+  function latestComplianceCheck(contentItemId: string): MockComplianceCheck | null {
+    return (
+      state.complianceChecks
+        .filter((check) => check.content_item_id === contentItemId)
+        .sort((left, right) => right.created_at.localeCompare(left.created_at))[0] ?? null
+    );
+  }
+
+  function hasFinalComplianceDecision(contentItemId: string): boolean {
+    const check = latestComplianceCheck(contentItemId);
+    return check?.status === "passed" || check?.status === "flagged";
   }
 
   const fetchMock = vi.fn(async (input: string | URL | Request, options?: RequestInit) => {
@@ -525,6 +622,7 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
             return jsonResponse({ detail: "Content item not found" }, 404);
           }
 
+          const complianceCheck = createComplianceCheck(contentItem);
           contentItem.status = "review";
           contentItem.updated_at = nowIso(sequence);
           const reviewTask: MockReviewTask = {
@@ -533,6 +631,8 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
             assigned_to_user_id: null,
             status: "open",
             decision_notes: null,
+            compliance_check_id: complianceCheck.id,
+            compliance_override_reason: null,
             completed_at: null,
             created_at: nowIso(sequence),
             updated_at: nowIso(sequence),
@@ -543,6 +643,23 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
         },
       ],
       ["GET", /^\/api\/review\/tasks$/, async () => jsonResponse({ items: state.reviewTasks })],
+      [
+        "GET",
+        /^\/api\/compliance\/checks$/,
+        async () => jsonResponse({ items: state.complianceChecks }),
+      ],
+      [
+        "POST",
+        /^\/api\/compliance\/content-items\/[^/]+\/checks$/,
+        async (matchedPath) => {
+          const contentItemId = matchedPath.split("/")[4];
+          const contentItem = state.contentItems.find((item) => item.id === contentItemId);
+          if (!contentItem) {
+            return jsonResponse({ detail: "Content item not found" }, 404);
+          }
+          return jsonResponse(createComplianceCheck(contentItem), 201);
+        },
+      ],
       [
         "POST",
         /^\/api\/review\/tasks\/[^/]+\/approve$/,
@@ -562,12 +679,34 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
             return jsonResponse({ detail: "Content item not found" }, 404);
           }
 
+          const complianceCheck = latestComplianceCheck(contentItem.id);
+          if (!complianceCheck) {
+            return jsonResponse({ detail: "Compliance check is required before review approval" }, 409);
+          }
+          if (complianceCheck.status === "failed") {
+            return jsonResponse(
+              { detail: "Compliance check has hard failures and cannot be approved" },
+              409,
+            );
+          }
+          if (complianceCheck.status === "flagged" && !body.compliance_override_reason) {
+            return jsonResponse(
+              { detail: "Compliance soft flags require an explicit override reason" },
+              409,
+            );
+          }
+
           reviewTask.status = "approved";
           reviewTask.decision_notes = body.decision_notes ?? null;
+          reviewTask.compliance_check_id = complianceCheck.id;
+          reviewTask.compliance_override_reason = body.compliance_override_reason ?? null;
           reviewTask.completed_at = nowIso(sequence);
           reviewTask.updated_at = nowIso(sequence);
           contentItem.status = "approved";
           contentItem.updated_at = nowIso(sequence);
+          if (reviewTask.compliance_override_reason) {
+            recordAudit("review.compliance_override", "review_task", reviewTask.id);
+          }
           recordAudit("review.approved", "review_task", reviewTask.id);
           return jsonResponse(reviewTask);
         },
@@ -774,6 +913,16 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
           const renderJob = state.renderJobs.find((item) => item.id === body.render_job_id);
           if (!renderJob || renderJob.status !== "succeeded") {
             return jsonResponse({ detail: "Render job must succeed before package export" }, 409);
+          }
+          const contentItem = state.contentItems.find((item) => item.id === renderJob.content_item_id);
+          if (contentItem?.status !== "approved") {
+            return jsonResponse({ detail: "Content item must be approved before package export" }, 409);
+          }
+          if (!hasFinalComplianceDecision(contentItem.id)) {
+            return jsonResponse(
+              { detail: "Content item requires a compliance check before package export" },
+              409,
+            );
           }
 
           const existingPackage = state.publishPackages.find(
@@ -1086,6 +1235,7 @@ describe("App", () => {
     installMockApi({
       session: createOwnerSession(),
       contentItems: [contentItem],
+      complianceChecks: [createPassedComplianceCheck(contentItem.id)],
       workflowPresets: [workflowPreset],
       renderJobs: [renderJob],
     });
@@ -1158,6 +1308,7 @@ describe("App", () => {
     installMockApi({
       session: createOwnerSession(),
       contentItems: [contentItem],
+      complianceChecks: [createPassedComplianceCheck(contentItem.id)],
       workflowPresets: [workflowPreset],
       renderJobs: [renderJob],
     });

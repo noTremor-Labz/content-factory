@@ -23,7 +23,7 @@
 |---|---------|----------|--------|
 | 1 | Стек и repo topology не зафиксированы | Зафиксировать ADR и базовую monorepo-структуру | pending |
 | 2 | Нет поэтапного delivery path | Разделить реализацию на 4 последовательных этапа | pending |
-| 3 | Review/compliance могут оказаться "поздним модулем" | Встроить review lifecycle с фазы 1, compliance engine с фазы 3 | pending |
+| 3 | Review/compliance могут оказаться "поздним модулем" | Встроить review lifecycle с фазы 1, compliance engine с фазы 3 | completed / review lifecycle and compliance gate implemented |
 | 4 | Async render pipeline не определен | Ввести worker-слой, provider adapters и render job lifecycle | completed / execution, live status, publish package export, operator actions, and media normalization contract complete |
 | 5 | Нет baseline infra и gates | Зафиксировать local/dev topology, CI и quality gates | pending |
 
@@ -70,9 +70,9 @@
   ```
 
 ### Phase 3: Compliance, Metrics, And Economics
-- **Status:** pending
+- **Status:** in_progress / compliance gate complete
 - **Files:** `.memory/sessions/plans/2026-05-06-content-factory-phase-3-compliance-metrics.md`, будущие compliance/analytics modules в `apps/api`, `apps/web`, `apps/worker`
-- **Changes:** hard-rule compliance engine, soft-risk scoring, manual metrics import, cost/retry accounting, dashboards, playbook loop
+- **Changes:** hard-rule compliance engine ✅, soft-risk scoring ✅, manual metrics import, cost/retry accounting, dashboards, playbook loop
 - **TDD:** rule-engine tests, import parser tests, cost aggregation tests, frontend analytics screen tests
 - **Gates:** previous gates ✅ | compliance scenario suite ✅ | metrics import suite ✅ | analytics regression suite ✅
 - **Impact:** добавляет regulatory gates, KPI visibility и economics tracking поверх уже работающего pipeline
@@ -123,3 +123,4 @@
 | 2026-05-07 | phase-2-publish-package-export | Добавлены package export API/model, worker ZIP manifest packaging, cockpit Export route и regenerated contracts |
 | 2026-05-07 | phase-2-operator-job-actions | Добавлены operator retry/cancel/requeue actions для render jobs и publish packages, worker cancellation guards, cockpit controls и regenerated contracts |
 | 2026-05-07 | phase-2-ffmpeg-media-normalization | Добавлены S3 artifact download, FFmpeg normalization contract, ZIP `video.mp4`, manifest metadata и worker tests |
+| 2026-05-07 | phase-3-compliance-gate | Добавлены deterministic compliance rules/checks, hard/soft approval gates, soft override, export/package defense-in-depth, reviewer/export UI summaries и regenerated contracts |

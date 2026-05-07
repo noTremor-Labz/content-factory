@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from content_factory_api.database import get_db_session
+from content_factory_api.modules.compliance import validate_compliance_for_review_approval
 from content_factory_api.modules.dependencies import get_current_user, require_roles
 from content_factory_api.modules.domain import (
     REVIEW_DECISION_ROLES,
@@ -44,17 +45,46 @@ def approve_review_task(
 ) -> ReviewTask:
     task = _get_open_review_task(db_session, task_id)
     content_item = get_by_id_or_404(db_session, ContentItem, task.content_item_id, "Content item")
+    compliance_check = validate_compliance_for_review_approval(
+        db_session,
+        content_item=content_item,
+        compliance_override_reason=request.compliance_override_reason,
+    )
     content_item.status = ContentStatus.APPROVED.value
     task.status = ReviewTaskStatus.APPROVED.value
     task.decision_notes = request.decision_notes
+    task.compliance_check_id = compliance_check.id
+    task.compliance_override_reason = (
+        request.compliance_override_reason.strip()
+        if request.compliance_override_reason is not None
+        else None
+    )
     task.completed_at = utcnow()
+    if task.compliance_override_reason is not None:
+        write_audit_log(
+            db_session,
+            actor_user_id=current_user.id,
+            action="review.compliance_override",
+            entity_type="review_task",
+            entity_id=task.id,
+            payload={
+                "content_item_id": content_item.id,
+                "compliance_check_id": compliance_check.id,
+                "reason": task.compliance_override_reason,
+            },
+        )
     write_audit_log(
         db_session,
         actor_user_id=current_user.id,
         action="review.approved",
         entity_type="review_task",
         entity_id=task.id,
-        payload={"content_item_id": content_item.id},
+        payload={
+            "content_item_id": content_item.id,
+            "compliance_check_id": compliance_check.id,
+            "compliance_status": compliance_check.status,
+            "compliance_override": task.compliance_override_reason is not None,
+        },
     )
     db_session.commit()
     return task

@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from content_factory_api.database import get_db_session
+from content_factory_api.modules.compliance import run_compliance_check
 from content_factory_api.modules.dependencies import get_current_user, require_roles
 from content_factory_api.modules.domain import MUTATION_ROLES, ContentStatus, ReviewTaskStatus
 from content_factory_api.modules.models import Avatar, Brand, ContentItem, ReviewTask, User
@@ -129,10 +130,16 @@ def submit_content_item_for_review(
     if existing_task is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Review task already open")
 
+    compliance_check = run_compliance_check(
+        db_session,
+        content_item=content_item,
+        actor_user_id=current_user.id,
+    )
     content_item.status = ContentStatus.REVIEW.value
     review_task = ReviewTask(
         content_item_id=content_item.id,
         status=ReviewTaskStatus.OPEN.value,
+        compliance_check_id=compliance_check.id,
     )
     db_session.add(review_task)
     db_session.flush()

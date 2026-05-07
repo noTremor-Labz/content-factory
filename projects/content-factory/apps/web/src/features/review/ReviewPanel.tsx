@@ -1,26 +1,37 @@
 import { useState } from "react";
 
 import { formatDateTime, formatStatus } from "../../shared/format";
-import type { ContentItem, ReviewTask } from "../../shared/api/types";
+import type { ComplianceCheck, ContentItem, ReviewTask } from "../../shared/api/types";
 
 interface ReviewPanelProps {
   reviewTasks: ReviewTask[];
+  complianceChecks: ComplianceCheck[];
   contentItems: ContentItem[];
   canReview: boolean;
   busy: boolean;
-  onApprove: (taskId: string, decisionNotes: string | null) => Promise<void>;
+  onApprove: (
+    taskId: string,
+    decisionNotes: string | null,
+    complianceOverrideReason: string | null,
+  ) => Promise<void>;
   onRequestRework: (taskId: string, decisionNotes: string | null) => Promise<void>;
+  onRerunCompliance: (contentItemId: string) => Promise<void>;
 }
 
 export function ReviewPanel({
   reviewTasks,
+  complianceChecks,
   contentItems,
   canReview,
   busy,
   onApprove,
   onRequestRework,
+  onRerunCompliance,
 }: ReviewPanelProps) {
   const [notesByTaskId, setNotesByTaskId] = useState<Record<string, string>>({});
+  const [overrideReasonsByTaskId, setOverrideReasonsByTaskId] = useState<Record<string, string>>(
+    {},
+  );
 
   return (
     <section className="surface panel-stack">
@@ -38,6 +49,14 @@ export function ReviewPanel({
         ) : (
           reviewTasks.map((task) => {
             const contentItem = contentItems.find((item) => item.id === task.content_item_id);
+            const complianceCheck = latestComplianceCheckForContent(
+              complianceChecks,
+              task.content_item_id,
+            );
+            const overrideReason = overrideReasonsByTaskId[task.id] ?? "";
+            const canApprove =
+              complianceCheck?.status === "passed" ||
+              (complianceCheck?.status === "flagged" && overrideReason.trim().length > 0);
 
             return (
               <article className="list-card" key={task.id}>
@@ -52,6 +71,10 @@ export function ReviewPanel({
                 <p className="meta-copy">
                   Decision notes: {task.decision_notes || "Pending reviewer decision"}
                 </p>
+                <ComplianceSummary
+                  check={complianceCheck}
+                  overrideReason={task.compliance_override_reason}
+                />
 
                 {canReview && task.status === "open" ? (
                   <div className="stack-form">
@@ -68,12 +91,33 @@ export function ReviewPanel({
                         }
                       />
                     </label>
+                    {complianceCheck?.status === "flagged" ? (
+                      <label>
+                        <span>Compliance override reason</span>
+                        <textarea
+                          rows={3}
+                          value={overrideReason}
+                          onChange={(event) =>
+                            setOverrideReasonsByTaskId((current) => ({
+                              ...current,
+                              [task.id]: event.target.value,
+                            }))
+                          }
+                        />
+                      </label>
+                    ) : null}
                     <div className="inline-action-row">
                       <button
                         className="primary-button"
-                        disabled={busy}
+                        disabled={busy || !canApprove}
                         type="button"
-                        onClick={() => onApprove(task.id, notesByTaskId[task.id] || null)}
+                        onClick={() =>
+                          onApprove(
+                            task.id,
+                            notesByTaskId[task.id] || null,
+                            overrideReason.trim() || null,
+                          )
+                        }
                       >
                         Approve
                       </button>
@@ -85,6 +129,16 @@ export function ReviewPanel({
                       >
                         Request rework
                       </button>
+                      {contentItem ? (
+                        <button
+                          className="secondary-button"
+                          disabled={busy}
+                          type="button"
+                          onClick={() => onRerunCompliance(contentItem.id)}
+                        >
+                          Rerun compliance
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 ) : null}
@@ -94,5 +148,53 @@ export function ReviewPanel({
         )}
       </div>
     </section>
+  );
+}
+
+function latestComplianceCheckForContent(
+  complianceChecks: ComplianceCheck[],
+  contentItemId: string,
+): ComplianceCheck | null {
+  return (
+    complianceChecks
+      .filter((check) => check.content_item_id === contentItemId)
+      .sort((left, right) => right.created_at.localeCompare(left.created_at))[0] ?? null
+  );
+}
+
+function ComplianceSummary({
+  check,
+  overrideReason,
+}: {
+  check: ComplianceCheck | null;
+  overrideReason: string | null;
+}) {
+  if (check === null) {
+    return <p className="banner error">Compliance check missing.</p>;
+  }
+
+  return (
+    <div className="compliance-summary">
+      <div className="list-card-header">
+        <div>
+          <span className="meta-label">Compliance</span>
+          <p className="meta-copy">
+            Risk {check.risk_score}/100 · {check.summary}
+          </p>
+        </div>
+        <span className="status-badge">{formatStatus(check.status)}</span>
+      </div>
+      {check.flags.length > 0 ? (
+        <ul className="flag-list">
+          {check.flags.map((flag) => (
+            <li key={`${flag.rule_key}-${flag.reason_code}`}>
+              <strong>{formatStatus(flag.severity)}</strong>
+              <span>{flag.message}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {overrideReason ? <p className="meta-copy">Override: {overrideReason}</p> : null}
+    </div>
   );
 }

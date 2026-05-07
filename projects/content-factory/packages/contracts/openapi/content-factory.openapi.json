@@ -1335,6 +1335,162 @@
         }
       }
     },
+    "/api/compliance/rules": {
+      "get": {
+        "tags": [
+          "compliance"
+        ],
+        "summary": "List Compliance Rules",
+        "operationId": "list_compliance_rules_api_compliance_rules_get",
+        "parameters": [
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceRuleListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/compliance/checks": {
+      "get": {
+        "tags": [
+          "compliance"
+        ],
+        "summary": "List Compliance Checks",
+        "operationId": "list_compliance_checks_api_compliance_checks_get",
+        "parameters": [
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceCheckListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/compliance/content-items/{content_item_id}/checks": {
+      "post": {
+        "tags": [
+          "compliance"
+        ],
+        "summary": "Rerun Compliance Check",
+        "operationId": "rerun_compliance_check_api_compliance_content_items__content_item_id__checks_post",
+        "parameters": [
+          {
+            "name": "content_item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Content Item Id"
+            }
+          },
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceCheckRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/workflow-presets": {
       "post": {
         "tags": [
@@ -3041,6 +3197,226 @@
         ],
         "title": "BrandRead"
       },
+      "ComplianceCheckListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceCheckRead"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "ComplianceCheckListResponse"
+      },
+      "ComplianceCheckRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "content_item_id": {
+            "type": "string",
+            "title": "Content Item Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ComplianceCheckStatus"
+          },
+          "risk_score": {
+            "type": "integer",
+            "title": "Risk Score"
+          },
+          "flags": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceFlagRead"
+            },
+            "type": "array",
+            "title": "Flags"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "evaluated_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluated By User Id"
+          },
+          "evaluated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Evaluated At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "content_item_id",
+          "status",
+          "risk_score",
+          "flags",
+          "summary",
+          "evaluated_by_user_id",
+          "evaluated_at",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ComplianceCheckRead"
+      },
+      "ComplianceCheckStatus": {
+        "type": "string",
+        "enum": [
+          "passed",
+          "flagged",
+          "failed"
+        ],
+        "title": "ComplianceCheckStatus"
+      },
+      "ComplianceFlagRead": {
+        "properties": {
+          "rule_key": {
+            "type": "string",
+            "title": "Rule Key"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/ComplianceRuleSeverity"
+          },
+          "reason_code": {
+            "type": "string",
+            "title": "Reason Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "matched_terms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Matched Terms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rule_key",
+          "severity",
+          "reason_code",
+          "message",
+          "matched_terms"
+        ],
+        "title": "ComplianceFlagRead"
+      },
+      "ComplianceRuleListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceRuleRead"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "ComplianceRuleListResponse"
+      },
+      "ComplianceRuleRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/ComplianceRuleSeverity"
+          },
+          "reason_code": {
+            "type": "string",
+            "title": "Reason Code"
+          },
+          "pattern": {
+            "type": "string",
+            "title": "Pattern"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "key",
+          "name",
+          "description",
+          "severity",
+          "reason_code",
+          "pattern",
+          "enabled",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ComplianceRuleRead"
+      },
+      "ComplianceRuleSeverity": {
+        "type": "string",
+        "enum": [
+          "hard_fail",
+          "soft_flag"
+        ],
+        "title": "ComplianceRuleSeverity"
+      },
       "ContentChannel": {
         "type": "string",
         "enum": [
@@ -3895,6 +4271,18 @@
               }
             ],
             "title": "Decision Notes"
+          },
+          "compliance_override_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 10000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compliance Override Reason"
           }
         },
         "type": "object",
@@ -3951,6 +4339,28 @@
             ],
             "title": "Decision Notes"
           },
+          "compliance_check_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compliance Check Id"
+          },
+          "compliance_override_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compliance Override Reason"
+          },
           "completed_at": {
             "anyOf": [
               {
@@ -3981,6 +4391,8 @@
           "assigned_to_user_id",
           "status",
           "decision_notes",
+          "compliance_check_id",
+          "compliance_override_reason",
           "completed_at",
           "created_at",
           "updated_at"

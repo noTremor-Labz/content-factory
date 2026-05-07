@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from content_factory_api.config import ApiSettings, get_settings
 from content_factory_api.database import get_db_session
+from content_factory_api.modules.compliance import ensure_final_compliance_decision_or_409
 from content_factory_api.modules.dependencies import get_current_user, require_roles
 from content_factory_api.modules.domain import (
     MUTATION_ROLES,
@@ -60,7 +61,11 @@ def create_publish_package(
         "Content item",
     )
 
-    _validate_export_inputs(render_job=render_job, content_item=content_item)
+    _validate_export_inputs(
+        db_session=db_session,
+        render_job=render_job,
+        content_item=content_item,
+    )
 
     existing_package = db_session.scalar(
         select(PublishPackage).where(PublishPackage.render_job_id == render_job.id)
@@ -170,7 +175,11 @@ def retry_publish_package(
         publish_package.content_item_id,
         "Content item",
     )
-    _validate_export_inputs(render_job=render_job, content_item=content_item)
+    _validate_export_inputs(
+        db_session=db_session,
+        render_job=render_job,
+        content_item=content_item,
+    )
 
     previous_status = publish_package.status
     publish_package.status = PublishPackageStatus.QUEUED.value
@@ -275,7 +284,12 @@ def _download_url(settings: ApiSettings, object_key: str) -> str:
     return cast(str, url)
 
 
-def _validate_export_inputs(*, render_job: RenderJob, content_item: ContentItem) -> None:
+def _validate_export_inputs(
+    *,
+    db_session: Session,
+    render_job: RenderJob,
+    content_item: ContentItem,
+) -> None:
     if render_job.status != RenderJobStatus.SUCCEEDED.value:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -287,3 +301,5 @@ def _validate_export_inputs(*, render_job: RenderJob, content_item: ContentItem)
             status_code=status.HTTP_409_CONFLICT,
             detail="Content item must be approved before package export",
         )
+
+    ensure_final_compliance_decision_or_409(db_session=db_session, content_item=content_item)

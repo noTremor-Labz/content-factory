@@ -6,6 +6,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from content_factory_api.modules.domain import (
     AssetStatus,
     AvatarStatus,
+    ComplianceCheckStatus,
+    ComplianceRuleSeverity,
     ContentChannel,
     ContentStatus,
     IdentityPackStatus,
@@ -292,6 +294,52 @@ class WorkflowPresetListResponse(BaseModel):
     items: list[WorkflowPresetRead]
 
 
+class ComplianceRuleRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    key: str
+    name: str
+    description: str | None
+    severity: ComplianceRuleSeverity
+    reason_code: str
+    pattern: str
+    enabled: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+class ComplianceRuleListResponse(BaseModel):
+    items: list[ComplianceRuleRead]
+
+
+class ComplianceFlagRead(BaseModel):
+    rule_key: str
+    severity: ComplianceRuleSeverity
+    reason_code: str
+    message: str
+    matched_terms: list[str]
+
+
+class ComplianceCheckRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    content_item_id: str
+    status: ComplianceCheckStatus
+    risk_score: int
+    flags: list[ComplianceFlagRead]
+    summary: str
+    evaluated_by_user_id: str | None
+    evaluated_at: datetime
+    created_at: datetime
+    updated_at: datetime
+
+
+class ComplianceCheckListResponse(BaseModel):
+    items: list[ComplianceCheckRead]
+
+
 class ContentItemRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -409,6 +457,8 @@ class ReviewTaskRead(BaseModel):
     assigned_to_user_id: str | None
     status: ReviewTaskStatus
     decision_notes: str | None
+    compliance_check_id: str | None
+    compliance_override_reason: str | None
     completed_at: datetime | None
     created_at: datetime
     updated_at: datetime
@@ -420,6 +470,7 @@ class ReviewTaskListResponse(BaseModel):
 
 class ReviewDecisionRequest(BaseModel):
     decision_notes: str | None = Field(default=None, max_length=10_000)
+    compliance_override_reason: str | None = Field(default=None, max_length=10_000)
 
 
 class AuditLogRead(BaseModel):

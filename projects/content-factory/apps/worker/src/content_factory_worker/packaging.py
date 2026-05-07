@@ -12,6 +12,10 @@ from zipfile import ZIP_DEFLATED, ZipFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from content_factory_api.modules.compliance import (
+    ComplianceGateError,
+    validate_final_compliance_decision,
+)
 from content_factory_api.modules.domain import (
     ContentStatus,
     JobAttemptStatus,
@@ -289,7 +293,12 @@ def process_publish_package(
         content_item = _get_content_item(db_session, publish_package.content_item_id)
         workflow_preset = _get_workflow_preset(db_session, render_job.workflow_preset_id)
         attempt = _latest_successful_attempt(db_session, render_job.id)
-        _validate_package_inputs(render_job=render_job, content_item=content_item, attempt=attempt)
+        _validate_package_inputs(
+            db_session=db_session,
+            render_job=render_job,
+            content_item=content_item,
+            attempt=attempt,
+        )
         assert attempt is not None
     except PublishPackageError as exc:
         return _fail_package(db_session, publish_package, str(exc))
@@ -404,6 +413,7 @@ def _latest_successful_attempt(db_session: Session, render_job_id: str) -> JobAt
 
 def _validate_package_inputs(
     *,
+    db_session: Session,
     render_job: RenderJob,
     content_item: ContentItem,
     attempt: JobAttempt | None,
@@ -412,6 +422,10 @@ def _validate_package_inputs(
         raise PublishPackageError("Render job must be succeeded before packaging")
     if content_item.status != ContentStatus.APPROVED.value:
         raise PublishPackageError("Content item must be approved before packaging")
+    try:
+        validate_final_compliance_decision(db_session, content_item=content_item)
+    except ComplianceGateError as exc:
+        raise PublishPackageError(str(exc)) from exc
     if attempt is None:
         raise PublishPackageError("Render job has no successful attempt to package")
 

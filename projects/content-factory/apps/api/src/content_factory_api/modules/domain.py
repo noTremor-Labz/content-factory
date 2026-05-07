@@ -100,5 +100,16 @@ class PublishPackageStatus(StrEnum):
     CANCELLED = "cancelled"
 
 
+class ComplianceRuleSeverity(StrEnum):
+    HARD_FAIL = "hard_fail"
+    SOFT_FLAG = "soft_flag"
+
+
+class ComplianceCheckStatus(StrEnum):
+    PASSED = "passed"
+    FLAGGED = "flagged"
+    FAILED = "failed"
+
+
 MUTATION_ROLES = (UserRole.OWNER, UserRole.OPERATOR)
 REVIEW_DECISION_ROLES = (UserRole.OWNER, UserRole.REVIEWER)
