@@ -13,6 +13,7 @@ from content_factory_api.modules.auth import router as auth_router
 from content_factory_api.modules.avatars import router as avatars_router
 from content_factory_api.modules.brands import router as brands_router
 from content_factory_api.modules.content import router as content_router
+from content_factory_api.modules.exports import router as exports_router
 from content_factory_api.modules.render import router as render_router
 from content_factory_api.modules.review import router as review_router
 from content_factory_api.modules.users import router as users_router
@@ -77,6 +78,7 @@ def create_app() -> FastAPI:
     app.include_router(content_router)
     app.include_router(workflows_router)
     app.include_router(render_router)
+    app.include_router(exports_router)
     app.include_router(review_router)
     app.include_router(audit_router)
     return app

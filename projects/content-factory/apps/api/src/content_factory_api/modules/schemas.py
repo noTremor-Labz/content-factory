@@ -12,6 +12,7 @@ from content_factory_api.modules.domain import (
     JobAttemptStatus,
     OutputArtifactType,
     PackagingProvider,
+    PublishPackageStatus,
     RenderJobStatus,
     ReviewTaskStatus,
     UserRole,
@@ -362,6 +363,42 @@ class RenderJobListResponse(BaseModel):
 class RenderJobStatusEvent(BaseModel):
     event: Literal["render_job.snapshot"] = "render_job.snapshot"
     render_job: RenderJobRead
+
+
+class PublishPackageCreateRequest(BaseModel):
+    render_job_id: str
+
+
+class PublishPackageRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    render_job_id: str
+    content_item_id: str
+    status: PublishPackageStatus
+    package_object_key: str | None
+    manifest_payload: dict[str, Any]
+    byte_size: int | None
+    error_message: str | None
+    created_by_user_id: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class PublishPackageListResponse(BaseModel):
+    items: list[PublishPackageRead]
+
+
+class DownloadTargetRead(BaseModel):
+    method: str
+    url: str
+    headers: dict[str, str]
+    expires_at: datetime
+
+
+class PublishPackageDownloadResponse(BaseModel):
+    package: PublishPackageRead
+    download: DownloadTargetRead
 
 
 class ReviewTaskRead(BaseModel):

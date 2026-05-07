@@ -13,3 +13,12 @@ def enqueue_render_job(render_job_id: str) -> Message[Any]:
     process_render_job_message.broker = broker
     broker.declare_actor(process_render_job_message)
     return process_render_job_message.send(render_job_id)
+
+
+def enqueue_publish_package(publish_package_id: str) -> Message[Any]:
+    broker = configure_broker(get_worker_settings())
+    from content_factory_worker.jobs.packaging import process_publish_package_message
+
+    process_publish_package_message.broker = broker
+    broker.declare_actor(process_publish_package_message)
+    return process_publish_package_message.send(publish_package_id)

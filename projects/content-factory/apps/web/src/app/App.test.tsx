@@ -147,6 +147,20 @@ interface MockRenderJob {
   attempts: MockJobAttempt[];
 }
 
+interface MockPublishPackage {
+  id: string;
+  render_job_id: string;
+  content_item_id: string;
+  status: "queued" | "running" | "ready" | "failed";
+  package_object_key: string | null;
+  manifest_payload: Record<string, unknown>;
+  byte_size: number | null;
+  error_message: string | null;
+  created_by_user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface MockApiState {
   session: MockSession | null;
   brands: MockBrand[];
@@ -158,6 +172,7 @@ interface MockApiState {
   auditLogs: MockAuditLog[];
   workflowPresets: MockWorkflowPreset[];
   renderJobs: MockRenderJob[];
+  publishPackages: MockPublishPackage[];
 }
 
 type RouteHandler = (
@@ -226,6 +241,7 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
     auditLogs: initialState.auditLogs ?? [],
     workflowPresets: initialState.workflowPresets ?? [],
     renderJobs: initialState.renderJobs ?? [],
+    publishPackages: initialState.publishPackages ?? [],
   };
 
   let sequence = 0;
@@ -587,6 +603,7 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
       ],
       ["GET", /^\/api\/workflow-presets$/, async () => jsonResponse({ items: state.workflowPresets })],
       ["GET", /^\/api\/render-jobs$/, async () => jsonResponse({ items: state.renderJobs })],
+      ["GET", /^\/api\/publish-packages$/, async () => jsonResponse({ items: state.publishPackages })],
       [
         "GET",
         /^\/api\/render-jobs\/[^/]+$/,
@@ -650,6 +667,61 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
           state.renderJobs.unshift(renderJob);
           recordAudit("render_job.created", "render_job", renderJob.id);
           return jsonResponse(renderJob, 201);
+        },
+      ],
+      [
+        "POST",
+        /^\/api\/publish-packages$/,
+        async (_path, requestOptions) => {
+          const body = JSON.parse(String(requestOptions?.body));
+          const renderJob = state.renderJobs.find((item) => item.id === body.render_job_id);
+          if (!renderJob || renderJob.status !== "succeeded") {
+            return jsonResponse({ detail: "Render job must succeed before package export" }, 409);
+          }
+
+          const existingPackage = state.publishPackages.find(
+            (publishPackage) => publishPackage.render_job_id === renderJob.id,
+          );
+          if (existingPackage) {
+            return jsonResponse(existingPackage);
+          }
+
+          const publishPackage: MockPublishPackage = {
+            id: nextId("package"),
+            render_job_id: renderJob.id,
+            content_item_id: renderJob.content_item_id,
+            status: "queued",
+            package_object_key: null,
+            manifest_payload: {},
+            byte_size: null,
+            error_message: null,
+            created_by_user_id: state.session?.user.id ?? "system",
+            created_at: nowIso(sequence),
+            updated_at: nowIso(sequence),
+          };
+          state.publishPackages.unshift(publishPackage);
+          recordAudit("publish_package.created", "publish_package", publishPackage.id);
+          return jsonResponse(publishPackage, 201);
+        },
+      ],
+      [
+        "GET",
+        /^\/api\/publish-packages\/[^/]+\/download$/,
+        async (matchedPath) => {
+          const packageId = matchedPath.split("/")[3];
+          const publishPackage = state.publishPackages.find((item) => item.id === packageId);
+          if (!publishPackage || publishPackage.status !== "ready") {
+            return jsonResponse({ detail: "Publish package is not ready for download" }, 409);
+          }
+          return jsonResponse({
+            package: publishPackage,
+            download: {
+              method: "GET",
+              url: `http://localhost:9000/content-factory-assets/${publishPackage.package_object_key}?signature=demo`,
+              headers: {},
+              expires_at: nowIso(30),
+            },
+          });
         },
       ],
       [
@@ -807,6 +879,73 @@ describe("App", () => {
 
     expect(await screen.findByText(/render job created\./i)).toBeVisible();
     expect((await screen.findAllByText(/pilot-reels v1/i)).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText(/^queued$/i)).length).toBeGreaterThan(0);
+  });
+
+  test("prepares a publish package from a succeeded approved render", async () => {
+    const contentItem: MockContentItem = {
+      id: "content-approved",
+      brand_id: "brand-1",
+      avatar_id: "avatar-1",
+      title: "Pilot short",
+      script: "A careful, platform-safe short script.",
+      channel: "youtube_shorts",
+      status: "approved",
+      planned_publish_at: null,
+      created_by_user_id: "user-owner",
+      created_at: nowIso(0),
+      updated_at: nowIso(0),
+    };
+    const workflowPreset = createWorkflowPreset();
+    const renderJob: MockRenderJob = {
+      id: "render-succeeded",
+      content_item_id: contentItem.id,
+      workflow_preset_id: workflowPreset.id,
+      workflow_preset_key: workflowPreset.key,
+      workflow_preset_version: workflowPreset.version,
+      workflow_provider: workflowPreset.workflow_provider,
+      voice_provider: workflowPreset.voice_provider,
+      packaging_provider: workflowPreset.packaging_provider,
+      input_snapshot: { script_text: contentItem.script },
+      status: "succeeded",
+      retry_budget: 3,
+      created_by_user_id: "user-owner",
+      created_at: nowIso(1),
+      updated_at: nowIso(2),
+      attempts: [
+        {
+          id: "attempt-1",
+          render_job_id: "render-succeeded",
+          attempt_number: 1,
+          status: "succeeded",
+          provider_job_id: "comfyui-1",
+          request_payload: { inputs: { script_text: contentItem.script } },
+          response_payload: {
+            outputs: { video_file: "s3://content-factory-assets/renders/video.mp4" },
+          },
+          error_message: null,
+          started_at: nowIso(1),
+          finished_at: nowIso(2),
+          created_at: nowIso(1),
+          updated_at: nowIso(2),
+        },
+      ],
+    };
+    installMockApi({
+      session: createOwnerSession(),
+      contentItems: [contentItem],
+      workflowPresets: [workflowPreset],
+      renderJobs: [renderJob],
+    });
+    window.location.hash = "#export";
+
+    render(<App />);
+
+    expect(await screen.findByRole("heading", { name: /publish packages/i })).toBeVisible();
+    expect((await screen.findAllByText(/pilot-reels v1/i)).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: /create package/i }));
+
+    expect(await screen.findByText(/publish package queued\./i)).toBeVisible();
     expect((await screen.findAllByText(/^queued$/i)).length).toBeGreaterThan(0);
   });
 });

@@ -1,7 +1,7 @@
 # Context: Content Factory
 
 **Last updated:** 2026-05-07
-**Status:** phase 2 in progress / provider adapter and live status slice complete / packaging-export next
+**Status:** phase 2 in progress / publish package export slice complete / local dev stack migrated and smoke-passed on 5173 / operator actions next
 
 ## Stack
 
@@ -46,6 +46,16 @@ See:
 - Worker now has a settings-driven `ComfyUiRenderExecutor` with local/cloud-compatible HTTP submission, provider status polling, timeout/failure mapping, optional API key support, and persisted provider payloads.
 - API now exposes authenticated `GET /api/render-jobs/{render_job_id}/events` SSE snapshots for live render status.
 - Web cockpit now has a Render route that loads workflow presets/render jobs, creates render jobs for renderable content, subscribes to selected job SSE updates, and shows attempts/provider payloads.
+- API now exposes `PublishPackage` create/list/detail/download contracts gated by approved content plus succeeded render jobs, with idempotent package creation per render job.
+- Worker packaging now creates a ZIP manifest bundle from the successful render attempt payload, stores it through S3-compatible storage, persists package object key/manifest/byte size, and marks missing-output packages failed with explicit errors.
+- Web cockpit now has an Export route that lists succeeded approved renders, queues publish packages, shows package status/object keys/errors, and fetches signed download URLs for ready packages.
+- OpenAPI and generated TypeScript contracts include publish package schemas and routes.
+- Local cockpit debugging stack is currently restored and verified:
+  - Vite frontend on `127.0.0.1:5173`;
+  - FastAPI on `0.0.0.0:8000`;
+  - Docker Compose infra on `5432`, `6379`, `9000`, `9001`;
+  - dev Postgres migrated through `20260507_0004_publish_packages`;
+  - browser smoke passed against `PLAYWRIGHT_BASE_URL=http://127.0.0.1:5173`.
 
 ## Recent Decisions
 
@@ -63,11 +73,14 @@ See:
 - 2026-05-06: Started Phase 2 by adding shared provider contracts, immutable workflow preset versioning, render job/job attempt tables, new render API routes, and regenerated OpenAPI/contracts.
 - 2026-05-07: Added Phase 2 worker orchestration with Dramatiq enqueue, attempt lifecycle processing, retry budget enforcement, response payload persistence, and regenerated contracts.
 - 2026-05-07: Added Phase 2 provider/live-status slice with ComfyUI HTTP executor, render job SSE stream, cockpit Render queue/detail UI, and regenerated contracts.
+- 2026-05-07: Diagnosed `localhost:5173` as an inactive local stack, restored Vite/API/Docker infra, ran migrations, verified `/health/ready`, and passed Playwright smoke on `5173`.
+- 2026-05-07: Added Phase 2 publish-package/export slice with `PublishPackage` API/model/migration, worker ZIP manifest packaging, cockpit Export route, regenerated contracts, local dev migration, and browser smoke verification on `5173`.
 
 ## Known Issues
 
-- Operator retry/cancel/requeue actions, FFmpeg packaging/export, compliance engine, metrics, and publish package export remain future phases.
+- Operator retry/cancel/requeue actions, FFmpeg binary media normalization, compliance engine, metrics, and direct package worker runtime operation remain future phases.
 - ComfyUI adapter submits the stored workflow definition and persists provider output payloads; richer input-to-node mutation remains a future preset mapping enhancement.
+- Publish-package ZIPs currently bundle manifest/title/caption/hashtags/provider output references. Copying/transcoding referenced media into platform-normalized MP4 assets should be added once FFmpeg runtime availability is decided.
 - Compliance requirements for vape/nicotine-adjacent content still need legal review before pilot launch.
 - Cloud vendor selection is still open, but the reference topology is now fixed in planning artifacts.
 
@@ -76,6 +89,12 @@ See:
 - Setup: `pnpm` workspace, Python `.venv` bootstrap, root `Makefile`, and Alembic migration command are now in place.
 - `.env.example` now contains local defaults for web/api/worker/storage/session/upload bootstrap, with `VITE_API_BASE_URL=/` for same-origin Vite proxy dev and `COMFYUI_*` worker settings for optional provider execution.
 - MCP preset: general filesystem/GitHub config in `.mcp.json`.
+- Active local debug stack as of 2026-05-07 12:22 MSK:
+  - frontend: `http://127.0.0.1:5173/`;
+  - API proxy target: `http://localhost:8000`;
+  - infra: Postgres `5432`, Redis `6379`, MinIO `9000/9001`.
+  - See `.memory/sessions/2026-05-07-codex-local-dev-stack-debug.md` for the recovery report.
+  - On 2026-05-07 this stack was migrated to include `publish_packages` and re-smoke-tested.
 
 ## Recommended Next Step
 
@@ -83,6 +102,6 @@ Continue `Phase 2 / Production Pipeline And Render Integration` with:
 - `.memory/sessions/plans/2026-05-06-content-factory-phase-2-production-pipeline.md`
 - `.memory/sessions/specs/2026-05-06-content-factory-pilot-implementation-rollout.md`
 - `.memory/sessions/plans/2026-05-06-content-factory-rollout-master.md`
-- immediate next slice: operator retry/cancel/requeue actions or FFmpeg publish-package/export pipeline on top of completed render execution/status visibility
+- immediate next slice: operator retry/cancel/requeue actions for render jobs and publish packages, or FFmpeg binary media normalization inside the completed publish package worker contract
 
-Latest handoff: `.memory/sessions/2026-05-07-codex-phase-2-provider-live-status.md`.
+Latest handoff: `.memory/sessions/2026-05-07-codex-phase-2-publish-package-export.md`.

@@ -11,7 +11,9 @@ def bootstrap_worker() -> str:
         sentry_dsn=settings.sentry_dsn,
     )
     configure_broker(settings)
+    import content_factory_worker.jobs.packaging as _packaging_jobs
     import content_factory_worker.jobs.render as _render_jobs
 
+    _ = _packaging_jobs
     _ = _render_jobs
     return settings.worker_name

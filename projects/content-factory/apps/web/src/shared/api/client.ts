@@ -23,6 +23,9 @@ import type {
   InviteCreateRequest,
   RenderJob,
   RenderJobCreateRequest,
+  PublishPackage,
+  PublishPackageCreateRequest,
+  PublishPackageDownloadResponse,
   ReviewDecisionRequest,
   ReviewTask,
   User,
@@ -226,6 +229,15 @@ export const apiClient = {
   },
   renderJobEventsUrl(renderJobId: string) {
     return resolveApiUrl(`/api/render-jobs/${renderJobId}/events`);
+  },
+  listPublishPackages() {
+    return getList<PublishPackage>("/api/publish-packages");
+  },
+  createPublishPackage(payload: PublishPackageCreateRequest) {
+    return postJson<PublishPackageCreateRequest, PublishPackage>("/api/publish-packages", payload);
+  },
+  getPublishPackageDownload(packageId: string) {
+    return requestJson<PublishPackageDownloadResponse>(`/api/publish-packages/${packageId}/download`);
   },
   approveReviewTask(taskId: string, payload: ReviewDecisionRequest) {
     return postJson<ReviewDecisionRequest, ReviewTask>(`/api/review/tasks/${taskId}/approve`, payload);

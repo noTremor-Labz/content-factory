@@ -7,6 +7,7 @@ import { AuditPanel } from "../features/audit/AuditPanel";
 import { AvatarsPanel } from "../features/avatars/AvatarsPanel";
 import { BrandsAssetsPanel } from "../features/brands-assets/BrandsAssetsPanel";
 import { ContentPanel } from "../features/content/ContentPanel";
+import { ExportPanel } from "../features/export/ExportPanel";
 import { RenderPanel } from "../features/render/RenderPanel";
 import { ReviewPanel } from "../features/review/ReviewPanel";
 import { webEnv } from "../config/env";
@@ -88,6 +89,13 @@ function nextStepForData(data: CockpitData): string {
     return "Approved content is ready for its first render job.";
   }
 
+  if (
+    data.renderJobs.some((renderJob) => renderJob.status === "succeeded") &&
+    data.publishPackages.length === 0
+  ) {
+    return "Succeeded renders are ready for export packaging.";
+  }
+
   return "Cockpit is ready for the next operator pass.";
 }
 
@@ -110,6 +118,7 @@ export function App() {
       reviewResponse,
       workflowPresetsResponse,
       renderJobsResponse,
+      publishPackagesResponse,
     ] =
       await Promise.all([
         apiClient.listBrands(),
@@ -119,6 +128,7 @@ export function App() {
         apiClient.listReviewTasks(),
         apiClient.listWorkflowPresets(),
         apiClient.listRenderJobs(),
+        apiClient.listPublishPackages(),
       ]);
 
     const identityPackLists = await Promise.all(
@@ -147,6 +157,7 @@ export function App() {
         auditLogs,
         workflowPresets: workflowPresetsResponse.items,
         renderJobs: renderJobsResponse.items,
+        publishPackages: publishPackagesResponse.items,
       });
     });
   }, []);
@@ -415,7 +426,7 @@ export function App() {
         <article className="metric-card surface">
           <span className="metric-label">Drafts in system</span>
           <strong>{cockpitData.contentItems.length}</strong>
-          <p>Content items across lifecycle states. Render jobs: {cockpitData.renderJobs.length}.</p>
+                  <p>Content items across lifecycle states. Render jobs: {cockpitData.renderJobs.length}.</p>
         </article>
       </section>
 
@@ -606,6 +617,27 @@ export function App() {
               onSelectRenderJob={setLiveRenderJobId}
               renderJobs={cockpitData.renderJobs}
               workflowPresets={cockpitData.workflowPresets}
+            />
+          ) : null}
+
+          {route === "export" ? (
+            <ExportPanel
+              busy={busyLabel !== null}
+              canMutate={canMutate}
+              contentItems={cockpitData.contentItems}
+              onCreatePackage={(renderJobId) =>
+                runCockpitMutation(
+                  "create publish package",
+                  () => apiClient.createPublishPackage({ render_job_id: renderJobId }),
+                  "Publish package queued.",
+                )
+              }
+              onGetDownload={async (packageId) => {
+                const response = await apiClient.getPublishPackageDownload(packageId);
+                return response.download.url;
+              }}
+              publishPackages={cockpitData.publishPackages}
+              renderJobs={cockpitData.renderJobs}
             />
           ) : null}
 

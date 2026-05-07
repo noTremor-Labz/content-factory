@@ -5,6 +5,7 @@ export const cockpitRoutes = [
   { id: "content", label: "Content" },
   { id: "review", label: "Review" },
   { id: "render", label: "Render" },
+  { id: "export", label: "Export" },
   { id: "audit", label: "Audit" },
 ] as const;
 

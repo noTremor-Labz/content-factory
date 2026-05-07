@@ -92,5 +92,12 @@ class JobAttemptStatus(StrEnum):
     CANCELLED = "cancelled"
 
 
+class PublishPackageStatus(StrEnum):
+    QUEUED = "queued"
+    RUNNING = "running"
+    READY = "ready"
+    FAILED = "failed"
+
+
 MUTATION_ROLES = (UserRole.OWNER, UserRole.OPERATOR)
 REVIEW_DECISION_ROLES = (UserRole.OWNER, UserRole.REVIEWER)

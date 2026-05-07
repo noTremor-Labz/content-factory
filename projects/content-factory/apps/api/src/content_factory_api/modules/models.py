@@ -16,6 +16,7 @@ from content_factory_api.modules.domain import (
     IdentityPackStatus,
     JobAttemptStatus,
     PackagingProvider,
+    PublishPackageStatus,
     RenderJobStatus,
     ReviewTaskStatus,
     UserRole,
@@ -338,3 +339,36 @@ class JobAttempt(TimestampMixin, Base):
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class PublishPackage(TimestampMixin, Base):
+    __tablename__ = "publish_packages"
+    __table_args__ = (UniqueConstraint("render_job_id", name="uq_publish_packages_render_job"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    render_job_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("render_jobs.id"),
+        index=True,
+        nullable=False,
+    )
+    content_item_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("content_items.id"),
+        index=True,
+        nullable=False,
+    )
+    status: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default=PublishPackageStatus.QUEUED.value,
+    )
+    package_object_key: Mapped[str | None] = mapped_column(String(700), nullable=True)
+    manifest_payload: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+    byte_size: Mapped[int | None] = mapped_column(nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_by_user_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("users.id"),
+        nullable=False,
+    )

@@ -30,4 +30,5 @@ def test_alembic_upgrade_head_creates_control_plane_tables(tmp_path: Path) -> No
         "workflow_presets",
         "render_jobs",
         "job_attempts",
+        "publish_packages",
     }.issubset(table_names)

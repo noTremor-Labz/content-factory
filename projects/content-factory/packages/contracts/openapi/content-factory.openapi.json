@@ -1721,6 +1721,228 @@
         }
       }
     },
+    "/api/publish-packages": {
+      "post": {
+        "tags": [
+          "publish-packages"
+        ],
+        "summary": "Create Publish Package",
+        "operationId": "create_publish_package_api_publish_packages_post",
+        "parameters": [
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishPackageCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishPackageRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "publish-packages"
+        ],
+        "summary": "List Publish Packages",
+        "operationId": "list_publish_packages_api_publish_packages_get",
+        "parameters": [
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishPackageListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/publish-packages/{package_id}": {
+      "get": {
+        "tags": [
+          "publish-packages"
+        ],
+        "summary": "Get Publish Package",
+        "operationId": "get_publish_package_api_publish_packages__package_id__get",
+        "parameters": [
+          {
+            "name": "package_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Package Id"
+            }
+          },
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishPackageRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/publish-packages/{package_id}/download": {
+      "get": {
+        "tags": [
+          "publish-packages"
+        ],
+        "summary": "Get Publish Package Download",
+        "operationId": "get_publish_package_download_api_publish_packages__package_id__download_get",
+        "parameters": [
+          {
+            "name": "package_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Package Id"
+            }
+          },
+          {
+            "name": "cf_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cf Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishPackageDownloadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/review/tasks": {
       "get": {
         "tags": [
@@ -2631,6 +2853,38 @@
         ],
         "title": "ContentStatus"
       },
+      "DownloadTargetRead": {
+        "properties": {
+          "method": {
+            "type": "string",
+            "title": "Method"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Headers"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "method",
+          "url",
+          "headers",
+          "expires_at"
+        ],
+        "title": "DownloadTargetRead"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -2989,6 +3243,147 @@
           "ffmpeg"
         ],
         "title": "PackagingProvider"
+      },
+      "PublishPackageCreateRequest": {
+        "properties": {
+          "render_job_id": {
+            "type": "string",
+            "title": "Render Job Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "render_job_id"
+        ],
+        "title": "PublishPackageCreateRequest"
+      },
+      "PublishPackageDownloadResponse": {
+        "properties": {
+          "package": {
+            "$ref": "#/components/schemas/PublishPackageRead"
+          },
+          "download": {
+            "$ref": "#/components/schemas/DownloadTargetRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "package",
+          "download"
+        ],
+        "title": "PublishPackageDownloadResponse"
+      },
+      "PublishPackageListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PublishPackageRead"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "PublishPackageListResponse"
+      },
+      "PublishPackageRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "render_job_id": {
+            "type": "string",
+            "title": "Render Job Id"
+          },
+          "content_item_id": {
+            "type": "string",
+            "title": "Content Item Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PublishPackageStatus"
+          },
+          "package_object_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Package Object Key"
+          },
+          "manifest_payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Manifest Payload"
+          },
+          "byte_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Byte Size"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "created_by_user_id": {
+            "type": "string",
+            "title": "Created By User Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "render_job_id",
+          "content_item_id",
+          "status",
+          "package_object_key",
+          "manifest_payload",
+          "byte_size",
+          "error_message",
+          "created_by_user_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "PublishPackageRead"
+      },
+      "PublishPackageStatus": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "running",
+          "ready",
+          "failed"
+        ],
+        "title": "PublishPackageStatus"
       },
       "RenderJobCreateRequest": {
         "properties": {

@@ -486,6 +486,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/publish-packages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Publish Packages */
+        get: operations["list_publish_packages_api_publish_packages_get"];
+        put?: never;
+        /** Create Publish Package */
+        post: operations["create_publish_package_api_publish_packages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/publish-packages/{package_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Publish Package */
+        get: operations["get_publish_package_api_publish_packages__package_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/publish-packages/{package_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Publish Package Download */
+        get: operations["get_publish_package_download_api_publish_packages__package_id__download_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/review/tasks": {
         parameters: {
             query?: never;
@@ -806,6 +858,22 @@ export interface components {
          * @enum {string}
          */
         ContentStatus: "draft" | "planned" | "review" | "approved" | "rework";
+        /** DownloadTargetRead */
+        DownloadTargetRead: {
+            /** Method */
+            method: string;
+            /** Url */
+            url: string;
+            /** Headers */
+            headers: {
+                [key: string]: string;
+            };
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -944,6 +1012,58 @@ export interface components {
          * @enum {string}
          */
         PackagingProvider: "ffmpeg";
+        /** PublishPackageCreateRequest */
+        PublishPackageCreateRequest: {
+            /** Render Job Id */
+            render_job_id: string;
+        };
+        /** PublishPackageDownloadResponse */
+        PublishPackageDownloadResponse: {
+            package: components["schemas"]["PublishPackageRead"];
+            download: components["schemas"]["DownloadTargetRead"];
+        };
+        /** PublishPackageListResponse */
+        PublishPackageListResponse: {
+            /** Items */
+            items: components["schemas"]["PublishPackageRead"][];
+        };
+        /** PublishPackageRead */
+        PublishPackageRead: {
+            /** Id */
+            id: string;
+            /** Render Job Id */
+            render_job_id: string;
+            /** Content Item Id */
+            content_item_id: string;
+            status: components["schemas"]["PublishPackageStatus"];
+            /** Package Object Key */
+            package_object_key: string | null;
+            /** Manifest Payload */
+            manifest_payload: {
+                [key: string]: unknown;
+            };
+            /** Byte Size */
+            byte_size: number | null;
+            /** Error Message */
+            error_message: string | null;
+            /** Created By User Id */
+            created_by_user_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * PublishPackageStatus
+         * @enum {string}
+         */
+        PublishPackageStatus: "queued" | "running" | "ready" | "failed";
         /** RenderJobCreateRequest */
         RenderJobCreateRequest: {
             /** Content Item Id */
@@ -2287,6 +2407,138 @@ export interface operations {
                 };
                 content: {
                     "text/event-stream": string;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_publish_packages_api_publish_packages_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishPackageListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_publish_package_api_publish_packages_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublishPackageCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishPackageRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_publish_package_api_publish_packages__package_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                package_id: string;
+            };
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishPackageRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_publish_package_download_api_publish_packages__package_id__download_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                package_id: string;
+            };
+            cookie?: {
+                cf_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishPackageDownloadResponse"];
                 };
             };
             /** @description Validation Error */

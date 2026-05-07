@@ -13,11 +13,13 @@ export type ContentChannel = components["schemas"]["ContentChannel"];
 export type AuditLog = components["schemas"]["AuditLogRead"];
 export type WorkflowPreset = components["schemas"]["WorkflowPresetRead"];
 export type RenderJob = components["schemas"]["RenderJobRead"];
+export type PublishPackage = components["schemas"]["PublishPackageRead"];
 export type InviteRole = components["schemas"]["InviteCreateRequest"]["role"];
 export type Invite = components["schemas"]["InviteCreateResponse"];
 export type InviteCreateResponse = components["schemas"]["InviteCreateResponse"];
 export type UploadTarget = components["schemas"]["UploadTargetRead"];
 export type AssetUploadInitiateResponse = components["schemas"]["AssetUploadInitiateResponse"];
+export type PublishPackageDownloadResponse = components["schemas"]["PublishPackageDownloadResponse"];
 
 export type BootstrapOwnerRequest = components["schemas"]["BootstrapOwnerRequest"];
 export type LoginRequest = components["schemas"]["LoginRequest"];
@@ -32,6 +34,7 @@ export type ContentItemCreateRequest = components["schemas"]["ContentItemCreateR
 export type ContentPlanRequest = components["schemas"]["ContentPlanRequest"];
 export type ReviewDecisionRequest = components["schemas"]["ReviewDecisionRequest"];
 export type RenderJobCreateRequest = components["schemas"]["RenderJobCreateRequest"];
+export type PublishPackageCreateRequest = components["schemas"]["PublishPackageCreateRequest"];
 
 export interface CockpitData {
   brands: Brand[];
@@ -43,6 +46,7 @@ export interface CockpitData {
   auditLogs: AuditLog[];
   workflowPresets: WorkflowPreset[];
   renderJobs: RenderJob[];
+  publishPackages: PublishPackage[];
 }
 
 export const emptyCockpitData: CockpitData = {
@@ -55,4 +59,5 @@ export const emptyCockpitData: CockpitData = {
   auditLogs: [],
   workflowPresets: [],
   renderJobs: [],
+  publishPackages: [],
 };
