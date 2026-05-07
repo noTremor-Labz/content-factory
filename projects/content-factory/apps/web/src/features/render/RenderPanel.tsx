@@ -17,10 +17,16 @@ interface RenderPanelProps {
   canMutate: boolean;
   busy: boolean;
   onCreateRenderJob: (payload: RenderJobCreateRequest) => Promise<void>;
+  onCancelRenderJob: (renderJobId: string) => Promise<void>;
+  onRetryRenderJob: (renderJobId: string) => Promise<void>;
+  onRequeueRenderJob: (renderJobId: string) => Promise<void>;
   onSelectRenderJob: (renderJobId: string | null) => void;
 }
 
 const renderableStatuses = new Set(["planned", "review", "approved", "rework"]);
+const cancelableRenderStatuses = new Set(["queued", "running"]);
+const retryableRenderStatuses = new Set(["failed", "cancelled"]);
+const requeueableRenderStatuses = new Set(["queued"]);
 
 export function RenderPanel({
   contentItems,
@@ -30,6 +36,9 @@ export function RenderPanel({
   canMutate,
   busy,
   onCreateRenderJob,
+  onCancelRenderJob,
+  onRetryRenderJob,
+  onRequeueRenderJob,
   onSelectRenderJob,
 }: RenderPanelProps) {
   const [selectedJobId, setSelectedJobId] = useState(renderJobs[0]?.id ?? "");
@@ -173,6 +182,40 @@ export function RenderPanel({
                 >
                   View job
                 </button>
+                {canMutate ? (
+                  <div className="inline-action-row">
+                    {requeueableRenderStatuses.has(renderJob.status) ? (
+                      <button
+                        className="secondary-button"
+                        disabled={busy}
+                        type="button"
+                        onClick={() => onRequeueRenderJob(renderJob.id)}
+                      >
+                        Requeue job
+                      </button>
+                    ) : null}
+                    {cancelableRenderStatuses.has(renderJob.status) ? (
+                      <button
+                        className="secondary-button"
+                        disabled={busy}
+                        type="button"
+                        onClick={() => onCancelRenderJob(renderJob.id)}
+                      >
+                        Cancel job
+                      </button>
+                    ) : null}
+                    {retryableRenderStatuses.has(renderJob.status) ? (
+                      <button
+                        className="secondary-button"
+                        disabled={busy}
+                        type="button"
+                        onClick={() => onRetryRenderJob(renderJob.id)}
+                      >
+                        Retry job
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
               </article>
             ))
           )}

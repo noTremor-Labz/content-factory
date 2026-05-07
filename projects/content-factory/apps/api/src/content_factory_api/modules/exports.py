@@ -32,6 +32,18 @@ from content_factory_api.modules.services import (
 
 router = APIRouter(prefix="/api/publish-packages", tags=["publish-packages"])
 
+CANCELABLE_PACKAGE_STATUSES = {
+    PublishPackageStatus.QUEUED.value,
+    PublishPackageStatus.RUNNING.value,
+}
+
+RETRYABLE_PACKAGE_STATUSES = {
+    PublishPackageStatus.FAILED.value,
+    PublishPackageStatus.CANCELLED.value,
+}
+
+REQUEUEABLE_PACKAGE_STATUSES = {PublishPackageStatus.QUEUED.value}
+
 
 @router.post("", response_model=PublishPackageRead, status_code=status.HTTP_201_CREATED)
 def create_publish_package(
@@ -48,17 +60,7 @@ def create_publish_package(
         "Content item",
     )
 
-    if render_job.status != RenderJobStatus.SUCCEEDED.value:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Render job must succeed before package export",
-        )
-
-    if content_item.status != ContentStatus.APPROVED.value:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Content item must be approved before package export",
-        )
+    _validate_export_inputs(render_job=render_job, content_item=content_item)
 
     existing_package = db_session.scalar(
         select(PublishPackage).where(PublishPackage.render_job_id == render_job.id)
@@ -113,6 +115,114 @@ def get_publish_package(
     return get_by_id_or_404(db_session, PublishPackage, package_id, "Publish package")
 
 
+@router.post("/{package_id}/cancel", response_model=PublishPackageRead)
+def cancel_publish_package(
+    package_id: str,
+    current_user: Annotated[User, Depends(require_roles(*MUTATION_ROLES))],
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> PublishPackage:
+    publish_package = get_by_id_or_404(db_session, PublishPackage, package_id, "Publish package")
+    if publish_package.status == PublishPackageStatus.CANCELLED.value:
+        return publish_package
+    if publish_package.status not in CANCELABLE_PACKAGE_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Publish package cannot be cancelled from its current status",
+        )
+
+    previous_status = publish_package.status
+    publish_package.status = PublishPackageStatus.CANCELLED.value
+    publish_package.error_message = publish_package.error_message or "Cancelled by operator"
+    write_audit_log(
+        db_session,
+        actor_user_id=current_user.id,
+        action="publish_package.cancelled",
+        entity_type="publish_package",
+        entity_id=publish_package.id,
+        payload={"previous_status": previous_status},
+    )
+    commit_or_409(db_session, "Publish package could not be cancelled")
+    return publish_package
+
+
+@router.post("/{package_id}/retry", response_model=PublishPackageRead)
+def retry_publish_package(
+    package_id: str,
+    current_user: Annotated[User, Depends(require_roles(*MUTATION_ROLES))],
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> PublishPackage:
+    publish_package = get_by_id_or_404(db_session, PublishPackage, package_id, "Publish package")
+    if publish_package.status not in RETRYABLE_PACKAGE_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Publish package can only be retried after failure or cancellation",
+        )
+
+    render_job = get_by_id_or_404(
+        db_session,
+        RenderJob,
+        publish_package.render_job_id,
+        "Render job",
+    )
+    content_item = get_by_id_or_404(
+        db_session,
+        ContentItem,
+        publish_package.content_item_id,
+        "Content item",
+    )
+    _validate_export_inputs(render_job=render_job, content_item=content_item)
+
+    previous_status = publish_package.status
+    publish_package.status = PublishPackageStatus.QUEUED.value
+    publish_package.package_object_key = None
+    publish_package.manifest_payload = {}
+    publish_package.byte_size = None
+    publish_package.error_message = None
+    write_audit_log(
+        db_session,
+        actor_user_id=current_user.id,
+        action="publish_package.retried",
+        entity_type="publish_package",
+        entity_id=publish_package.id,
+        payload={"previous_status": previous_status, "render_job_id": render_job.id},
+    )
+    commit_or_409(db_session, "Publish package could not be retried")
+
+    from content_factory_worker.queue import enqueue_publish_package
+
+    enqueue_publish_package(publish_package.id)
+    return publish_package
+
+
+@router.post("/{package_id}/requeue", response_model=PublishPackageRead)
+def requeue_publish_package(
+    package_id: str,
+    current_user: Annotated[User, Depends(require_roles(*MUTATION_ROLES))],
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> PublishPackage:
+    publish_package = get_by_id_or_404(db_session, PublishPackage, package_id, "Publish package")
+    if publish_package.status not in REQUEUEABLE_PACKAGE_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Publish package can only be requeued while queued",
+        )
+
+    write_audit_log(
+        db_session,
+        actor_user_id=current_user.id,
+        action="publish_package.requeued",
+        entity_type="publish_package",
+        entity_id=publish_package.id,
+        payload={"render_job_id": publish_package.render_job_id},
+    )
+    commit_or_409(db_session, "Publish package could not be requeued")
+
+    from content_factory_worker.queue import enqueue_publish_package
+
+    enqueue_publish_package(publish_package.id)
+    return publish_package
+
+
 @router.get("/{package_id}/download", response_model=PublishPackageDownloadResponse)
 def get_publish_package_download(
     package_id: str,
@@ -163,3 +273,17 @@ def _download_url(settings: ApiSettings, object_key: str) -> str:
         HttpMethod="GET",
     )
     return cast(str, url)
+
+
+def _validate_export_inputs(*, render_job: RenderJob, content_item: ContentItem) -> None:
+    if render_job.status != RenderJobStatus.SUCCEEDED.value:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Render job must succeed before package export",
+        )
+
+    if content_item.status != ContentStatus.APPROVED.value:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Content item must be approved before package export",
+        )

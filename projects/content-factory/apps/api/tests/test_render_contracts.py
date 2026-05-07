@@ -1,10 +1,11 @@
 import json
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from content_factory_api.database import get_sessionmaker
-from content_factory_api.modules.domain import RenderJobStatus
-from content_factory_api.modules.models import RenderJob
+from content_factory_api.modules.domain import JobAttemptStatus, RenderJobStatus
+from content_factory_api.modules.models import JobAttempt, RenderJob
 
 
 def _bootstrap_owner(client: TestClient) -> None:
@@ -255,3 +256,137 @@ def test_render_job_events_stream_terminal_snapshot(api_client: TestClient) -> N
     payload = json.loads(raw_payload)
     assert payload["render_job"]["id"] == render_job_id
     assert payload["render_job"]["status"] == "succeeded"
+
+
+def test_render_job_operator_actions_cancel_retry_and_requeue(
+    api_client: TestClient,
+) -> None:
+    _bootstrap_owner(api_client)
+    brand_id = _create_brand(api_client)
+    avatar_id = _create_avatar(api_client, brand_id)
+    identity_pack_id = _create_identity_pack(api_client, avatar_id)
+    content_item_id = _create_content_item(api_client, brand_id, avatar_id)
+    _plan_content_item(api_client, content_item_id)
+    preset_response = api_client.post("/api/workflow-presets", json=_workflow_preset_payload())
+    assert preset_response.status_code == 201
+
+    render_job_response = api_client.post(
+        "/api/render-jobs",
+        json={
+            "content_item_id": content_item_id,
+            "workflow_preset_id": str(preset_response.json()["id"]),
+            "identity_pack_id": identity_pack_id,
+            "retry_budget": 1,
+        },
+    )
+    assert render_job_response.status_code == 201
+    render_job_id = str(render_job_response.json()["id"])
+
+    requeue_response = api_client.post(f"/api/render-jobs/{render_job_id}/requeue")
+    assert requeue_response.status_code == 200
+    assert requeue_response.json()["status"] == "queued"
+    assert len(requeue_response.json()["attempts"]) == 1
+
+    cancel_response = api_client.post(f"/api/render-jobs/{render_job_id}/cancel")
+    assert cancel_response.status_code == 200
+    cancel_payload = cancel_response.json()
+    assert cancel_payload["status"] == "cancelled"
+    assert cancel_payload["attempts"][0]["status"] == "cancelled"
+
+    retry_response = api_client.post(f"/api/render-jobs/{render_job_id}/retry")
+    assert retry_response.status_code == 200
+    retry_payload = retry_response.json()
+    assert retry_payload["status"] == "queued"
+    assert [attempt["attempt_number"] for attempt in retry_payload["attempts"]] == [1, 2]
+    assert retry_payload["attempts"][1]["status"] == "queued"
+
+    audit_response = api_client.get("/api/audit/logs")
+    actions = [entry["action"] for entry in audit_response.json()["items"]]
+    assert "render_job.requeued" in actions
+    assert "render_job.cancelled" in actions
+    assert "render_job.retried" in actions
+
+
+def test_render_job_operator_actions_are_role_gated(
+    api_app: FastAPI,
+    api_client: TestClient,
+) -> None:
+    _bootstrap_owner(api_client)
+    brand_id = _create_brand(api_client)
+    avatar_id = _create_avatar(api_client, brand_id)
+    identity_pack_id = _create_identity_pack(api_client, avatar_id)
+    content_item_id = _create_content_item(api_client, brand_id, avatar_id)
+    _plan_content_item(api_client, content_item_id)
+    preset_response = api_client.post("/api/workflow-presets", json=_workflow_preset_payload())
+    assert preset_response.status_code == 201
+    render_job_response = api_client.post(
+        "/api/render-jobs",
+        json={
+            "content_item_id": content_item_id,
+            "workflow_preset_id": str(preset_response.json()["id"]),
+            "identity_pack_id": identity_pack_id,
+        },
+    )
+    assert render_job_response.status_code == 201
+
+    invite_response = api_client.post(
+        "/api/auth/invites",
+        json={"email": "reviewer@inflave.test", "role": "reviewer"},
+    )
+    reviewer_client = TestClient(api_app)
+    accept_response = reviewer_client.post(
+        "/api/auth/invites/accept",
+        json={
+            "token": invite_response.json()["token"],
+            "email": "reviewer@inflave.test",
+            "display_name": "Reviewer",
+            "password": "reviewer-password",
+        },
+    )
+    assert accept_response.status_code == 201
+
+    response = reviewer_client.post(
+        f"/api/render-jobs/{render_job_response.json()['id']}/cancel",
+    )
+
+    assert response.status_code == 403
+
+
+def test_render_job_retry_rejects_succeeded_jobs(api_client: TestClient) -> None:
+    _bootstrap_owner(api_client)
+    brand_id = _create_brand(api_client)
+    avatar_id = _create_avatar(api_client, brand_id)
+    identity_pack_id = _create_identity_pack(api_client, avatar_id)
+    content_item_id = _create_content_item(api_client, brand_id, avatar_id)
+    _plan_content_item(api_client, content_item_id)
+    preset_response = api_client.post("/api/workflow-presets", json=_workflow_preset_payload())
+    assert preset_response.status_code == 201
+    render_job_response = api_client.post(
+        "/api/render-jobs",
+        json={
+            "content_item_id": content_item_id,
+            "workflow_preset_id": str(preset_response.json()["id"]),
+            "identity_pack_id": identity_pack_id,
+        },
+    )
+    assert render_job_response.status_code == 201
+    render_job_id = str(render_job_response.json()["id"])
+
+    db_session = get_sessionmaker()()
+    try:
+        render_job = db_session.get(RenderJob, render_job_id)
+        assert render_job is not None
+        render_job.status = RenderJobStatus.SUCCEEDED.value
+        attempt = (
+            db_session.query(JobAttempt)
+            .filter(JobAttempt.render_job_id == render_job_id)
+            .one()
+        )
+        attempt.status = JobAttemptStatus.SUCCEEDED.value
+        db_session.commit()
+    finally:
+        db_session.close()
+
+    response = api_client.post(f"/api/render-jobs/{render_job_id}/retry")
+
+    assert response.status_code == 409

@@ -97,6 +97,7 @@ class PublishPackageStatus(StrEnum):
     RUNNING = "running"
     READY = "ready"
     FAILED = "failed"
+    CANCELLED = "cancelled"
 
 
 MUTATION_ROLES = (UserRole.OWNER, UserRole.OPERATOR)

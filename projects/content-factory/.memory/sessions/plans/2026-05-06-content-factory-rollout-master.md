@@ -24,7 +24,7 @@
 | 1 | Стек и repo topology не зафиксированы | Зафиксировать ADR и базовую monorepo-структуру | pending |
 | 2 | Нет поэтапного delivery path | Разделить реализацию на 4 последовательных этапа | pending |
 | 3 | Review/compliance могут оказаться "поздним модулем" | Встроить review lifecycle с фазы 1, compliance engine с фазы 3 | pending |
-| 4 | Async render pipeline не определен | Ввести worker-слой, provider adapters и render job lifecycle | in_progress / execution, live status, and publish package export complete |
+| 4 | Async render pipeline не определен | Ввести worker-слой, provider adapters и render job lifecycle | in_progress / execution, live status, publish package export, and operator actions complete |
 | 5 | Нет baseline infra и gates | Зафиксировать local/dev topology, CI и quality gates | pending |
 
 ## Phases
@@ -52,8 +52,8 @@
 ### Phase 2: Production Pipeline And Render Integration
 - **Status:** in_progress
 - **Files:** `.memory/sessions/plans/2026-05-06-content-factory-phase-2-production-pipeline.md`, будущие pipeline/render/export модули в `apps/api`, `apps/worker`, `apps/web`
-- **Changes:** workflow presets, provider adapters, render jobs, worker attempt lifecycle/retries, live job status, package export
-- **TDD:** ComfyUI executor tests, worker orchestration tests, API SSE tests, UI tests для queue/job detail/export flow
+- **Changes:** workflow presets, provider adapters, render jobs, worker attempt lifecycle/retries, live job status, package export, operator retry/cancel/requeue actions
+- **TDD:** ComfyUI executor tests, worker orchestration tests, API SSE/action tests, UI tests для queue/job detail/export/action flow
 - **Gates:** phase 1 gates ✅ | worker integration suite ✅ | packaging/export regression suite ✅
 - **Impact:** впервые соединяет control plane с render plane, влияет на storage, queueing и domain state machine
 - **Prompt for launch:**
@@ -121,3 +121,4 @@
 | 2026-05-07 | phase-2-worker-orchestration | Добавлены Dramatiq enqueue, worker attempt lifecycle, retry budget enforcement и regenerated contracts |
 | 2026-05-07 | phase-2-provider-live-status | Добавлены ComfyUI HTTP executor, render job SSE stream, cockpit Render route и regenerated contracts |
 | 2026-05-07 | phase-2-publish-package-export | Добавлены package export API/model, worker ZIP manifest packaging, cockpit Export route и regenerated contracts |
+| 2026-05-07 | phase-2-operator-job-actions | Добавлены operator retry/cancel/requeue actions для render jobs и publish packages, worker cancellation guards, cockpit controls и regenerated contracts |

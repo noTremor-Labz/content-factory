@@ -1,3 +1,4 @@
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from content_factory_api.database import get_sessionmaker
@@ -223,3 +224,87 @@ def test_publish_package_download_requires_ready_package(api_client: TestClient)
     assert payload["package"]["id"] == package_id
     assert payload["download"]["method"] == "GET"
     assert "publish-packages/content/package.zip" in payload["download"]["url"]
+
+
+def test_publish_package_operator_actions_cancel_retry_and_requeue(
+    api_client: TestClient,
+) -> None:
+    _bootstrap_owner(api_client)
+    render_job_id = _seed_approved_render_job(api_client)
+    create_response = api_client.post(
+        "/api/publish-packages",
+        json={"render_job_id": render_job_id},
+    )
+    assert create_response.status_code == 201
+    package_id = str(create_response.json()["id"])
+
+    requeue_response = api_client.post(f"/api/publish-packages/{package_id}/requeue")
+    assert requeue_response.status_code == 200
+    assert requeue_response.json()["status"] == "queued"
+
+    cancel_response = api_client.post(f"/api/publish-packages/{package_id}/cancel")
+    assert cancel_response.status_code == 200
+    assert cancel_response.json()["status"] == "cancelled"
+
+    db_session = get_sessionmaker()()
+    try:
+        publish_package = db_session.get(PublishPackage, package_id)
+        assert publish_package is not None
+        publish_package.status = PublishPackageStatus.FAILED.value
+        publish_package.package_object_key = "publish-packages/stale.zip"
+        publish_package.manifest_payload = {"stale": True}
+        publish_package.byte_size = 10
+        publish_package.error_message = "Missing output"
+        db_session.commit()
+    finally:
+        db_session.close()
+
+    retry_response = api_client.post(f"/api/publish-packages/{package_id}/retry")
+    assert retry_response.status_code == 200
+    retry_payload = retry_response.json()
+    assert retry_payload["status"] == "queued"
+    assert retry_payload["package_object_key"] is None
+    assert retry_payload["manifest_payload"] == {}
+    assert retry_payload["byte_size"] is None
+    assert retry_payload["error_message"] is None
+
+    audit_response = api_client.get("/api/audit/logs")
+    actions = [entry["action"] for entry in audit_response.json()["items"]]
+    assert "publish_package.requeued" in actions
+    assert "publish_package.cancelled" in actions
+    assert "publish_package.retried" in actions
+
+
+def test_publish_package_actions_are_role_gated(
+    api_app: FastAPI,
+    api_client: TestClient,
+) -> None:
+    _bootstrap_owner(api_client)
+    render_job_id = _seed_approved_render_job(api_client)
+    create_response = api_client.post(
+        "/api/publish-packages",
+        json={"render_job_id": render_job_id},
+    )
+    assert create_response.status_code == 201
+
+    invite_response = api_client.post(
+        "/api/auth/invites",
+        json={"email": "viewer@inflave.test", "role": "viewer"},
+    )
+    viewer_client = TestClient(api_app)
+    accept_response = viewer_client.post(
+        "/api/auth/invites/accept",
+        json={
+            "token": invite_response.json()["token"],
+            "email": "viewer@inflave.test",
+            "display_name": "Viewer",
+            "password": "viewer-password",
+        },
+    )
+    assert accept_response.status_code == 201
+
+    response = viewer_client.post(
+        f"/api/publish-packages/{create_response.json()['id']}/cancel",
+    )
+
+    assert response.status_code == 403

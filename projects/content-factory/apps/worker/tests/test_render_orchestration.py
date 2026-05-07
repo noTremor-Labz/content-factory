@@ -86,6 +86,35 @@ class FailingExecutor:
         raise RenderExecutionError("ComfyUI request timed out")
 
 
+class CancellingExecutor:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def execute(
+        self,
+        *,
+        render_job: RenderJob,
+        workflow_preset: WorkflowPreset,
+        attempt: JobAttempt,
+    ) -> RenderExecutionResult:
+        self.calls += 1
+        cancel_session = get_sessionmaker()()
+        try:
+            cancelled_job = cancel_session.get(RenderJob, render_job.id)
+            cancelled_attempt = cancel_session.get(JobAttempt, attempt.id)
+            assert cancelled_job is not None
+            assert cancelled_attempt is not None
+            cancelled_job.status = RenderJobStatus.CANCELLED.value
+            cancelled_attempt.status = JobAttemptStatus.CANCELLED.value
+            cancel_session.commit()
+        finally:
+            cancel_session.close()
+        return RenderExecutionResult(
+            provider_job_id="comfyui-cancelled",
+            response_payload={"outputs": {"video_file": "renders/cancelled.mp4"}},
+        )
+
+
 def test_process_render_job_marks_attempt_succeeded(db_session: Session) -> None:
     render_job, attempt = _seed_render_job(db_session, retry_budget=2)
     executor = SuccessfulExecutor()
@@ -152,6 +181,23 @@ def test_terminal_render_job_is_not_processed_again(db_session: Session) -> None
 
     assert outcome.status == "skipped_terminal"
     assert executor.calls == 0
+
+
+def test_operator_cancelled_render_job_is_not_overwritten_after_execution(
+    db_session: Session,
+) -> None:
+    render_job, attempt = _seed_render_job(db_session, retry_budget=2)
+    executor = CancellingExecutor()
+
+    outcome = process_render_job(render_job.id, db_session=db_session, executor=executor)
+
+    db_session.refresh(render_job)
+    db_session.refresh(attempt)
+    assert outcome.status == "cancelled"
+    assert executor.calls == 1
+    assert render_job.status == RenderJobStatus.CANCELLED.value
+    assert attempt.status == JobAttemptStatus.CANCELLED.value
+    assert attempt.provider_job_id is None
 
 
 def _seed_render_job(db_session: Session, *, retry_budget: int) -> tuple[RenderJob, JobAttempt]:

@@ -227,6 +227,15 @@ export const apiClient = {
   createRenderJob(payload: RenderJobCreateRequest) {
     return postJson<RenderJobCreateRequest, RenderJob>("/api/render-jobs", payload);
   },
+  cancelRenderJob(renderJobId: string) {
+    return requestJson<RenderJob>(`/api/render-jobs/${renderJobId}/cancel`, { method: "POST" });
+  },
+  retryRenderJob(renderJobId: string) {
+    return requestJson<RenderJob>(`/api/render-jobs/${renderJobId}/retry`, { method: "POST" });
+  },
+  requeueRenderJob(renderJobId: string) {
+    return requestJson<RenderJob>(`/api/render-jobs/${renderJobId}/requeue`, { method: "POST" });
+  },
   renderJobEventsUrl(renderJobId: string) {
     return resolveApiUrl(`/api/render-jobs/${renderJobId}/events`);
   },
@@ -235,6 +244,15 @@ export const apiClient = {
   },
   createPublishPackage(payload: PublishPackageCreateRequest) {
     return postJson<PublishPackageCreateRequest, PublishPackage>("/api/publish-packages", payload);
+  },
+  cancelPublishPackage(packageId: string) {
+    return requestJson<PublishPackage>(`/api/publish-packages/${packageId}/cancel`, { method: "POST" });
+  },
+  retryPublishPackage(packageId: string) {
+    return requestJson<PublishPackage>(`/api/publish-packages/${packageId}/retry`, { method: "POST" });
+  },
+  requeuePublishPackage(packageId: string) {
+    return requestJson<PublishPackage>(`/api/publish-packages/${packageId}/requeue`, { method: "POST" });
   },
   getPublishPackageDownload(packageId: string) {
     return requestJson<PublishPackageDownloadResponse>(`/api/publish-packages/${packageId}/download`);

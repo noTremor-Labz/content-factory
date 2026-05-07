@@ -24,7 +24,7 @@
 | 1 | Нет контракта между продуктом и render backend | Ввести `WorkflowPreset` с версионируемым workflow JSON и input/output mapping | completed |
 | 2 | Нет async execution lifecycle | Ввести `RenderJob`, `JobAttempt`, idempotent worker tasks и retry budget | completed |
 | 3 | Нет provider abstraction | Реализовать adapters для ComfyUI, voice generation и packaging | in_progress / ComfyUI workflow executor and manifest package builder complete |
-| 4 | Нет operator visibility по задачам | Добавить live job status через SSE и job detail UI | completed |
+| 4 | Нет operator visibility/control по задачам | Добавить live job status через SSE, job detail UI и operator retry/cancel/requeue actions | completed |
 | 5 | Нет publish package | Собирать финальный bundle: video, cover, title, caption, hashtags, audit metadata | completed / ZIP manifest export complete; FFmpeg binary normalization pending runtime decision |
 
 ## Phases
@@ -44,13 +44,12 @@
   Do not add free-form canvas editing.
   ```
 
-### Phase 2: Worker Orchestration, Retries, And Live Status
-- **Status:** in_progress / provider and live-status slices complete
+- **Status:** completed / provider, live-status, and operator action slices complete
 - **Files:** `apps/worker/src/content_factory_worker/orchestration.py`, `apps/worker/src/content_factory_worker/jobs/render.py`, `apps/worker/src/content_factory_worker/queue.py`, `apps/worker/src/content_factory_worker/executors/comfyui.py`, `apps/api/src/content_factory_api/modules/render.py`, `apps/api/src/content_factory_api/modules/models.py`, `apps/api/src/content_factory_api/modules/schemas.py`, `apps/api/alembic/versions/20260506_0003_render_attempt_response_payload.py`, `apps/worker/tests/test_render_orchestration.py`, `apps/worker/tests/test_comfyui_executor.py`, `apps/web/src/features/render/RenderPanel.tsx`, `packages/contracts/*`
-- **Changes:** реализованы Dramatiq enqueue при создании render job, typed worker executor contract, attempt lifecycle `queued -> running -> succeeded/failed`, retry budget enforcement с созданием следующей queued attempt, response payload persistence, idempotent skip terminal jobs, settings-driven ComfyUI HTTP executor, authenticated SSE stream `GET /api/render-jobs/{id}/events`, and cockpit Render queue/detail UI. Operator actions остаются следующим slice.
-- **TDD:** worker orchestration tests для success, retry queueing, exhausted failure и terminal idempotency; ComfyUI executor tests для submit/history/status/timeout/factory; render API regression + SSE stream test; cockpit render route test; generated OpenAPI/TS contract update.
+- **Changes:** реализованы Dramatiq enqueue при создании render job, typed worker executor contract, attempt lifecycle `queued -> running -> succeeded/failed`, retry budget enforcement с созданием следующей queued attempt, response payload persistence, idempotent skip terminal jobs, settings-driven ComfyUI HTTP executor, authenticated SSE stream `GET /api/render-jobs/{id}/events`, cockpit Render queue/detail UI, and role-gated render `cancel`/`retry`/`requeue` actions. Cancelled running renders are not overwritten by worker completion.
+- **TDD:** worker orchestration tests для success, retry queueing, exhausted failure, terminal idempotency, and operator cancellation race; ComfyUI executor tests для submit/history/status/timeout/factory; render API regression + SSE stream + operator action tests; cockpit render route/action tests; generated OpenAPI/TS contract update.
 - **Gates:** `make lint-api` ✅ | `make typecheck-api` ✅ | `make test-api` ✅ | `make generate-contracts` ✅ | `make lint-web` ✅ | `make typecheck-web` ✅ | `make test-web` ✅
-- **Impact:** добавляет первый настоящий server-side async execution lifecycle и operator visibility; queue/state consistency, provider submission/polling, and render UI path покрыты тестами. Packaging/export still pending.
+- **Impact:** добавляет первый настоящий server-side async execution lifecycle и operator control; queue/state consistency, provider submission/polling, cancellation race handling, and render UI path покрыты тестами.
 - **Prompt for launch:**
   ```text
   Read this plan and the implemented provider contracts.
@@ -83,3 +82,4 @@
 | 2026-05-07 | worker-orchestration | Добавлены Dramatiq enqueue, worker attempt lifecycle, retry budget enforcement, response payload persistence и orchestration tests |
 | 2026-05-07 | provider-live-status | Добавлены ComfyUI HTTP executor, authenticated render job SSE stream, cockpit Render route, and regenerated contracts |
 | 2026-05-07 | publish-package-export | Добавлены PublishPackage API/model/migration, worker ZIP manifest packaging, S3 download target, cockpit Export route, tests, and regenerated contracts |
+| 2026-05-07 | operator-job-actions | Добавлены role-gated cancel/retry/requeue actions для render jobs и publish packages, worker cancellation guards, cockpit action controls, tests, and regenerated contracts |

@@ -1,7 +1,7 @@
 # Context: Content Factory
 
 **Last updated:** 2026-05-07
-**Status:** phase 2 in progress / publish package export slice complete / local dev stack migrated and smoke-passed on 5173 / operator actions next
+**Status:** phase 2 in progress / operator job actions slice complete / local dev stack migrated and smoke-passed on 5173 / FFmpeg normalization or compliance next
 
 ## Stack
 
@@ -50,6 +50,19 @@ See:
 - Worker packaging now creates a ZIP manifest bundle from the successful render attempt payload, stores it through S3-compatible storage, persists package object key/manifest/byte size, and marks missing-output packages failed with explicit errors.
 - Web cockpit now has an Export route that lists succeeded approved renders, queues publish packages, shows package status/object keys/errors, and fetches signed download URLs for ready packages.
 - OpenAPI and generated TypeScript contracts include publish package schemas and routes.
+- API now exposes role-gated operator actions for render jobs:
+  - `POST /api/render-jobs/{render_job_id}/cancel`;
+  - `POST /api/render-jobs/{render_job_id}/retry`;
+  - `POST /api/render-jobs/{render_job_id}/requeue`.
+- API now exposes role-gated operator actions for publish packages:
+  - `POST /api/publish-packages/{package_id}/cancel`;
+  - `POST /api/publish-packages/{package_id}/retry`;
+  - `POST /api/publish-packages/{package_id}/requeue`.
+- Render retries append a new queued attempt, render requeue is idempotent for queued jobs, and render cancellation marks queued/running attempts cancelled.
+- Publish packages now support `cancelled`; package retry resets stale object/manifest/error fields and reuses the one-package-per-render-job row.
+- Worker orchestration now refreshes render job/attempt state after provider execution so operator cancellation is not overwritten by late provider completion, and package processing skips cancelled packages.
+- Web cockpit Render and Export routes now show status-aware operator action buttons and refresh after each action.
+- OpenAPI and generated TypeScript contracts include operator action routes and `PublishPackageStatus.cancelled`.
 - Local cockpit debugging stack is currently restored and verified:
   - Vite frontend on `127.0.0.1:5173`;
   - FastAPI on `0.0.0.0:8000`;
@@ -75,10 +88,12 @@ See:
 - 2026-05-07: Added Phase 2 provider/live-status slice with ComfyUI HTTP executor, render job SSE stream, cockpit Render queue/detail UI, and regenerated contracts.
 - 2026-05-07: Diagnosed `localhost:5173` as an inactive local stack, restored Vite/API/Docker infra, ran migrations, verified `/health/ready`, and passed Playwright smoke on `5173`.
 - 2026-05-07: Added Phase 2 publish-package/export slice with `PublishPackage` API/model/migration, worker ZIP manifest packaging, cockpit Export route, regenerated contracts, local dev migration, and browser smoke verification on `5173`.
+- 2026-05-07: Added Phase 2 operator job actions with role-gated render/package cancel/retry/requeue endpoints, worker cancellation guards, cockpit action buttons, tests, and regenerated contracts.
+- 2026-05-07: Re-ran live Playwright cockpit smoke on `127.0.0.1:5173` after operator action UI changes; smoke passed.
 
 ## Known Issues
 
-- Operator retry/cancel/requeue actions, FFmpeg binary media normalization, compliance engine, metrics, and direct package worker runtime operation remain future phases.
+- FFmpeg binary media normalization, compliance engine, metrics, and direct package worker runtime operation remain future phases.
 - ComfyUI adapter submits the stored workflow definition and persists provider output payloads; richer input-to-node mutation remains a future preset mapping enhancement.
 - Publish-package ZIPs currently bundle manifest/title/caption/hashtags/provider output references. Copying/transcoding referenced media into platform-normalized MP4 assets should be added once FFmpeg runtime availability is decided.
 - Compliance requirements for vape/nicotine-adjacent content still need legal review before pilot launch.
@@ -102,6 +117,6 @@ Continue `Phase 2 / Production Pipeline And Render Integration` with:
 - `.memory/sessions/plans/2026-05-06-content-factory-phase-2-production-pipeline.md`
 - `.memory/sessions/specs/2026-05-06-content-factory-pilot-implementation-rollout.md`
 - `.memory/sessions/plans/2026-05-06-content-factory-rollout-master.md`
-- immediate next slice: operator retry/cancel/requeue actions for render jobs and publish packages, or FFmpeg binary media normalization inside the completed publish package worker contract
+- immediate next slice: FFmpeg binary media normalization inside the completed publish package worker contract, or begin Phase 3 compliance/metrics if media runtime decisions stay deferred
 
-Latest handoff: `.memory/sessions/2026-05-07-codex-phase-2-publish-package-export.md`.
+Latest handoff: `.memory/sessions/2026-05-07-codex-phase-2-operator-job-actions.md`.

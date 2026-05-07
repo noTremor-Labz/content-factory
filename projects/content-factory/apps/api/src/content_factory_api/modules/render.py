@@ -39,6 +39,7 @@ from content_factory_api.modules.schemas import (
     RenderJobStatusEvent,
     WorkflowInputBinding,
 )
+from content_factory_api.modules.security import utcnow
 from content_factory_api.modules.services import (
     commit_or_409,
     get_by_id_or_404,
@@ -58,6 +59,23 @@ TERMINAL_RENDER_JOB_STATUSES = {
     RenderJobStatus.SUCCEEDED.value,
     RenderJobStatus.FAILED.value,
     RenderJobStatus.CANCELLED.value,
+}
+
+CANCELABLE_RENDER_JOB_STATUSES = {
+    RenderJobStatus.QUEUED.value,
+    RenderJobStatus.RUNNING.value,
+}
+
+RETRYABLE_RENDER_JOB_STATUSES = {
+    RenderJobStatus.FAILED.value,
+    RenderJobStatus.CANCELLED.value,
+}
+
+REQUEUEABLE_RENDER_JOB_STATUSES = {RenderJobStatus.QUEUED.value}
+
+CANCELABLE_ATTEMPT_STATUSES = {
+    JobAttemptStatus.QUEUED.value,
+    JobAttemptStatus.RUNNING.value,
 }
 
 
@@ -159,6 +177,114 @@ def get_render_job(
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> RenderJobRead:
     render_job = get_by_id_or_404(db_session, RenderJob, render_job_id, "Render job")
+    return _serialize_render_job(db_session, render_job)
+
+
+@router.post("/{render_job_id}/cancel", response_model=RenderJobRead)
+def cancel_render_job(
+    render_job_id: str,
+    current_user: Annotated[User, Depends(require_roles(*MUTATION_ROLES))],
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> RenderJobRead:
+    render_job = get_by_id_or_404(db_session, RenderJob, render_job_id, "Render job")
+    if render_job.status == RenderJobStatus.CANCELLED.value:
+        return _serialize_render_job(db_session, render_job)
+    if render_job.status not in CANCELABLE_RENDER_JOB_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Render job cannot be cancelled from its current status",
+        )
+
+    previous_status = render_job.status
+    cancelled_attempt_ids = _cancel_active_attempts(db_session, render_job.id)
+    render_job.status = RenderJobStatus.CANCELLED.value
+    write_audit_log(
+        db_session,
+        actor_user_id=current_user.id,
+        action="render_job.cancelled",
+        entity_type="render_job",
+        entity_id=render_job.id,
+        payload={
+            "previous_status": previous_status,
+            "cancelled_attempt_ids": cancelled_attempt_ids,
+        },
+    )
+    commit_or_409(db_session, "Render job could not be cancelled")
+    return _serialize_render_job(db_session, render_job)
+
+
+@router.post("/{render_job_id}/retry", response_model=RenderJobRead)
+def retry_render_job(
+    render_job_id: str,
+    current_user: Annotated[User, Depends(require_roles(*MUTATION_ROLES))],
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> RenderJobRead:
+    render_job = get_by_id_or_404(db_session, RenderJob, render_job_id, "Render job")
+    if render_job.status not in RETRYABLE_RENDER_JOB_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Render job can only be retried after failure or cancellation",
+        )
+
+    previous_status = render_job.status
+    retry_attempt = _append_queued_attempt(db_session, render_job)
+    render_job.status = RenderJobStatus.QUEUED.value
+    write_audit_log(
+        db_session,
+        actor_user_id=current_user.id,
+        action="render_job.retried",
+        entity_type="render_job",
+        entity_id=render_job.id,
+        payload={
+            "previous_status": previous_status,
+            "attempt_id": retry_attempt.id,
+            "attempt_number": retry_attempt.attempt_number,
+        },
+    )
+    commit_or_409(db_session, "Render job could not be retried")
+
+    from content_factory_worker.queue import enqueue_render_job
+
+    enqueue_render_job(render_job.id)
+    return _serialize_render_job(db_session, render_job)
+
+
+@router.post("/{render_job_id}/requeue", response_model=RenderJobRead)
+def requeue_render_job(
+    render_job_id: str,
+    current_user: Annotated[User, Depends(require_roles(*MUTATION_ROLES))],
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> RenderJobRead:
+    render_job = get_by_id_or_404(db_session, RenderJob, render_job_id, "Render job")
+    if render_job.status not in REQUEUEABLE_RENDER_JOB_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Render job can only be requeued while queued",
+        )
+
+    queued_attempt = _next_queued_attempt(db_session, render_job.id)
+    created_attempt = False
+    if queued_attempt is None:
+        queued_attempt = _append_queued_attempt(db_session, render_job)
+        created_attempt = True
+
+    write_audit_log(
+        db_session,
+        actor_user_id=current_user.id,
+        action="render_job.requeued",
+        entity_type="render_job",
+        entity_id=render_job.id,
+        payload={
+            "attempt_id": queued_attempt.id,
+            "attempt_number": queued_attempt.attempt_number,
+            "created_attempt": created_attempt,
+        },
+    )
+    commit_or_409(db_session, "Render job could not be requeued")
+
+    from content_factory_worker.queue import enqueue_render_job
+
+    enqueue_render_job(render_job.id)
     return _serialize_render_job(db_session, render_job)
 
 
@@ -278,13 +404,7 @@ def _resolve_binding_value(
 
 
 def _serialize_render_job(db_session: Session, render_job: RenderJob) -> RenderJobRead:
-    attempts = list(
-        db_session.scalars(
-            select(JobAttempt)
-            .where(JobAttempt.render_job_id == render_job.id)
-            .order_by(JobAttempt.attempt_number.asc())
-        )
-    )
+    attempts = _attempts_for_render_job(db_session, render_job.id)
     return RenderJobRead(
         id=render_job.id,
         content_item_id=render_job.content_item_id,
@@ -302,6 +422,60 @@ def _serialize_render_job(db_session: Session, render_job: RenderJob) -> RenderJ
         updated_at=render_job.updated_at,
         attempts=[JobAttemptRead.model_validate(attempt) for attempt in attempts],
     )
+
+
+def _attempts_for_render_job(db_session: Session, render_job_id: str) -> list[JobAttempt]:
+    return list(
+        db_session.scalars(
+            select(JobAttempt)
+            .where(JobAttempt.render_job_id == render_job_id)
+            .order_by(JobAttempt.attempt_number.asc())
+        )
+    )
+
+
+def _next_queued_attempt(db_session: Session, render_job_id: str) -> JobAttempt | None:
+    return db_session.scalar(
+        select(JobAttempt)
+        .where(
+            JobAttempt.render_job_id == render_job_id,
+            JobAttempt.status == JobAttemptStatus.QUEUED.value,
+        )
+        .order_by(JobAttempt.attempt_number.asc())
+    )
+
+
+def _cancel_active_attempts(db_session: Session, render_job_id: str) -> list[str]:
+    now = utcnow()
+    cancelled_attempt_ids: list[str] = []
+    for attempt in _attempts_for_render_job(db_session, render_job_id):
+        if attempt.status not in CANCELABLE_ATTEMPT_STATUSES:
+            continue
+        attempt.status = JobAttemptStatus.CANCELLED.value
+        attempt.error_message = attempt.error_message or "Cancelled by operator"
+        attempt.finished_at = attempt.finished_at or now
+        cancelled_attempt_ids.append(attempt.id)
+    return cancelled_attempt_ids
+
+
+def _append_queued_attempt(db_session: Session, render_job: RenderJob) -> JobAttempt:
+    attempts = _attempts_for_render_job(db_session, render_job.id)
+    latest_attempt = attempts[-1] if attempts else None
+    next_attempt_number = (latest_attempt.attempt_number + 1) if latest_attempt else 1
+    request_payload = (
+        latest_attempt.request_payload
+        if latest_attempt is not None
+        else {"inputs": render_job.input_snapshot}
+    )
+    attempt = JobAttempt(
+        render_job_id=render_job.id,
+        attempt_number=next_attempt_number,
+        status=JobAttemptStatus.QUEUED.value,
+        request_payload=request_payload,
+    )
+    db_session.add(attempt)
+    db_session.flush()
+    return attempt
 
 
 async def _render_job_event_stream(

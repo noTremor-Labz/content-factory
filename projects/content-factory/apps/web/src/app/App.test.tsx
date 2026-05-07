@@ -151,7 +151,7 @@ interface MockPublishPackage {
   id: string;
   render_job_id: string;
   content_item_id: string;
-  status: "queued" | "running" | "ready" | "failed";
+  status: "queued" | "running" | "ready" | "failed" | "cancelled";
   package_object_key: string | null;
   manifest_payload: Record<string, unknown>;
   byte_size: number | null;
@@ -671,6 +671,103 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
       ],
       [
         "POST",
+        /^\/api\/render-jobs\/[^/]+\/cancel$/,
+        async (matchedPath) => {
+          const renderJobId = matchedPath.split("/")[3];
+          const renderJob = state.renderJobs.find((item) => item.id === renderJobId);
+          if (!renderJob) {
+            return jsonResponse({ detail: "Render job not found" }, 404);
+          }
+          if (!["queued", "running", "cancelled"].includes(renderJob.status)) {
+            return jsonResponse({ detail: "Render job cannot be cancelled from its current status" }, 409);
+          }
+          renderJob.status = "cancelled";
+          renderJob.updated_at = nowIso(sequence);
+          renderJob.attempts.forEach((attempt) => {
+            if (attempt.status === "queued" || attempt.status === "running") {
+              attempt.status = "cancelled";
+              attempt.error_message = attempt.error_message ?? "Cancelled by operator";
+              attempt.finished_at = attempt.finished_at ?? nowIso(sequence);
+              attempt.updated_at = nowIso(sequence);
+            }
+          });
+          recordAudit("render_job.cancelled", "render_job", renderJob.id);
+          return jsonResponse(renderJob);
+        },
+      ],
+      [
+        "POST",
+        /^\/api\/render-jobs\/[^/]+\/retry$/,
+        async (matchedPath) => {
+          const renderJobId = matchedPath.split("/")[3];
+          const renderJob = state.renderJobs.find((item) => item.id === renderJobId);
+          if (!renderJob) {
+            return jsonResponse({ detail: "Render job not found" }, 404);
+          }
+          if (!["failed", "cancelled"].includes(renderJob.status)) {
+            return jsonResponse({ detail: "Render job can only be retried after failure or cancellation" }, 409);
+          }
+          const latestAttempt = [...renderJob.attempts].sort(
+            (left, right) => right.attempt_number - left.attempt_number,
+          )[0];
+          const nextAttempt: MockJobAttempt = {
+            id: nextId("attempt"),
+            render_job_id: renderJob.id,
+            attempt_number: latestAttempt ? latestAttempt.attempt_number + 1 : 1,
+            status: "queued",
+            provider_job_id: null,
+            request_payload: latestAttempt?.request_payload ?? { inputs: renderJob.input_snapshot },
+            response_payload: {},
+            error_message: null,
+            started_at: null,
+            finished_at: null,
+            created_at: nowIso(sequence),
+            updated_at: nowIso(sequence),
+          };
+          renderJob.status = "queued";
+          renderJob.updated_at = nowIso(sequence);
+          renderJob.attempts.push(nextAttempt);
+          recordAudit("render_job.retried", "render_job", renderJob.id);
+          return jsonResponse(renderJob);
+        },
+      ],
+      [
+        "POST",
+        /^\/api\/render-jobs\/[^/]+\/requeue$/,
+        async (matchedPath) => {
+          const renderJobId = matchedPath.split("/")[3];
+          const renderJob = state.renderJobs.find((item) => item.id === renderJobId);
+          if (!renderJob) {
+            return jsonResponse({ detail: "Render job not found" }, 404);
+          }
+          if (renderJob.status !== "queued") {
+            return jsonResponse({ detail: "Render job can only be requeued while queued" }, 409);
+          }
+          if (!renderJob.attempts.some((attempt) => attempt.status === "queued")) {
+            const latestAttempt = [...renderJob.attempts].sort(
+              (left, right) => right.attempt_number - left.attempt_number,
+            )[0];
+            renderJob.attempts.push({
+              id: nextId("attempt"),
+              render_job_id: renderJob.id,
+              attempt_number: latestAttempt ? latestAttempt.attempt_number + 1 : 1,
+              status: "queued",
+              provider_job_id: null,
+              request_payload: latestAttempt?.request_payload ?? { inputs: renderJob.input_snapshot },
+              response_payload: {},
+              error_message: null,
+              started_at: null,
+              finished_at: null,
+              created_at: nowIso(sequence),
+              updated_at: nowIso(sequence),
+            });
+          }
+          recordAudit("render_job.requeued", "render_job", renderJob.id);
+          return jsonResponse(renderJob);
+        },
+      ],
+      [
+        "POST",
         /^\/api\/publish-packages$/,
         async (_path, requestOptions) => {
           const body = JSON.parse(String(requestOptions?.body));
@@ -702,6 +799,63 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
           state.publishPackages.unshift(publishPackage);
           recordAudit("publish_package.created", "publish_package", publishPackage.id);
           return jsonResponse(publishPackage, 201);
+        },
+      ],
+      [
+        "POST",
+        /^\/api\/publish-packages\/[^/]+\/cancel$/,
+        async (matchedPath) => {
+          const packageId = matchedPath.split("/")[3];
+          const publishPackage = state.publishPackages.find((item) => item.id === packageId);
+          if (!publishPackage) {
+            return jsonResponse({ detail: "Publish package not found" }, 404);
+          }
+          if (!["queued", "running", "cancelled"].includes(publishPackage.status)) {
+            return jsonResponse({ detail: "Publish package cannot be cancelled from its current status" }, 409);
+          }
+          publishPackage.status = "cancelled";
+          publishPackage.error_message = publishPackage.error_message ?? "Cancelled by operator";
+          publishPackage.updated_at = nowIso(sequence);
+          recordAudit("publish_package.cancelled", "publish_package", publishPackage.id);
+          return jsonResponse(publishPackage);
+        },
+      ],
+      [
+        "POST",
+        /^\/api\/publish-packages\/[^/]+\/retry$/,
+        async (matchedPath) => {
+          const packageId = matchedPath.split("/")[3];
+          const publishPackage = state.publishPackages.find((item) => item.id === packageId);
+          if (!publishPackage) {
+            return jsonResponse({ detail: "Publish package not found" }, 404);
+          }
+          if (!["failed", "cancelled"].includes(publishPackage.status)) {
+            return jsonResponse({ detail: "Publish package can only be retried after failure or cancellation" }, 409);
+          }
+          publishPackage.status = "queued";
+          publishPackage.package_object_key = null;
+          publishPackage.manifest_payload = {};
+          publishPackage.byte_size = null;
+          publishPackage.error_message = null;
+          publishPackage.updated_at = nowIso(sequence);
+          recordAudit("publish_package.retried", "publish_package", publishPackage.id);
+          return jsonResponse(publishPackage);
+        },
+      ],
+      [
+        "POST",
+        /^\/api\/publish-packages\/[^/]+\/requeue$/,
+        async (matchedPath) => {
+          const packageId = matchedPath.split("/")[3];
+          const publishPackage = state.publishPackages.find((item) => item.id === packageId);
+          if (!publishPackage) {
+            return jsonResponse({ detail: "Publish package not found" }, 404);
+          }
+          if (publishPackage.status !== "queued") {
+            return jsonResponse({ detail: "Publish package can only be requeued while queued" }, 409);
+          }
+          recordAudit("publish_package.requeued", "publish_package", publishPackage.id);
+          return jsonResponse(publishPackage);
         },
       ],
       [
@@ -882,6 +1036,76 @@ describe("App", () => {
     expect((await screen.findAllByText(/^queued$/i)).length).toBeGreaterThan(0);
   });
 
+  test("runs render job operator actions", async () => {
+    const contentItem: MockContentItem = {
+      id: "content-planned",
+      brand_id: "brand-1",
+      avatar_id: "avatar-1",
+      title: "Pilot short",
+      script: "A careful, platform-safe short script.",
+      channel: "youtube_shorts",
+      status: "planned",
+      planned_publish_at: null,
+      created_by_user_id: "user-owner",
+      created_at: nowIso(0),
+      updated_at: nowIso(0),
+    };
+    const workflowPreset = createWorkflowPreset();
+    const renderJob: MockRenderJob = {
+      id: "render-queued",
+      content_item_id: contentItem.id,
+      workflow_preset_id: workflowPreset.id,
+      workflow_preset_key: workflowPreset.key,
+      workflow_preset_version: workflowPreset.version,
+      workflow_provider: workflowPreset.workflow_provider,
+      voice_provider: workflowPreset.voice_provider,
+      packaging_provider: workflowPreset.packaging_provider,
+      input_snapshot: { script_text: contentItem.script },
+      status: "queued",
+      retry_budget: 1,
+      created_by_user_id: "user-owner",
+      created_at: nowIso(1),
+      updated_at: nowIso(2),
+      attempts: [
+        {
+          id: "attempt-1",
+          render_job_id: "render-queued",
+          attempt_number: 1,
+          status: "queued",
+          provider_job_id: null,
+          request_payload: { inputs: { script_text: contentItem.script } },
+          response_payload: {},
+          error_message: null,
+          started_at: null,
+          finished_at: null,
+          created_at: nowIso(1),
+          updated_at: nowIso(2),
+        },
+      ],
+    };
+    installMockApi({
+      session: createOwnerSession(),
+      contentItems: [contentItem],
+      workflowPresets: [workflowPreset],
+      renderJobs: [renderJob],
+    });
+    window.location.hash = "#render";
+
+    render(<App />);
+
+    expect(await screen.findByRole("heading", { name: /render queue/i })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: /requeue job/i }));
+    expect(await screen.findByText(/render job requeued\./i)).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: /cancel job/i }));
+    expect(await screen.findByText(/render job cancelled\./i)).toBeVisible();
+    expect((await screen.findAllByText(/^cancelled$/i)).length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole("button", { name: /retry job/i }));
+    expect(await screen.findByText(/render job retried\./i)).toBeVisible();
+    expect((await screen.findAllByText(/^queued$/i)).length).toBeGreaterThan(0);
+  });
+
   test("prepares a publish package from a succeeded approved render", async () => {
     const contentItem: MockContentItem = {
       id: "content-approved",
@@ -946,6 +1170,20 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: /create package/i }));
 
     expect(await screen.findByText(/publish package queued\./i)).toBeVisible();
+    expect(
+      await screen.findByText(/no succeeded approved renders waiting for package export/i),
+    ).toBeVisible();
+    expect((await screen.findAllByText(/^queued$/i)).length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole("button", { name: /requeue package/i }));
+    expect(await screen.findByText(/publish package requeued\./i)).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: /cancel package/i }));
+    expect(await screen.findByText(/publish package cancelled\./i)).toBeVisible();
+    expect((await screen.findAllByText(/^cancelled$/i)).length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole("button", { name: /retry package/i }));
+    expect(await screen.findByText(/publish package retried\./i)).toBeVisible();
     expect((await screen.findAllByText(/^queued$/i)).length).toBeGreaterThan(0);
   });
 });

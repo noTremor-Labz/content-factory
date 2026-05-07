@@ -10,10 +10,15 @@ interface ExportPanelProps {
   canMutate: boolean;
   busy: boolean;
   onCreatePackage: (renderJobId: string) => Promise<void>;
+  onCancelPackage: (packageId: string) => Promise<void>;
   onGetDownload: (packageId: string) => Promise<string>;
+  onRetryPackage: (packageId: string) => Promise<void>;
+  onRequeuePackage: (packageId: string) => Promise<void>;
 }
 
-const activePackageStatuses = new Set(["queued", "running", "ready"]);
+const cancelablePackageStatuses = new Set(["queued", "running"]);
+const retryablePackageStatuses = new Set(["failed", "cancelled"]);
+const requeueablePackageStatuses = new Set(["queued"]);
 
 export function ExportPanel({
   contentItems,
@@ -22,22 +27,23 @@ export function ExportPanel({
   canMutate,
   busy,
   onCreatePackage,
+  onCancelPackage,
   onGetDownload,
+  onRetryPackage,
+  onRequeuePackage,
 }: ExportPanelProps) {
   const [selectedRenderJobId, setSelectedRenderJobId] = useState("");
   const [downloadUrls, setDownloadUrls] = useState<Record<string, string>>({});
   const [downloadError, setDownloadError] = useState<string | null>(null);
-  const activePackageRenderJobIds = new Set(
-    publishPackages
-      .filter((publishPackage) => activePackageStatuses.has(publishPackage.status))
-      .map((publishPackage) => publishPackage.render_job_id),
+  const packagedRenderJobIds = new Set(
+    publishPackages.map((publishPackage) => publishPackage.render_job_id),
   );
   const eligibleRenderJobs = renderJobs.filter((renderJob) => {
     const contentItem = contentItems.find((item) => item.id === renderJob.content_item_id);
     return (
       renderJob.status === "succeeded" &&
       contentItem?.status === "approved" &&
-      !activePackageRenderJobIds.has(renderJob.id)
+      !packagedRenderJobIds.has(renderJob.id)
     );
   });
   const renderJobId = selectedRenderJobId || eligibleRenderJobs[0]?.id || "";
@@ -171,6 +177,40 @@ export function ExportPanel({
                         <a className="secondary-button" href={downloadUrl}>
                           Open package
                         </a>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {canMutate ? (
+                    <div className="inline-action-row">
+                      {requeueablePackageStatuses.has(publishPackage.status) ? (
+                        <button
+                          className="secondary-button"
+                          disabled={busy}
+                          type="button"
+                          onClick={() => onRequeuePackage(publishPackage.id)}
+                        >
+                          Requeue package
+                        </button>
+                      ) : null}
+                      {cancelablePackageStatuses.has(publishPackage.status) ? (
+                        <button
+                          className="secondary-button"
+                          disabled={busy}
+                          type="button"
+                          onClick={() => onCancelPackage(publishPackage.id)}
+                        >
+                          Cancel package
+                        </button>
+                      ) : null}
+                      {retryablePackageStatuses.has(publishPackage.status) ? (
+                        <button
+                          className="secondary-button"
+                          disabled={busy}
+                          type="button"
+                          onClick={() => onRetryPackage(publishPackage.id)}
+                        >
+                          Retry package
+                        </button>
                       ) : null}
                     </div>
                   ) : null}

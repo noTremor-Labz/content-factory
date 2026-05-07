@@ -24,7 +24,13 @@ from content_factory_api.modules.models import (
 )
 from content_factory_api.modules.schemas import WorkflowOutputBinding
 
-ProcessingStatus = Literal["ready", "failed", "skipped_ready", "skipped_running"]
+ProcessingStatus = Literal[
+    "ready",
+    "failed",
+    "skipped_ready",
+    "skipped_running",
+    "skipped_cancelled",
+]
 
 
 class PublishPackageError(RuntimeError):
@@ -132,6 +138,8 @@ def process_publish_package(
         return PublishPackageProcessingOutcome(publish_package.id, "skipped_ready")
     if publish_package.status == PublishPackageStatus.RUNNING.value:
         return PublishPackageProcessingOutcome(publish_package.id, "skipped_running")
+    if publish_package.status == PublishPackageStatus.CANCELLED.value:
+        return PublishPackageProcessingOutcome(publish_package.id, "skipped_cancelled")
 
     try:
         render_job = _get_render_job(db_session, publish_package.render_job_id)
@@ -159,6 +167,10 @@ def process_publish_package(
         return _fail_package(db_session, publish_package, str(exc))
     except Exception as exc:
         return _fail_package(db_session, publish_package, f"{exc.__class__.__name__}: {exc}")
+
+    db_session.refresh(publish_package)
+    if publish_package.status == PublishPackageStatus.CANCELLED.value:
+        return PublishPackageProcessingOutcome(publish_package.id, "skipped_cancelled")
 
     publish_package.status = PublishPackageStatus.READY.value
     publish_package.package_object_key = result.package_object_key

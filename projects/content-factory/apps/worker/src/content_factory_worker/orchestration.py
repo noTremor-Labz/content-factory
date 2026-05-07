@@ -20,6 +20,7 @@ ProcessingStatus = Literal[
     "succeeded",
     "failed",
     "retry_queued",
+    "cancelled",
     "skipped_terminal",
     "skipped_no_attempt",
 ]
@@ -103,6 +104,8 @@ def process_render_job(
             attempt=attempt,
         )
     except RenderExecutionError as exc:
+        if _job_or_attempt_cancelled(db_session, render_job, attempt):
+            return _mark_operator_cancelled(db_session, render_job=render_job, attempt=attempt)
         return _fail_attempt(
             db_session,
             render_job=render_job,
@@ -111,6 +114,8 @@ def process_render_job(
             error_message=str(exc),
         )
     except Exception as exc:
+        if _job_or_attempt_cancelled(db_session, render_job, attempt):
+            return _mark_operator_cancelled(db_session, render_job=render_job, attempt=attempt)
         return _fail_attempt(
             db_session,
             render_job=render_job,
@@ -118,6 +123,9 @@ def process_render_job(
             attempts=attempts,
             error_message=f"{exc.__class__.__name__}: {exc}",
         )
+
+    if _job_or_attempt_cancelled(db_session, render_job, attempt):
+        return _mark_operator_cancelled(db_session, render_job=render_job, attempt=attempt)
 
     attempt.status = JobAttemptStatus.SUCCEEDED.value
     attempt.provider_job_id = result.provider_job_id
@@ -193,4 +201,36 @@ def _fail_attempt(
         render_job_id=render_job.id,
         attempt_id=attempt.id,
         status="failed",
+    )
+
+
+def _job_or_attempt_cancelled(
+    db_session: Session,
+    render_job: RenderJob,
+    attempt: JobAttempt,
+) -> bool:
+    db_session.refresh(render_job)
+    db_session.refresh(attempt)
+    return (
+        render_job.status == RenderJobStatus.CANCELLED.value
+        or attempt.status == JobAttemptStatus.CANCELLED.value
+    )
+
+
+def _mark_operator_cancelled(
+    db_session: Session,
+    *,
+    render_job: RenderJob,
+    attempt: JobAttempt,
+) -> RenderJobProcessingOutcome:
+    now = utcnow()
+    render_job.status = RenderJobStatus.CANCELLED.value
+    attempt.status = JobAttemptStatus.CANCELLED.value
+    attempt.finished_at = attempt.finished_at or now
+    attempt.error_message = attempt.error_message or "Cancelled by operator"
+    db_session.commit()
+    return RenderJobProcessingOutcome(
+        render_job_id=render_job.id,
+        attempt_id=attempt.id,
+        status="cancelled",
     )

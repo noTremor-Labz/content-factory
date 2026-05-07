@@ -614,6 +614,27 @@ export function App() {
                   "Render job created.",
                 )
               }
+              onCancelRenderJob={(renderJobId) =>
+                runCockpitMutation(
+                  "cancel render job",
+                  () => apiClient.cancelRenderJob(renderJobId),
+                  "Render job cancelled.",
+                )
+              }
+              onRetryRenderJob={(renderJobId) =>
+                runCockpitMutation(
+                  "retry render job",
+                  () => apiClient.retryRenderJob(renderJobId),
+                  "Render job retried.",
+                )
+              }
+              onRequeueRenderJob={(renderJobId) =>
+                runCockpitMutation(
+                  "requeue render job",
+                  () => apiClient.requeueRenderJob(renderJobId),
+                  "Render job requeued.",
+                )
+              }
               onSelectRenderJob={setLiveRenderJobId}
               renderJobs={cockpitData.renderJobs}
               workflowPresets={cockpitData.workflowPresets}
@@ -632,10 +653,31 @@ export function App() {
                   "Publish package queued.",
                 )
               }
+              onCancelPackage={(packageId) =>
+                runCockpitMutation(
+                  "cancel publish package",
+                  () => apiClient.cancelPublishPackage(packageId),
+                  "Publish package cancelled.",
+                )
+              }
               onGetDownload={async (packageId) => {
                 const response = await apiClient.getPublishPackageDownload(packageId);
                 return response.download.url;
               }}
+              onRetryPackage={(packageId) =>
+                runCockpitMutation(
+                  "retry publish package",
+                  () => apiClient.retryPublishPackage(packageId),
+                  "Publish package retried.",
+                )
+              }
+              onRequeuePackage={(packageId) =>
+                runCockpitMutation(
+                  "requeue publish package",
+                  () => apiClient.requeuePublishPackage(packageId),
+                  "Publish package requeued.",
+                )
+              }
               publishPackages={cockpitData.publishPackages}
               renderJobs={cockpitData.renderJobs}
             />

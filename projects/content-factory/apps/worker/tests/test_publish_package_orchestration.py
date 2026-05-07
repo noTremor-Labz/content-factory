@@ -120,6 +120,32 @@ def test_process_publish_package_marks_missing_outputs_failed(db_session: Sessio
     assert "video_file" in publish_package.error_message
 
 
+def test_cancelled_publish_package_is_not_processed(db_session: Session) -> None:
+    publish_package = _seed_publish_package(
+        db_session,
+        response_payload={
+            "outputs": {
+                "video_file": "s3://content-factory-assets/renders/video.mp4",
+                "cover_file": "s3://content-factory-assets/renders/cover.jpg",
+            }
+        },
+    )
+    publish_package.status = PublishPackageStatus.CANCELLED.value
+    db_session.commit()
+    storage = MemoryPackageStorage()
+
+    outcome = process_publish_package(
+        publish_package.id,
+        db_session=db_session,
+        packager=ZipPublishPackager(storage=storage),
+    )
+
+    db_session.refresh(publish_package)
+    assert outcome.status == "skipped_cancelled"
+    assert publish_package.status == PublishPackageStatus.CANCELLED.value
+    assert storage.objects == {}
+
+
 def _seed_publish_package(
     db_session: Session,
     *,
