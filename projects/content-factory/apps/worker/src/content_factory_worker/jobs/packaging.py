@@ -1,4 +1,5 @@
 from io import BytesIO
+from urllib.parse import urlparse
 
 import boto3
 import dramatiq
@@ -7,7 +8,9 @@ from botocore.client import Config
 from content_factory_api.database import get_sessionmaker
 from content_factory_worker.config import WorkerSettings, get_worker_settings
 from content_factory_worker.packaging import (
+    FfmpegMediaNormalizer,
     PackageStorage,
+    PublishPackageError,
     PublishPackager,
     ZipPublishPackager,
     process_publish_package,
@@ -35,9 +38,44 @@ class S3PackageStorage(PackageStorage):
             ExtraArgs={"ContentType": content_type},
         )
 
+    def download_artifact(self, artifact_reference: str) -> bytes:
+        bucket, key = self._resolve_artifact_reference(artifact_reference)
+        buffer = BytesIO()
+        self._client.download_fileobj(bucket, key, buffer)
+        return buffer.getvalue()
+
+    def _resolve_artifact_reference(self, artifact_reference: str) -> tuple[str, str]:
+        parsed = urlparse(artifact_reference)
+        if parsed.scheme == "s3":
+            bucket = parsed.netloc
+            key = parsed.path.lstrip("/")
+            if bucket != self._bucket:
+                raise PublishPackageError(
+                    f"Artifact bucket '{bucket}' does not match configured bucket '{self._bucket}'",
+                )
+            if key == "":
+                raise PublishPackageError("S3 artifact reference has no object key")
+            return bucket, key
+        if parsed.scheme in {"http", "https"}:
+            raise PublishPackageError("HTTP media artifact references are not supported")
+        if parsed.scheme:
+            raise PublishPackageError(
+                f"Unsupported media artifact reference scheme '{parsed.scheme}'",
+            )
+        object_key = artifact_reference.lstrip("/")
+        if object_key == "":
+            raise PublishPackageError("Media artifact reference has no object key")
+        return self._bucket, object_key
+
 
 def build_publish_packager(settings: WorkerSettings) -> PublishPackager:
-    return ZipPublishPackager(storage=S3PackageStorage(settings))
+    return ZipPublishPackager(
+        storage=S3PackageStorage(settings),
+        media_normalizer=FfmpegMediaNormalizer(
+            ffmpeg_path=settings.ffmpeg_path,
+            timeout_seconds=settings.ffmpeg_timeout_seconds,
+        ),
+    )
 
 
 @dramatiq.actor(queue_name="publish-packages", max_retries=0)

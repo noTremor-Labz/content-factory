@@ -34,6 +34,7 @@ AI-сервис контент-завода для цифровых аватар
 - API migrations: `make migrate-api`
 - Contracts: `make generate-contracts`
 - Dev servers: `make dev-web` и `make dev-api`
+- Dev watchdog: `make dev-watchdog` следит за local infra/API/web и поднимает упавшие части; безопасная проверка без запуска процессов: `.venv/bin/python scripts/dev_watchdog.py --once --dry-run`
 
 ## Web Dev Notes
 

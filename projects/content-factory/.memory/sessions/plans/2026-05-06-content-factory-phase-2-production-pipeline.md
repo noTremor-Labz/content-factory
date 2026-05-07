@@ -23,9 +23,9 @@
 |---|---------|----------|--------|
 | 1 | Нет контракта между продуктом и render backend | Ввести `WorkflowPreset` с версионируемым workflow JSON и input/output mapping | completed |
 | 2 | Нет async execution lifecycle | Ввести `RenderJob`, `JobAttempt`, idempotent worker tasks и retry budget | completed |
-| 3 | Нет provider abstraction | Реализовать adapters для ComfyUI, voice generation и packaging | in_progress / ComfyUI workflow executor and manifest package builder complete |
+| 3 | Нет provider abstraction | Реализовать adapters для ComfyUI, voice generation и packaging | completed / ComfyUI workflow executor and FFmpeg package normalizer contract complete |
 | 4 | Нет operator visibility/control по задачам | Добавить live job status через SSE, job detail UI и operator retry/cancel/requeue actions | completed |
-| 5 | Нет publish package | Собирать финальный bundle: video, cover, title, caption, hashtags, audit metadata | completed / ZIP manifest export complete; FFmpeg binary normalization pending runtime decision |
+| 5 | Нет publish package | Собирать финальный bundle: video, cover, title, caption, hashtags, audit metadata | completed / ZIP export now includes normalized `video.mp4`; local FFmpeg binary install still pending |
 
 ## Phases
 
@@ -59,12 +59,12 @@
   ```
 
 ### Phase 3: Packaging, Export, And Operator Flow
-- **Status:** completed / manifest ZIP publish-package slice complete
-- **Files:** `apps/api/src/content_factory_api/modules/exports.py`, `apps/api/src/content_factory_api/modules/models.py`, `apps/api/src/content_factory_api/modules/schemas.py`, `apps/api/alembic/versions/20260507_0004_publish_packages.py`, `apps/worker/src/content_factory_worker/packaging.py`, `apps/worker/src/content_factory_worker/jobs/packaging.py`, `apps/web/src/features/export/ExportPanel.tsx`, `apps/web/src/app/App.tsx`, `apps/web/src/shared/api/client.ts`, `packages/contracts/*`
-- **Changes:** добавлен `PublishPackage` lifecycle, API create/list/detail/download, approved+succeeded gates, idempotent package creation per render job, worker ZIP manifest bundle with title/caption/hashtags/provider output, S3-compatible package upload, cockpit Export route, and regenerated OpenAPI/TS contracts.
-- **TDD:** API package gate/idempotency/download tests, worker ZIP manifest and missing-output failure tests, cockpit export route test.
+- **Status:** completed / normalized MP4 publish-package slice complete; local FFmpeg binary install pending
+- **Files:** `apps/api/src/content_factory_api/modules/exports.py`, `apps/api/src/content_factory_api/modules/models.py`, `apps/api/src/content_factory_api/modules/schemas.py`, `apps/api/alembic/versions/20260507_0004_publish_packages.py`, `apps/worker/src/content_factory_worker/packaging.py`, `apps/worker/src/content_factory_worker/jobs/packaging.py`, `apps/worker/src/content_factory_worker/config.py`, `apps/worker/tests/test_publish_package_orchestration.py`, `apps/web/src/features/export/ExportPanel.tsx`, `apps/web/src/app/App.tsx`, `apps/web/src/shared/api/client.ts`, `packages/contracts/*`, `.env.example`
+- **Changes:** добавлен `PublishPackage` lifecycle, API create/list/detail/download, approved+succeeded gates, idempotent package creation per render job, worker ZIP bundle with title/caption/hashtags/provider output, S3-compatible package upload/download support, FFmpeg media normalization contract, ZIP `video.mp4` inclusion, `normalized_artifacts` manifest metadata, cockpit Export route, and regenerated OpenAPI/TS contracts.
+- **TDD:** API package gate/idempotency/download tests, worker ZIP manifest and missing-output failure tests, worker media normalization/failure tests, cockpit export route test.
 - **Gates:** `make generate-contracts` ✅ | `make lint-api` ✅ | `make typecheck-api` ✅ | `make test-api` ✅ | `make lint-web` ✅ | `make typecheck-web` ✅ | `make test-web` ✅ | `PLAYWRIGHT_BASE_URL=http://127.0.0.1:5173 pnpm --dir apps/web test:e2e` ✅
-- **Impact:** закрывает production pipeline loop до ручной публикации через download-ready package contract. Actual FFmpeg binary remux/normalization remains a runtime enhancement because `ffmpeg` is not installed in the current local environment.
+- **Impact:** закрывает production pipeline loop до ручной публикации через download-ready package contract. Реальный runtime все еще требует установленный `ffmpeg`; без него package worker корректно помечает пакет `failed`.
 - **Prompt for launch:**
   ```text
   Read this plan, the rollout spec, and existing render job flow.
@@ -83,3 +83,4 @@
 | 2026-05-07 | provider-live-status | Добавлены ComfyUI HTTP executor, authenticated render job SSE stream, cockpit Render route, and regenerated contracts |
 | 2026-05-07 | publish-package-export | Добавлены PublishPackage API/model/migration, worker ZIP manifest packaging, S3 download target, cockpit Export route, tests, and regenerated contracts |
 | 2026-05-07 | operator-job-actions | Добавлены role-gated cancel/retry/requeue actions для render jobs и publish packages, worker cancellation guards, cockpit action controls, tests, and regenerated contracts |
+| 2026-05-07 | ffmpeg-media-normalization | Добавлены FFmpeg media normalizer, S3 artifact download, ZIP `video.mp4`, normalized artifact manifest metadata, worker settings, and packaging tests |

@@ -32,7 +32,11 @@ from content_factory_api.modules.models import (
     WorkflowPreset,
 )
 from content_factory_worker.packaging import (
+    FfmpegMediaNormalizer,
+    MediaNormalizer,
+    NormalizedMedia,
     PackageStorage,
+    PublishPackageError,
     ZipPublishPackager,
     process_publish_package,
 )
@@ -56,31 +60,60 @@ def db_session(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Generator[Ses
 
 
 class MemoryPackageStorage(PackageStorage):
-    def __init__(self) -> None:
+    def __init__(self, artifacts: dict[str, bytes] | None = None) -> None:
         self.objects: dict[str, bytes] = {}
+        self.artifacts = artifacts or {}
+        self.downloaded_artifacts: list[str] = []
 
     def upload_package(self, *, object_key: str, data: bytes, content_type: str) -> None:
         assert content_type == "application/zip"
         self.objects[object_key] = data
 
+    def download_artifact(self, artifact_reference: str) -> bytes:
+        self.downloaded_artifacts.append(artifact_reference)
+        return self.artifacts[artifact_reference]
+
+
+class FakeMediaNormalizer(MediaNormalizer):
+    def __init__(self, output: bytes = b"normalized mp4 bytes") -> None:
+        self.output = output
+        self.sources: list[tuple[str, bytes]] = []
+
+    def normalize_video(self, *, source_reference: str, source_bytes: bytes) -> NormalizedMedia:
+        self.sources.append((source_reference, source_bytes))
+        return NormalizedMedia(
+            package_path="video.mp4",
+            data=self.output,
+            content_type="video/mp4",
+            container="mp4",
+            profile="test-profile",
+        )
+
+
+class FailingMediaNormalizer(MediaNormalizer):
+    def normalize_video(self, *, source_reference: str, source_bytes: bytes) -> NormalizedMedia:
+        raise PublishPackageError(f"Could not normalize {source_reference}")
+
 
 def test_process_publish_package_builds_manifest_zip(db_session: Session) -> None:
+    video_reference = "s3://content-factory-assets/renders/video.mp4"
     publish_package = _seed_publish_package(
         db_session,
         response_payload={
             "outputs": {
-                "video_file": "s3://content-factory-assets/renders/video.mp4",
+                "video_file": video_reference,
                 "cover_file": "s3://content-factory-assets/renders/cover.jpg",
             },
             "hashtags": ["#inflave"],
         },
     )
-    storage = MemoryPackageStorage()
+    storage = MemoryPackageStorage(artifacts={video_reference: b"raw render video"})
+    normalizer = FakeMediaNormalizer()
 
     outcome = process_publish_package(
         publish_package.id,
         db_session=db_session,
-        packager=ZipPublishPackager(storage=storage),
+        packager=ZipPublishPackager(storage=storage, media_normalizer=normalizer),
     )
 
     db_session.refresh(publish_package)
@@ -98,10 +131,29 @@ def test_process_publish_package_builds_manifest_zip(db_session: Session) -> Non
         "manifest.json",
         "provider-output.json",
         "title.txt",
+        "video.mp4",
     ]
+    assert archive.read("video.mp4") == b"normalized mp4 bytes"
     manifest = json.loads(archive.read("manifest.json").decode("utf-8"))
     assert manifest["render_job_id"] == publish_package.render_job_id
     assert manifest["manual_publish"]["hashtags"] == ["#inflave"]
+    assert manifest["normalized_artifacts"] == [
+        {
+            "name": "video",
+            "artifact_type": "video",
+            "package_path": "video.mp4",
+            "content_type": "video/mp4",
+            "container": "mp4",
+            "profile": "test-profile",
+            "source": {
+                "name": "video_file",
+                "output_path": "outputs.video_file",
+                "value": video_reference,
+            },
+        }
+    ]
+    assert storage.downloaded_artifacts == [video_reference]
+    assert normalizer.sources == [(video_reference, b"raw render video")]
 
 
 def test_process_publish_package_marks_missing_outputs_failed(db_session: Session) -> None:
@@ -110,7 +162,10 @@ def test_process_publish_package_marks_missing_outputs_failed(db_session: Sessio
     outcome = process_publish_package(
         publish_package.id,
         db_session=db_session,
-        packager=ZipPublishPackager(storage=MemoryPackageStorage()),
+        packager=ZipPublishPackager(
+            storage=MemoryPackageStorage(),
+            media_normalizer=FakeMediaNormalizer(),
+        ),
     )
 
     db_session.refresh(publish_package)
@@ -118,6 +173,33 @@ def test_process_publish_package_marks_missing_outputs_failed(db_session: Sessio
     assert publish_package.status == PublishPackageStatus.FAILED.value
     assert publish_package.error_message is not None
     assert "video_file" in publish_package.error_message
+
+
+def test_process_publish_package_marks_normalization_failure_failed(db_session: Session) -> None:
+    video_reference = "s3://content-factory-assets/renders/video.mp4"
+    publish_package = _seed_publish_package(
+        db_session,
+        response_payload={
+            "outputs": {
+                "video_file": video_reference,
+                "cover_file": "s3://content-factory-assets/renders/cover.jpg",
+            }
+        },
+    )
+
+    outcome = process_publish_package(
+        publish_package.id,
+        db_session=db_session,
+        packager=ZipPublishPackager(
+            storage=MemoryPackageStorage(artifacts={video_reference: b"raw render video"}),
+            media_normalizer=FailingMediaNormalizer(),
+        ),
+    )
+
+    db_session.refresh(publish_package)
+    assert outcome.status == "failed"
+    assert publish_package.status == PublishPackageStatus.FAILED.value
+    assert publish_package.error_message == f"Could not normalize {video_reference}"
 
 
 def test_cancelled_publish_package_is_not_processed(db_session: Session) -> None:
@@ -137,13 +219,26 @@ def test_cancelled_publish_package_is_not_processed(db_session: Session) -> None
     outcome = process_publish_package(
         publish_package.id,
         db_session=db_session,
-        packager=ZipPublishPackager(storage=storage),
+        packager=ZipPublishPackager(storage=storage, media_normalizer=FakeMediaNormalizer()),
     )
 
     db_session.refresh(publish_package)
     assert outcome.status == "skipped_cancelled"
     assert publish_package.status == PublishPackageStatus.CANCELLED.value
     assert storage.objects == {}
+
+
+def test_ffmpeg_media_normalizer_reports_missing_binary() -> None:
+    normalizer = FfmpegMediaNormalizer(
+        ffmpeg_path="/definitely/missing/content-factory-ffmpeg",
+        timeout_seconds=1.0,
+    )
+
+    with pytest.raises(PublishPackageError, match="FFmpeg binary"):
+        normalizer.normalize_video(
+            source_reference="s3://content-factory-assets/renders/video.mp4",
+            source_bytes=b"raw render video",
+        )
 
 
 def _seed_publish_package(

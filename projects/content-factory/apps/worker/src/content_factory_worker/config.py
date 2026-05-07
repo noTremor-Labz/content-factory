@@ -24,6 +24,8 @@ class WorkerSettings(BaseSettings):
     s3_access_key: str = Field(default="minioadmin", min_length=1)
     s3_secret_key: str = Field(default="minioadmin", min_length=1)
     s3_force_path_style: bool = True
+    ffmpeg_path: str = Field(default="ffmpeg", min_length=1)
+    ffmpeg_timeout_seconds: PositiveFloat = 300.0
     sentry_dsn: str | None = None
 
     @field_validator("comfyui_base_url", "comfyui_api_key", mode="before")

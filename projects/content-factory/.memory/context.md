@@ -1,7 +1,7 @@
 # Context: Content Factory
 
 **Last updated:** 2026-05-07
-**Status:** phase 2 in progress / operator job actions slice complete / local dev stack migrated and smoke-passed on 5173 / FFmpeg normalization or compliance next
+**Status:** phase 2 complete at code-contract level / dev watchdog added / local FFmpeg binary install still pending / compliance and metrics next
 
 ## Stack
 
@@ -63,6 +63,9 @@ See:
 - Worker orchestration now refreshes render job/attempt state after provider execution so operator cancellation is not overwritten by late provider completion, and package processing skips cancelled packages.
 - Web cockpit Render and Export routes now show status-aware operator action buttons and refresh after each action.
 - OpenAPI and generated TypeScript contracts include operator action routes and `PublishPackageStatus.cancelled`.
+- Worker publish packaging now downloads same-bucket render video artifacts, runs them through an injectable FFmpeg normalizer, includes normalized `video.mp4` in the ZIP bundle, and records `normalized_artifacts` metadata in the manifest.
+- Worker settings now include `FFMPEG_PATH` and `FFMPEG_TIMEOUT_SECONDS`; tests use fake normalizers so local verification does not require a real FFmpeg binary.
+- Local/dev service recovery now has `scripts/dev_watchdog.py` and `make dev-watchdog`, monitoring infra/API/web and starting unhealthy parts through existing project commands.
 - Local cockpit debugging stack is currently restored and verified:
   - Vite frontend on `127.0.0.1:5173`;
   - FastAPI on `0.0.0.0:8000`;
@@ -90,19 +93,24 @@ See:
 - 2026-05-07: Added Phase 2 publish-package/export slice with `PublishPackage` API/model/migration, worker ZIP manifest packaging, cockpit Export route, regenerated contracts, local dev migration, and browser smoke verification on `5173`.
 - 2026-05-07: Added Phase 2 operator job actions with role-gated render/package cancel/retry/requeue endpoints, worker cancellation guards, cockpit action buttons, tests, and regenerated contracts.
 - 2026-05-07: Re-ran live Playwright cockpit smoke on `127.0.0.1:5173` after operator action UI changes; smoke passed.
+- 2026-05-07: Added Phase 2 FFmpeg media normalization contract with S3 artifact download, ZIP `video.mp4`, manifest `normalized_artifacts`, worker settings, and packaging tests.
+- 2026-05-07: Added local dev watchdog with dry-run/once modes, infra/API/web checks, managed API/web restart, Make target, docs, and tests.
 
 ## Known Issues
 
-- FFmpeg binary media normalization, compliance engine, metrics, and direct package worker runtime operation remain future phases.
+- Local/worker runtime still needs a real `ffmpeg` binary installed before real media packages can become `ready`; without it package processing fails cleanly with an explicit error.
+- The dev watchdog is local/dev tooling only and does not replace future production supervision. It only terminates API/web processes it started itself.
+- Compliance engine, metrics, and direct package worker runtime operation remain future phases.
 - ComfyUI adapter submits the stored workflow definition and persists provider output payloads; richer input-to-node mutation remains a future preset mapping enhancement.
-- Publish-package ZIPs currently bundle manifest/title/caption/hashtags/provider output references. Copying/transcoding referenced media into platform-normalized MP4 assets should be added once FFmpeg runtime availability is decided.
+- Publish-package ZIPs now include normalized `video.mp4` when FFmpeg runtime is available; cover-image copying and richer platform-specific media validation remain future enhancements.
 - Compliance requirements for vape/nicotine-adjacent content still need legal review before pilot launch.
 - Cloud vendor selection is still open, but the reference topology is now fixed in planning artifacts.
 
 ## Environment
 
 - Setup: `pnpm` workspace, Python `.venv` bootstrap, root `Makefile`, and Alembic migration command are now in place.
-- `.env.example` now contains local defaults for web/api/worker/storage/session/upload bootstrap, with `VITE_API_BASE_URL=/` for same-origin Vite proxy dev and `COMFYUI_*` worker settings for optional provider execution.
+- `.env.example` now contains local defaults for web/api/worker/storage/session/upload bootstrap, with `VITE_API_BASE_URL=/` for same-origin Vite proxy dev, `COMFYUI_*` worker settings for optional provider execution, and `FFMPEG_*` worker settings for media normalization.
+- Dev recovery: `make dev-watchdog` runs the local watchdog; `.venv/bin/python scripts/dev_watchdog.py --once --dry-run` checks what it would recover without starting services.
 - MCP preset: general filesystem/GitHub config in `.mcp.json`.
 - Active local debug stack as of 2026-05-07 12:22 MSK:
   - frontend: `http://127.0.0.1:5173/`;
@@ -113,10 +121,10 @@ See:
 
 ## Recommended Next Step
 
-Continue `Phase 2 / Production Pipeline And Render Integration` with:
+Continue after `Phase 2 / Production Pipeline And Render Integration` with:
 - `.memory/sessions/plans/2026-05-06-content-factory-phase-2-production-pipeline.md`
 - `.memory/sessions/specs/2026-05-06-content-factory-pilot-implementation-rollout.md`
 - `.memory/sessions/plans/2026-05-06-content-factory-rollout-master.md`
-- immediate next slice: FFmpeg binary media normalization inside the completed publish package worker contract, or begin Phase 3 compliance/metrics if media runtime decisions stay deferred
+- immediate next slice: begin `Phase 3 / Compliance, Metrics, And Economics`, or install/provision `ffmpeg` in the worker runtime if real media-package execution is needed before Phase 3
 
-Latest handoff: `.memory/sessions/2026-05-07-codex-phase-2-operator-job-actions.md`.
+Latest handoff: `.memory/sessions/2026-05-07-codex-dev-service-watchdog.md`.
