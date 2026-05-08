@@ -261,6 +261,52 @@ def test_process_publish_package_requires_final_compliance_decision(db_session: 
     assert "compliance" in publish_package.error_message.lower()
 
 
+def test_process_publish_package_rejects_soft_flag_without_override(db_session: Session) -> None:
+    video_reference = "s3://content-factory-assets/renders/video.mp4"
+    publish_package = _seed_publish_package(
+        db_session,
+        response_payload={
+            "outputs": {
+                "video_file": video_reference,
+                "cover_file": "s3://content-factory-assets/renders/cover.jpg",
+            }
+        },
+    )
+    compliance_check = (
+        db_session.query(ComplianceCheck)
+        .filter_by(content_item_id=publish_package.content_item_id)
+        .one()
+    )
+    compliance_check.status = ComplianceCheckStatus.FLAGGED.value
+    compliance_check.risk_score = 40
+    compliance_check.flags = [
+        {
+            "rule_key": "nicotine_or_vape_reference",
+            "severity": "soft_flag",
+            "reason_code": "nicotine_or_vape_reference",
+            "message": "Nicotine or vape-adjacent placement requires reviewer attention.",
+            "matched_terms": ["vape"],
+        }
+    ]
+    compliance_check.summary = "1 soft compliance flag(s) require reviewer override."
+    db_session.commit()
+
+    outcome = process_publish_package(
+        publish_package.id,
+        db_session=db_session,
+        packager=ZipPublishPackager(
+            storage=MemoryPackageStorage(artifacts={video_reference: b"raw render video"}),
+            media_normalizer=FakeMediaNormalizer(),
+        ),
+    )
+
+    db_session.refresh(publish_package)
+    assert outcome.status == "failed"
+    assert publish_package.status == PublishPackageStatus.FAILED.value
+    assert publish_package.error_message is not None
+    assert "override" in publish_package.error_message.lower()
+
+
 def test_ffmpeg_media_normalizer_reports_missing_binary() -> None:
     normalizer = FfmpegMediaNormalizer(
         ffmpeg_path="/definitely/missing/content-factory-ffmpeg",

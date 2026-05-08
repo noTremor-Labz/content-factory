@@ -268,6 +268,29 @@ function createPassedComplianceCheck(contentItemId: string): MockComplianceCheck
   };
 }
 
+function createFlaggedComplianceCheck(contentItemId: string): MockComplianceCheck {
+  return {
+    id: `compliance-${contentItemId}`,
+    content_item_id: contentItemId,
+    status: "flagged",
+    risk_score: 40,
+    flags: [
+      {
+        rule_key: "nicotine_or_vape_reference",
+        severity: "soft_flag",
+        reason_code: "nicotine_or_vape_reference",
+        message: "Nicotine or vape-adjacent placement requires reviewer attention.",
+        matched_terms: ["vape"],
+      },
+    ],
+    summary: "1 soft compliance flag(s) require reviewer override.",
+    evaluated_by_user_id: "user-owner",
+    evaluated_at: nowIso(0),
+    created_at: nowIso(0),
+    updated_at: nowIso(0),
+  };
+}
+
 function installMockApi(initialState: Partial<MockApiState> = {}) {
   const state: MockApiState = {
     session: initialState.session ?? null,
@@ -357,7 +380,21 @@ function installMockApi(initialState: Partial<MockApiState> = {}) {
 
   function hasFinalComplianceDecision(contentItemId: string): boolean {
     const check = latestComplianceCheck(contentItemId);
-    return check?.status === "passed" || check?.status === "flagged";
+    if (check?.status === "passed") {
+      return true;
+    }
+
+    if (check?.status !== "flagged") {
+      return false;
+    }
+
+    return state.reviewTasks.some(
+      (task) =>
+        task.content_item_id === contentItemId &&
+        task.status === "approved" &&
+        task.compliance_check_id === check.id &&
+        (task.compliance_override_reason?.trim().length ?? 0) > 0,
+    );
   }
 
   const fetchMock = vi.fn(async (input: string | URL | Request, options?: RequestInit) => {
@@ -1336,5 +1373,70 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: /retry package/i }));
     expect(await screen.findByText(/publish package retried\./i)).toBeVisible();
     expect((await screen.findAllByText(/^queued$/i)).length).toBeGreaterThan(0);
+  });
+
+  test("does not offer flagged export candidates without a matching reviewer override", async () => {
+    const contentItem: MockContentItem = {
+      id: "content-flagged",
+      brand_id: "brand-1",
+      avatar_id: "avatar-1",
+      title: "Flagged pilot short",
+      script: "Inflave vape appears as native placement.",
+      channel: "youtube_shorts",
+      status: "approved",
+      planned_publish_at: null,
+      created_by_user_id: "user-owner",
+      created_at: nowIso(0),
+      updated_at: nowIso(0),
+    };
+    const workflowPreset = createWorkflowPreset();
+    const renderJob: MockRenderJob = {
+      id: "render-flagged",
+      content_item_id: contentItem.id,
+      workflow_preset_id: workflowPreset.id,
+      workflow_preset_key: workflowPreset.key,
+      workflow_preset_version: workflowPreset.version,
+      workflow_provider: workflowPreset.workflow_provider,
+      voice_provider: workflowPreset.voice_provider,
+      packaging_provider: workflowPreset.packaging_provider,
+      input_snapshot: { script_text: contentItem.script },
+      status: "succeeded",
+      retry_budget: 3,
+      created_by_user_id: "user-owner",
+      created_at: nowIso(1),
+      updated_at: nowIso(2),
+      attempts: [
+        {
+          id: "attempt-flagged",
+          render_job_id: "render-flagged",
+          attempt_number: 1,
+          status: "succeeded",
+          provider_job_id: "comfyui-1",
+          request_payload: { inputs: { script_text: contentItem.script } },
+          response_payload: {
+            outputs: { video_file: "s3://content-factory-assets/renders/video.mp4" },
+          },
+          error_message: null,
+          started_at: nowIso(1),
+          finished_at: nowIso(2),
+          created_at: nowIso(1),
+          updated_at: nowIso(2),
+        },
+      ],
+    };
+    installMockApi({
+      session: createOwnerSession(),
+      contentItems: [contentItem],
+      complianceChecks: [createFlaggedComplianceCheck(contentItem.id)],
+      workflowPresets: [workflowPreset],
+      renderJobs: [renderJob],
+    });
+    window.location.hash = "#export";
+
+    render(<App />);
+
+    expect(await screen.findByRole("heading", { name: /publish packages/i })).toBeVisible();
+    expect(await screen.findByText(/no succeeded approved renders waiting for package export/i)).toBeVisible();
+    expect(screen.queryByText(/pilot-reels v1/i)).toBeNull();
   });
 });

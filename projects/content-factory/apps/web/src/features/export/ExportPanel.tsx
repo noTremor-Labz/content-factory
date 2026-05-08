@@ -5,6 +5,7 @@ import type {
   ContentItem,
   PublishPackage,
   RenderJob,
+  ReviewTask,
 } from "../../shared/api/types";
 import { formatDateTime, formatStatus } from "../../shared/format";
 
@@ -13,6 +14,7 @@ interface ExportPanelProps {
   complianceChecks: ComplianceCheck[];
   publishPackages: PublishPackage[];
   renderJobs: RenderJob[];
+  reviewTasks: ReviewTask[];
   canMutate: boolean;
   busy: boolean;
   onCreatePackage: (renderJobId: string) => Promise<void>;
@@ -31,6 +33,7 @@ export function ExportPanel({
   complianceChecks,
   publishPackages,
   renderJobs,
+  reviewTasks,
   canMutate,
   busy,
   onCreatePackage,
@@ -51,7 +54,7 @@ export function ExportPanel({
       renderJob.status === "succeeded" &&
       contentItem !== undefined &&
       contentItem.status === "approved" &&
-      hasFinalComplianceDecision(complianceChecks, contentItem.id) &&
+      hasFinalComplianceDecision(complianceChecks, reviewTasks, contentItem.id) &&
       !packagedRenderJobIds.has(renderJob.id)
     );
   });
@@ -256,8 +259,23 @@ function latestComplianceCheckForContent(
 
 function hasFinalComplianceDecision(
   complianceChecks: ComplianceCheck[],
+  reviewTasks: ReviewTask[],
   contentItemId: string,
 ): boolean {
   const check = latestComplianceCheckForContent(complianceChecks, contentItemId);
-  return check?.status === "passed" || check?.status === "flagged";
+  if (check?.status === "passed") {
+    return true;
+  }
+
+  if (check?.status !== "flagged") {
+    return false;
+  }
+
+  return reviewTasks.some(
+    (task) =>
+      task.content_item_id === contentItemId &&
+      task.status === "approved" &&
+      task.compliance_check_id === check.id &&
+      (task.compliance_override_reason?.trim().length ?? 0) > 0,
+  );
 }

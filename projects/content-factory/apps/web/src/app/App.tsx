@@ -19,6 +19,7 @@ import {
   type ComplianceCheck,
   type ContentItem,
   type RenderJob,
+  type ReviewTask,
   type UserRole,
 } from "../shared/api/types";
 import { formatDateTime } from "../shared/format";
@@ -84,13 +85,28 @@ function latestComplianceCheckForContent(
 function hasFinalComplianceDecision(
   contentItem: ContentItem | undefined,
   complianceChecks: ComplianceCheck[],
+  reviewTasks: ReviewTask[],
 ): boolean {
   if (!contentItem || contentItem.status !== "approved") {
     return false;
   }
 
   const check = latestComplianceCheckForContent(complianceChecks, contentItem.id);
-  return check?.status === "passed" || check?.status === "flagged";
+  if (check?.status === "passed") {
+    return true;
+  }
+
+  if (check?.status !== "flagged") {
+    return false;
+  }
+
+  return reviewTasks.some(
+    (task) =>
+      task.content_item_id === contentItem.id &&
+      task.status === "approved" &&
+      task.compliance_check_id === check.id &&
+      (task.compliance_override_reason?.trim().length ?? 0) > 0,
+  );
 }
 
 function nextStepForData(data: CockpitData): string {
@@ -125,6 +141,7 @@ function nextStepForData(data: CockpitData): string {
         hasFinalComplianceDecision(
           data.contentItems.find((item) => item.id === renderJob.content_item_id),
           data.complianceChecks,
+          data.reviewTasks,
         ),
     ) &&
     data.publishPackages.length === 0
@@ -732,6 +749,7 @@ export function App() {
               }
               publishPackages={cockpitData.publishPackages}
               renderJobs={cockpitData.renderJobs}
+              reviewTasks={cockpitData.reviewTasks}
             />
           ) : null}
 

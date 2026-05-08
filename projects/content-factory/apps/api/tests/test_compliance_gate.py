@@ -234,3 +234,51 @@ def test_publish_package_requires_final_compliance_decision(api_client: TestClie
 
     assert package_response.status_code == 409
     assert "compliance" in package_response.json()["detail"].lower()
+
+
+def test_publish_package_blocks_latest_soft_flag_without_matching_override(
+    api_client: TestClient,
+) -> None:
+    _bootstrap_owner(api_client)
+    content_item_id = _create_content(
+        api_client,
+        script="A careful lifestyle short about planning a weekend routine.",
+    )
+    review_response = api_client.post(f"/api/content-items/{content_item_id}/submit-review")
+    assert review_response.status_code == 201
+    approve_response = api_client.post(
+        f"/api/review/tasks/{review_response.json()['id']}/approve",
+        json={"decision_notes": "Approved for manual publishing."},
+    )
+    assert approve_response.status_code == 200
+
+    db_session = get_sessionmaker()()
+    try:
+        soft_check = ComplianceCheck(
+            content_item_id=content_item_id,
+            status=ComplianceCheckStatus.FLAGGED.value,
+            risk_score=40,
+            flags=[
+                {
+                    "rule_key": "nicotine_or_vape_reference",
+                    "severity": "soft_flag",
+                    "reason_code": "nicotine_or_vape_reference",
+                    "message": "Nicotine or vape-adjacent placement requires reviewer attention.",
+                    "matched_terms": ["vape"],
+                }
+            ],
+            summary="1 soft compliance flag(s) require reviewer override.",
+        )
+        db_session.add(soft_check)
+        db_session.commit()
+    finally:
+        db_session.close()
+
+    render_job_id = _seed_succeeded_render(api_client, content_item_id)
+    package_response = api_client.post(
+        "/api/publish-packages",
+        json={"render_job_id": render_job_id},
+    )
+
+    assert package_response.status_code == 409
+    assert "override" in package_response.json()["detail"].lower()
